@@ -1,0 +1,63 @@
+{
+  "_comment": "Configuration input file",
+  "project": {
+    "_comment": "Type of neural network to train",
+    "name": "Demo",
+    "neural_network": "ae"
+  },
+  "dataset": {
+    "_comment": "Dataset manipulation: dataset splitting and normalization",
+    "split": false,
+    "split_ratio": 0.8,
+    "shuffle": true,
+    "normalize_scale": 0.0,
+    "max_scale": 2
+  },
+  "model": {
+    "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
+    "optimizer": "adam",
+    "loss": "mean_absolute_error",
+    "num_epoch": 200,
+    "batch_size": 60
+  },
+  "network": {
+    "_comment": "Number of neurons and activation function for each hidden layer",
+    "hidden_layers": 5,
+    "units_1": 32,
+    "units_2": 8,
+    "units_3": 2,
+    "units_4": 8,
+    "units_5": 32,
+    "func_1": "tanh",
+    "func_2": "tanh",
+    "func_3": "tanh",
+    "func_4": "tanh",
+    "func_5": "tanh"
+  },
+  "performance": {
+    "_comment": "Setting for training performance",
+    "enable_gpu": true,
+    "gpus": 1
+  },
+  "settings": {
+    "_comment": "User-defined settings",
+    "verbosity": 1,
+    "show_summary": true,
+    "save_tb": false,
+    "save_model": true,
+    "save_weights": true,
+    "save_weights_npz": true,
+    "save_biases_npz": true,
+    "save_graph": true,
+    "show_loss": true
+  },
+  "output": {
+    "_comment": "Set name of output files",
+    "out_dir": "output",
+    "out_model": "model.h5",
+    "out_weights": "model_weights.h5",
+    "out_weights_npz": "model_weights.npz",
+    "out_biases_npz": "model_biases.npz",
+    "loss_plot": "loss.png"
+  }
+}

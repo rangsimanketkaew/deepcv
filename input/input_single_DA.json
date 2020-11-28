@@ -1,0 +1,60 @@
+{
+  "_comment": "Configuration input file",
+  "project": {
+    "_comment": "Type of neural network to train",
+    "name": "Demo",
+    "neural_network": "single"
+  },
+  "input": {
+    "_comment": "Trajectories, cartesian coordinate, properties of molecule as features",
+    "dataset": "dataset/DA/dataset.xyz",
+    "labelset": "dataset/DA/labelset.txt",
+    "ref_mol": "dataset/DA/ref_mol.xyz"
+  },
+  "output": {
+    "_comment": "Set name of output files",
+    "out_model": "model.h5",
+    "out_plumed": "plumed_inp.dat",
+    "model_img": "model.png"
+  },
+  "dataset": {
+    "_comment": "Splitting ratio (%) for preparing training and testing sets",
+    "split": false,
+    "split_ratio": 80,
+    "shuffle": true
+  },
+  "model": {
+    "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
+    "optimizer": "adam",
+    "loss": "mean_squared_error",
+    "num_epoch": 150,
+    "batch_size": 256
+  },
+  "network": {
+    "_comment": "Number of neurons and activation function for each layer",
+    "num_layers": 3,
+    "units_1": 100,
+    "units_2": 200,
+    "units_3": 100,
+    "func_1": "sigmoid",
+    "func_2": "sigmoid",
+    "func_3": "sigmoid"
+  },
+  "performance": {
+    "_comment": "Setting for training performance",
+    "enable_gpu": true,
+    "gpus": 1
+  },
+  "settings": {
+    "_comment": "User-defined settings",
+    "verbosity": 1,
+    "save_model": false,
+    "save_cv": false,
+    "show_summary": false,
+    "show_layer": false,
+    "show_eva": false,
+    "show_loss": false,
+    "show_corr": false,
+    "show_layer_table": false
+  }
+}

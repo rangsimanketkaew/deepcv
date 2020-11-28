@@ -1,0 +1,84 @@
+{
+  "_comment": "DeepCV input file for training neural network model",
+  "project": {
+    "_comment": "Type of neural network to build and train",
+    "name": "Demo",
+    "neural_network": "gan"
+  },
+  "dataset": {
+    "_comment": "Dataset manipulation: normalization",
+    "normalize_scale": 0.0,
+    "max_scale": 1.0
+  },
+  "gan": {
+    "_comment": "Define functions and hyper-parameters for GAN model",
+    "optimizer": {
+      "name": "adam",
+      "learning_rate": 0.0002,
+      "beta_1": 0.5,
+      "beta_2": 0.999
+    },
+    "loss": "binary_crossentropy",
+    "regularizer": {
+      "name": false,
+      "factor": 1e-4
+    },
+    "num_epoch": 100,
+    "batch_size": 512,
+    "save_interval": 10
+  },
+  "generator": {
+    "_comment": "Hyperparameters for the Generator",
+    "noise_shape": [100],
+    "units_1": 256,
+    "units_2": 512,
+    "units_3": 1024,
+    "func_1": "LeakyReLu",
+    "func_2": "LeakyReLu",
+    "func_3": "LeakyReLu",
+    "func_4": "Tanh",
+    "batch_norm": true,
+    "batch_norm_param": {
+      "momentum": 0.8,
+      "epsilon": 0.0,
+      "renorm": true,
+      "renorm_momentum": 0.99
+    }
+  },
+  "discriminator": {
+    "_comment": "Hyperparameters for the Discriminator",
+    "units_1": 512,
+    "units_2": 256,
+    "units_3": 1,
+    "func_1": "LeakyReLu",
+    "func_2": "LeakyReLu",
+    "func_3": "Sigmoid",
+    "batch_norm": false,
+    "batch_norm_param": {
+      "momentum": 0.8,
+      "epsilon": 0.0,
+      "renorm": true,
+      "renorm_momentum": 0.99
+    }
+  },
+  "performance": {
+    "_comment": "Setting for training performance",
+    "enable_gpu": true,
+    "gpus": 1
+  },
+  "settings": {
+    "_comment": "User-defined settings",
+    "show_summary": true,
+    "save_graph": false,
+    "save_model": false,
+    "show_loss": false
+  },
+  "output": {
+    "_comment": "Set name of output files",
+    "out_dir": "output",
+    "out_G_model": "G_model.h5",
+    "out_D_model": "D_model.h5",
+    "out_GAN_model": "GAN_model.h5",
+    "loss_plot": "loss.png"
+  }
+}
