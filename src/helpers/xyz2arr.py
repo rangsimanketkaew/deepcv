@@ -1,8 +1,25 @@
+#!/usr/bin/env python3
+
+#------------------
+# Rangsiman Ketkaew
+#------------------
+
+import argparse
+import os
 import numpy as np
 import ase.io
 
-f = "/home/rketka/works/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1.xyz"
-no_atoms = 16
+
+info="Read cartesian coordinate (.xyz) file and save as NumPy's compress file"
+parser = argparse.ArgumentParser(description=info)
+parser.add_argument("--xyz", "-i", metavar="XYZ", required=True, type=str, help="XYZ file")
+parser.add_argument("--atoms", "-a", metavar="NUM_ATOMS", required=True, type=int, help="Number of atoms")
+parser.add_argument("--key", "-k", metavar="KEYWORD", type=str, default="coord", help="Keyword name of the coordinate array in .npz file")
+
+args = parser.parse_args()
+
+f = args.xyz
+no_atoms = args.atoms
 
 generator = ase.io.iread(f)
 # num = sum(1 for atoms in generator)
@@ -19,5 +36,6 @@ for atoms in generator:
     arr = np.append(arr, pos, axis=0)
 
 # save array as npz
-out = "coord"
-np.savez_compressed(out, coords=arr)
+out = os.path.splitext(args.xyz)[0] + "_" + args.key + ".npz"
+d = {args.key: arr}
+np.savez_compressed(out, **d)
