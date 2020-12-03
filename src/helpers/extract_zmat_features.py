@@ -1,9 +1,18 @@
+#!/usr/bin/env python3
+
+#------------------
+# Rangsiman Ketkaew
+#------------------
+
 import os
 import glob
 import argparse
 import numpy as np
 from scipy.spatial.distance import cdist
-from .extract_features_DA import angle_sign, dihedral
+try:
+    from .extract_features_DA import angle_sign, dihedral
+except ImportError:
+    from extract_features_DA import angle_sign, dihedral
 
 
 def distance(xyz):
@@ -74,14 +83,14 @@ def torsion(xyz):
 
 
 if __name__ == "__main__":
-    info="Extract internal coordinate and save as NumPy's compressed array format."
+    info="Extract internal coordinate (Z-matrix) and save as NumPy's compressed array format (.npz)."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--input", "-i", dest="input_npz", metavar="files.npz", type=str, required=True, nargs="*",
-        help="Cartesian coordinate in NumPy's compressed array format with 'coords' as a key.")
-    parser.add_argument("--key", "-k", dest="key_npz", metavar="keyword", default="coords", type=str,
+    parser.add_argument("--input", "-i", dest="input_npz", metavar="FILE.npz", type=str, required=True, nargs="*",
+        help="Cartesian coordinate in NumPy's compressed array format.")
+    parser.add_argument("--key", "-k", dest="key_npz", metavar="KEYWORD", default="coord", type=str,
         help="Keyword name that corresponds to array saved in the npz file. \
-            Note that all npz files must have the same keyword name. Defaults to 'coords'.")
-    parser.add_argument("--output-dir", "-d", metavar="directory", default=os.getcwd(), type=str,
+            Note that all npz files must have the same keyword name. Defaults to 'coord'.")
+    parser.add_argument("--output-dir", "-o", metavar="DIRECTORY", default=os.getcwd(), type=str,
         help="Output directory to store npz files of distance, angle, and torsion. \
             Defaults to current directory where this code is executed.")
     arg = parser.parse_args()
@@ -95,10 +104,13 @@ if __name__ == "__main__":
     for i in range(1, len(npz)):
         xyz = np.vstack((xyz, np.load(npz[i])[arg.key_npz]))
     print(f"Shape of NumPy array (after stacking): {xyz.shape}")
-    print("Calculating distance, angle, torsion ...")
+    print("Calculating distance ...")
     int_dist = distance(xyz)
+    print("Calculating angle ...")
     int_angle = angle(xyz)
+    print("Calculating torsion ...")
     int_torsion = torsion(xyz)
+    print("Saving data as npz files ...")
     np.savez_compressed(f"{arg.output_dir}" + "/distance.npz", dist=int_dist)
     np.savez_compressed(f"{arg.output_dir}" + "/angle.npz", angle=int_angle)
     np.savez_compressed(f"{arg.output_dir}" + "/torsion.npz", torsion=int_torsion)
