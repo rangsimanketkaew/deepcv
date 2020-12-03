@@ -10,25 +10,31 @@ import numpy as np
 import ase.io
 
 
-info="Read cartesian coordinate (.xyz) file and save as NumPy's compress file"
+info="Read cartesian coordinate file (.xyz) and save as NumPy's compress file"
 parser = argparse.ArgumentParser(description=info)
-parser.add_argument("--xyz", "-i", metavar="XYZ", required=True, type=str, help="XYZ file")
-parser.add_argument("--atoms", "-a", metavar="NUM_ATOMS", required=True, type=int, help="Number of atoms")
-parser.add_argument("--key", "-k", metavar="KEYWORD", type=str, default="coord", help="Keyword name of the coordinate array in .npz file")
+parser.add_argument("--xyz", "-i", metavar="XYZ", required=True, type=str, 
+    help="Cartesian coordinate in XYZ file format")
+parser.add_argument("--n-atoms", "-a", metavar="FIRST_N_ATOMS", required=True, type=int, 
+    help="First N atoms to be extracted")
+parser.add_argument("--key", "-k", metavar="KEYWORD", type=str, default="coord", 
+    help="Keyword name of the coordinate array to be saved in .npz file")
 
 args = parser.parse_args()
 
-f = args.xyz
-no_atoms = args.atoms
+if not args.atoms:
+    f = open(args.xyz, "r")
+    no_atoms = f.readline()
+    f.close()
+else:
+    no_atoms = args.n_atoms
 
-generator = ase.io.iread(f)
+generator = ase.io.iread(args.xyz)
 # num = sum(1 for atoms in generator)
 # print(num)
 
 # 3D empty array
 # No. of structures x No. of atoms x 3 (xyz coord)
 arr = np.empty((0, no_atoms, 3))
-
 for atoms in generator:
     pos = atoms.positions
     pos = pos[:no_atoms]

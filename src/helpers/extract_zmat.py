@@ -5,8 +5,8 @@
 #------------------
 
 import os
-import glob
 import argparse
+import ase.io
 import numpy as np
 from scipy.spatial.distance import cdist
 try:
@@ -85,33 +85,42 @@ def torsion(xyz):
 if __name__ == "__main__":
     info="Extract internal coordinate (Z-matrix) and save as NumPy's compressed array format (.npz)."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--input", "-i", dest="input_npz", metavar="FILE.npz", type=str, required=True, nargs="*",
+    parser.add_argument("--xyz", "-i", dest="xyz", metavar="FILE.xyz", type=str, required=True,
         help="Cartesian coordinate in NumPy's compressed array format.")
-    parser.add_argument("--key", "-k", dest="key_npz", metavar="KEYWORD", default="coord", type=str,
-        help="Keyword name that corresponds to array saved in the npz file. \
-            Note that all npz files must have the same keyword name. Defaults to 'coord'.")
-    parser.add_argument("--output-dir", "-o", metavar="DIRECTORY", default=os.getcwd(), type=str,
-        help="Output directory to store npz files of distance, angle, and torsion. \
-            Defaults to current directory where this code is executed.")
+    parser.add_argument("--atom-index", "-a", dest="index_list", metavar="ATOM_INDEX", type=int, nargs="+", default=None,
+        help="List of atomic index that will be taken. (0-based array index)")
+
     arg = parser.parse_args()
-    files = []
-    for f in arg.input_npz:
-        files += glob.glob(f)
-    npz = sorted(files)
-    for i, f in enumerate(npz):
-        print(f"Input {i+1}: {f}")
-    xyz = np.load(npz[0])[arg.key_npz]
-    for i in range(1, len(npz)):
-        xyz = np.vstack((xyz, np.load(npz[i])[arg.key_npz]))
-    print(f"Shape of NumPy array (after stacking): {xyz.shape}")
+
+    f = open(arg.xyz, "r")
+    no_atoms = int(f.readline())
+    f.close()
+    generator = ase.io.iread(arg.xyz)
+    # 3D empty array
+    # No. of structures x No. of atoms x 3 (xyz coord)
+    xyz = np.empty((0, no_atoms, 3))
+    for atoms in generator:
+        pos = atoms.positions
+        pos = pos[:no_atoms]
+        pos = pos.reshape((1, -1, 3))
+        xyz = np.append(xyz, pos, axis=0)
+
+    print(f"Shape of NumPy array: {xyz.shape}")
+    index = arg.index_list
+    if index:
+        xyz = xyz[:,index]
+        print(f"List of atom index: {index}")
+        print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
+    
+    out = os.path.splitext(arg.xyz)[0]
     print("Calculating distance ...")
-    int_dist = distance(xyz)
+    dat = distance(xyz)
+    np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dat)
     print("Calculating angle ...")
-    int_angle = angle(xyz)
+    dat = angle(xyz)
+    np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=dat)
     print("Calculating torsion ...")
-    int_torsion = torsion(xyz)
-    print("Saving data as npz files ...")
-    np.savez_compressed(f"{arg.output_dir}" + "/distance.npz", dist=int_dist)
-    np.savez_compressed(f"{arg.output_dir}" + "/angle.npz", angle=int_angle)
-    np.savez_compressed(f"{arg.output_dir}" + "/torsion.npz", torsion=int_torsion)
-    print("---Done!---")
+    dat = torsion(xyz)
+    np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dat)
+    print("All data have been saved as npz files!")
+    print("-"*10 + " Done " + "-"*10)
