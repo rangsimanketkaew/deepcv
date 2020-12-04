@@ -29,8 +29,9 @@ def main():
         ["gan_train.py", "Training generative adversarial network (GAN)"],
         ["gan_predict.py", "Generating samples using trained GAN"],
         ["ae_train.py", "Autoencoder neural network"],
+        ["int_gen.py", "Neural network input generator"],
         ["sprint.py", "Calculate SPRINT coordinate"],
-        ["deepcv2plumed.py", "Create PLUMED input file"],
+        ["deepcv2plumed.py", "Create PLUMED input file"]
     ]
     t = tabulate(list_of_functions, headers=["Module", "Descriptions"])
     print(t)
