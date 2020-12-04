@@ -131,7 +131,7 @@ class WritePlumed:
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
         print(f">>> WARINING!!! You need to define contact matrix in SPRINT deck in {self.output_plumed}")
-        arg = [f'ss{i+1}' for i in range(self.num_sprint)]
+        arg = [f'ss.coord-{i}' for i in range(self.num_sprint)]
         self.arg_input += arg
         f.close()
 
