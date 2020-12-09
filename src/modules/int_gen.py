@@ -14,10 +14,12 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication, 
     QCheckBox, QComboBox, QFileDialog, 
+    QGridLayout,
     QFormLayout, QLabel, 
     QLineEdit, 
     QTabWidget, 
     QWidget, 
+    QFrame,
     QPushButton, 
     QVBoxLayout
 )
@@ -27,7 +29,7 @@ class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.setWindowTitle("DeepCV input generator")
-        self.resize(800, 500)
+        self.resize(400, 500)
         layout = QVBoxLayout()
         # Menu bar
         tabs = QTabWidget()
@@ -38,81 +40,131 @@ class Window(QWidget):
         self.setLayout(layout)
 
     def autoencoderTabUI(self):
-        networkTab = QWidget()
-        layout = QVBoxLayout()
+        networkTab = QFrame()
+        # networkTab.setStyleSheet("margin:5px; border:1px solid")
 
-        layout_form = QFormLayout()
-        layout_form.addRow("Size of sample (features:)", QLineEdit())
-        layout_form.addRow("Split ratio:", QLineEdit())
-        layout_form.addRow("Number of neurons in layer 1:", QLineEdit())
-        layout_form.addRow("Number of neurons in layer 2:", QLineEdit())
-        layout_form.addRow("Number of neurons in layer 3:", QLineEdit())
-        layout_form.addRow("Number of neurons in layer 4:", QLineEdit())
-        layout_form.addRow("Number of neurons in layer 5:", QLineEdit())
-        layout_form.addRow("Number of neurons in output layer:", QLineEdit())
+        # layout input
+        layout_1 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Load dataset"), 0, 0)
+        button_loadfile = QPushButton("Dataset 1")
+        button_loadfile.pressed.connect(self.loadFile)
+        grid.addWidget(button_loadfile, 1, 0)
+        button_loadfile = QPushButton("Dataset 2")
+        button_loadfile.pressed.connect(self.loadFile)
+        grid.addWidget(button_loadfile, 1, 1)
+        button_loadfile = QPushButton("Dataset 3")
+        button_loadfile.pressed.connect(self.loadFile)
+        grid.addWidget(button_loadfile, 1, 2)
+        layout_1.addLayout(grid)
+        layout_1.addStretch(1)
 
-        layout_act_func = QVBoxLayout()
-        label_act_func = QLabel("Activation function:")
-        layout_act_func.addWidget(label_act_func)
+        # layout dataset
+        layout_2 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Size of sample (features):"), 0, 0)
+        self.size_sample = QLineEdit()
+        grid.addWidget(self.size_sample, 0, 1, 1, 3)
+        grid.addWidget(QCheckBox("Shuffle dataset"), 1, 0)
+        grid.addWidget(QCheckBox("Split dataset"), 1, 1)
+        grid.addWidget(QLabel("Split ratio:"), 1, 2)
+        grid.addWidget(QLineEdit(), 1, 3)
+        layout_2.addLayout(grid)
+        layout_2.addStretch(1)
 
-        layout_combo = QVBoxLayout()
+        # layout network
+        layout_3 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Layer"), 2, 0)
+        for i in range(5):
+            grid.addWidget(QLabel(f"Hidden {i+1}"), i+3, 0)
+            grid.addWidget(QLineEdit(), i+3, 1)
+            grid.addWidget(QCheckBox(), i+3, 2)
+            grid.addWidget(QCheckBox(), i+3, 3)
+            grid.addWidget(QCheckBox(), i+3, 4)
+        grid.addWidget(QLabel("Neurons"), 2, 1)
+        grid.addWidget(QLabel("Dropout"), 2, 2)
+        grid.addWidget(QLabel("Batch norm"), 2, 3)
+        grid.addWidget(QLabel("Regularization"), 2, 4)
+        layout_3.addLayout(grid)
+        layout_3.addStretch(1)
+
+        # layout activation function
+        layout_4 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Activation function"), 0, 0)
         combo_act_func = QComboBox()
         combo_act_func.addItems(["Linear", "Sigmoid", "Tanh", "ReLU", "LeakyReLU"])
-        layout_combo.addWidget(combo_act_func)
+        grid.addWidget(QLabel("Hidden layer"), 1, 0)
+        grid.addWidget(combo_act_func, 1, 1)
+        combo_act_func = QComboBox()
+        combo_act_func.addItems(["Linear", "Sigmoid", "Tanh", "ReLU", "LeakyReLU"])
+        grid.addWidget(QLabel("Output layer"), 2, 0)
+        grid.addWidget(combo_act_func, 2, 1)
+        layout_4.addLayout(grid)
+        layout_4.addStretch(1)
 
-        layout_check_techniques = QVBoxLayout()
-        layout_check_techniques.addWidget(QCheckBox("Use DropOut"))
-        layout_check_techniques.addWidget(QCheckBox("Use Regularizer"))
-        layout_check_techniques.addWidget(QCheckBox("Use Batch normalization"))
-        layout_check_techniques.addWidget(QCheckBox("Use Early stopping"))
-        layout_check_techniques.addWidget(QCheckBox("Use Reduce learning rate"))
+        # layout techniques
+        layout_5 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QCheckBox("Use Early stopping"))
+        grid.addWidget(QCheckBox("Use Reduce learning rate"))
+        layout_5.addLayout(grid)
+        layout_5.addStretch(1)
         
-        # input
-        layout_box_input = QVBoxLayout()
-        button_loadfile = QPushButton("Load dataset")
-        button_loadfile.pressed.connect(self.loadFile)
-        layout_box_input.addWidget(button_loadfile)
+        # layout output
+        layout_6 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Output"), 0, 0)
+        grid.addWidget(QCheckBox("Save model (.h5)"), 1, 0)
+        grid.addWidget(QCheckBox("Save weight (.npz)"), 1, 1)
+        grid.addWidget(QCheckBox("Save bias (.npz)"), 1, 2)
+        grid.addWidget(QCheckBox("Save model graph (.png)"), 2, 0)
+        grid.addWidget(QCheckBox("Save model summary (.txt)"), 2, 1)
+        layout_6.addLayout(grid)
+        layout_6.addStretch(1)
 
-        # output
-        layout_output = QVBoxLayout()
-        label_output = QLabel("Output:")
-        layout_output.addWidget(label_output)
-        layout_check_output = QVBoxLayout()
-        layout_check_output.addWidget(QCheckBox("Save model (.h5)"))
-        layout_check_output.addWidget(QCheckBox("Save weight (.npz)"))
-        layout_check_output.addWidget(QCheckBox("Save bias (.npz)"))
-        layout_check_output.addWidget(QCheckBox("Save model graph (.png)"))
-        layout_check_output.addWidget(QCheckBox("Save model summary (.txt)"))
+        # layout training setting
+        layout_7 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
+        grid.addWidget(QLabel("Training:"), 0, 0)
+        grid.addWidget(QLabel("Epochs:"), 1, 0)
+        grid.addWidget(QLineEdit(), 1, 1)
+        grid.addWidget(QLabel("Batch size:"), 1, 2)
+        grid.addWidget(QLineEdit(), 1, 3)
+        layout_7.addLayout(grid)
+        layout_7.addStretch(1)
 
-        # training settings
-        layout_train = QVBoxLayout()
-        label_train = QLabel("Training:")
-        layout_train.addWidget(label_train)
-        layout_train_settings = QFormLayout()
-        layout_train_settings.addRow("Epochs:", QLineEdit())
-        layout_train_settings.addRow("Batch size:", QLineEdit())
-
-        # generate file
-        layout_save = QVBoxLayout()
+        # layout generate file
+        layout_8 = QVBoxLayout()
+        grid = QGridLayout()
+        # --- widget ---
         button_preview = QPushButton("Preview Input")
         button_preview.pressed.connect(self.preview_input)
         button_save = QPushButton("Save")
         button_save.pressed.connect(self.save_file)
-        layout_save.addWidget(button_preview)
-        layout_save.addWidget(button_save)
+        grid.addWidget(button_preview, 0, 0)
+        grid.addWidget(button_save, 0, 1)
+        layout_8.addLayout(grid)
+        layout_8.addStretch(1)
 
         # Combine layouts
-        layout.addLayout(layout_box_input)
-        layout.addLayout(layout_form)
-        layout.addLayout(layout_act_func)
-        layout.addLayout(layout_combo)
-        layout.addLayout(layout_check_techniques)
-        layout.addLayout(layout_train)
-        layout.addLayout(layout_train_settings)
-        layout.addLayout(layout_output)
-        layout.addLayout(layout_check_output)
-        layout.addLayout(layout_save)
-
+        layout = QVBoxLayout()
+        layout.addLayout(layout_1)
+        layout.addLayout(layout_2)
+        layout.addLayout(layout_3)
+        layout.addLayout(layout_4)
+        layout.addLayout(layout_5)
+        layout.addLayout(layout_6)
+        layout.addLayout(layout_7)
+        layout.addLayout(layout_8)
         networkTab.setLayout(layout)
         return networkTab
 
@@ -126,7 +178,10 @@ Support:\n\
 - Multi-layer autoencoder\n\
 - Non-linear and linear activation functions\n\n\
 Author:\n\
-- Rangsiman Ketkaew - University of Zurich"
+- Rangsiman Ketkaew\n\
+- Fabrizio Creazzo\n\
+- Sandra Luber\n\n\
+Developed at Department of Chemistry, University of Zurich, Switzerland"
         label_author = QLabel(text)
         layout.addWidget(label_author)
         infoTab.setLayout(layout)
@@ -140,10 +195,12 @@ Author:\n\
         print(names[:-1])
 
     def preview_input(self):
-        pass
+        print("Test preview file", flush=True)
+        print(self.size_sample.text())
+
 
     def save_file(self):
-        print("Test save button")
+        print("Test save button", flush=True)
 
 def main():
     app = QApplication([])
