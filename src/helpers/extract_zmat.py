@@ -85,34 +85,45 @@ def torsion(xyz):
 if __name__ == "__main__":
     info="Extract internal coordinate (Z-matrix) and save as NumPy's compressed array format (.npz)."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--xyz", "-i", dest="xyz", metavar="FILE.xyz", type=str, required=True,
-        help="Cartesian coordinate in NumPy's compressed array format.")
+    parser.add_argument("--input", "-i", dest="input", metavar="FILE", type=str, required=True,
+        help="Cartesian coordinate in XYZ file format (.xyz) or in NumPy's compressed array format (npz).")
     parser.add_argument("--atom-index", "-a", dest="index_list", metavar="ATOM_INDEX", type=int, nargs="+", default=None,
         help="List of atomic index that will be taken. (0-based array index)")
 
     arg = parser.parse_args()
 
-    f = open(arg.xyz, "r")
-    no_atoms = int(f.readline())
-    f.close()
-    generator = ase.io.iread(arg.xyz)
-    # 3D empty array
-    # No. of structures x No. of atoms x 3 (xyz coord)
-    xyz = np.empty((0, no_atoms, 3))
-    for atoms in generator:
-        pos = atoms.positions
-        pos = pos[:no_atoms]
-        pos = pos.reshape((1, -1, 3))
-        xyz = np.append(xyz, pos, axis=0)
+    # Check file type
+    filename, filext = os.path.splitext(arg.input)
+
+    if filext == ".xyz":
+        print("Converting text data to NumPy array...")
+        f = open(arg.input, "r")
+        no_atoms = int(f.readline())
+        f.close()
+        generator = ase.io.iread(arg.input)
+        # 3D empty array
+        # No. of structures x No. of atoms x 3 (xyz coord)
+        xyz = np.empty((0, no_atoms, 3))
+        for atoms in generator:
+            pos = atoms.positions
+            pos = pos[:no_atoms]
+            pos = pos.reshape((1, -1, 3))
+            xyz = np.append(xyz, pos, axis=0)
+    elif filext == ".npz":
+        dat = np.load(arg.input)
+        xyz = dat[dat.files[0]]
+    else:
+        print("Error: File type {filext} is not supported.")
 
     print(f"Shape of NumPy array: {xyz.shape}")
+
     index = arg.index_list
     if index:
         xyz = xyz[:,index]
         print(f"List of atom index: {index}")
         print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
     
-    out = os.path.splitext(arg.xyz)[0]
+    out = filename
     print("Calculating distance ...")
     dat = distance(xyz)
     np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dat)
