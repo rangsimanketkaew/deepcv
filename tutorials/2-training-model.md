@@ -1,31 +1,11 @@
-# Autoencoder-based collective variable for Diels-Alder reaction
+# Training autoencoder neural network
 
-This tutorial shows how to prepare an input file for training an autoencoder neural network.
-Input file defines general settings, necessary hyper-parameters, outputs, etc.
+DeepCV now accepts dataset only in NumPy's compress file formats (.npz).
 
-## Step 1: Generate input files (dataset)
-DeepCV now accepts only NumPy's compress file formats (.npz) as dataset (train and test sets). 
-```sh
-$ python -m src.helpers.extract_zmat_features -i dataset/DA/R/DUMP*.npz
+## Step 1: Prepare input file for Diels-Alder reaction
 
-Input 1: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-10.npz
-Input 2: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-11.npz
-Input 3: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-12.npz
-Input 4: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-13.npz
-Input 5: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-14.npz
-Input 6: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-15.npz
-Input 7: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-16.npz
-Input 8: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-17.npz
-Input 9: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-18.npz
-Input 10: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-19.npz
-Input 11: dataset/DA/R/DUMP_DNN_DA_MetaD_XTB_NVT_300K-pos-1-partial-xyz-array-20.npz
-Shape of NumPy array (after stacking): (99000, 16, 3)
-Calculating distance, angle, torsion ...
----Done!---
-```
-
-## Step 2: Prepare input file
 DeepCV's input file needed to be prepared in a JSON file format (dictionary-like). The following example show a complete input file for training the model using an autoencoder with 3 hidden layers. The first 3 hidden layers contain 2 encoded layers and 1 latent encoded layer (middle layer) and the last 2 hidden layers are decoded layers for reconstruction. On the other hand, the size of two hidden layers that opposite each other, e.g. input and output layers, 1st and 5th hidden layers, must be the same.
+
 ```JSON
 {
   "_comment": "Configuration input file",
@@ -92,11 +72,13 @@ DeepCV's input file needed to be prepared in a JSON file format (dictionary-like
 }
 ```
 
-## Step 3: Train model
+## Step 2: Train model
+
 Execute the `ae_train.py` source using `-m`, like below. Then it will start to train the model. The training time depends the size of dataset and networks, the number of epochs, etc.
+
 ```sh
 $ python -m src.modules.ae_train \
-    -d dataset/DA/DNN_DA_R_distance.npz dataset/DA/DNN_DA_R_angle.npz dataset/DA/DNN_DA_R_torsion.npz \
+    -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz \
     -k dist angle torsion \
     -i input/input_ae_DA.json
 
@@ -128,63 +110,3 @@ Epoch 3/200
 >>> Loss history plot has been saved to Demo_loss_vs_epoch.png
 ============================== DONE ==============================
 ```
-
-## Step 4: Create PLUMED input file
-Once the training is completed, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `ae_train.py`. It will automatically extract the weight and bias from model and print out the file.
-```sh
-$ python -m src.scripts.deepcv2plumed -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
-
->>> Plumed data have been successfully written to 'plumed-NN.dat'
->>> In order to run metadynamics using CP2K & PLUMED, specify the following input deck in CP2K input:
-
-# Import PLUMED input file
-&MOTION
-    &FREE_ENERGY
-        &METADYN
-            USE_PLUMED .TRUE.
-            PLUMED_INPUT_FILE plumed-NN.dat
-        &END METADYN
-    &END FREE_ENERGY
-%END MOTION
-```
-
-## Step 5: Test plumed input file
-This step is to check if a generated PLUMED input file works or not. You can use plumed driver to run a trial test on one-frame simple Diels-Alder trajectory.
-```sh
-$ plumed driver --ixyz reactant_DA_water_100atoms.xyz --plumed plumed-NN.dat
-$ tree
-
-.
-├── bias.log
-├── COLVAR.log
-├── HILLS
-├── input_plumed.log
-├── layer1.log
-├── layer2.log
-├── layer3.log
-├── plumed-NN.dat
-└── reactant_DA_water_100atoms.xyz
-```
-
-## Step 6: Prepare input files for performing enhanced sampling simulation
-Prepare all necessary files and run metadynamics simulation using CP2K.
-```sh
-$ tree
-
-.
-├── dftd3.dat
-├── MetaD.inp
-├── plumed-NN.dat
-├── reactant_DA_water_100atoms.xyz
-├── run_script.sh
-└── xTB_parameters
-```
-
-## Step 7: Submit job
-Submit the job on Pit Daint.
-```sh
-$ sbatch -J MetaD.inp run_script.sh
-```
-
-## Author
-Rangsiman Ketkaew
