@@ -15,6 +15,7 @@ import tensorflow as tf
 # from tensorflow.python.framework import ops
 
 
+@tf.function
 def GRMSE(y_true, y_pred):
     """Calculate Geometric root mean-squared error (GRMSE)
     """
