@@ -13,14 +13,17 @@ Autoencoder for learning collective variables from features
 import os
 import argparse
 import numpy as np
+from inspect import getmembers, isfunction
 
 from src.utils import util # needs to be loaded before calling TF
 util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 util.fix_autograph_warning()
 
+from .loss import GRMSE
+
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Dense, Concatenate
+from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model, multi_gpu_model
 from tensorflow.keras.callbacks import TensorBoard
@@ -234,7 +237,7 @@ if __name__ == "__main__":
         help="Dataset (train + test sets) for training neural network."
         )
     parser.add_argument(
-        "-k", "--key", metavar="KEY", type=str, required=True, nargs="+",
+        "-k", "--key", metavar="KEY", type=str, nargs="+",
         help="Keyword name (dictionary key) of the dataset array in NumPy's compressed file. \
             The number of keyword must consistent with that of npz files."
         )
@@ -283,6 +286,7 @@ if __name__ == "__main__":
     save_weights_npz = json["settings"]["save_weights_npz"]
     save_biases_npz = json["settings"]["save_biases_npz"]
     save_graph = json["settings"]["save_graph"]
+    save_loss = json["settings"]["save_loss"]
     show_loss = json["settings"]["show_loss"]
     # ---------
     out_dir = json["output"]["out_dir"]
@@ -303,7 +307,12 @@ if __name__ == "__main__":
     # Check and prepare datasets
     ############################
     # Extract features (input)
-    dataset_arr = [np.load(i)[j] for i, j in zip(args.dataset, args.key)]
+    if not args.key:
+        print("Warning: No npz keys specified, the first key found in array.files is automatically used.")
+        dataset_arr_raw = [np.load(i) for i in args.dataset] 
+        dataset_arr = [i[i.files[0]] for i in dataset_arr_raw]
+    else:
+        dataset_arr = [np.load(i)[j] for i, j in zip(args.dataset, args.key)]
 
     print("=== Shape of dataset before splitting ===")
     for i, j in enumerate(dataset_arr):
@@ -328,23 +337,64 @@ if __name__ == "__main__":
     if not enable_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+    ########################
+    # Check layer parameters
+    ########################
+    # Activation function
+    tf_act_func = getmembers(tf.keras.activations, isfunction)
+    avail_act_func = [i[0] for i in tf_act_func]
+    def check_act_func(f):
+        if f in avail_act_func:
+            return f
+        if f.lower() == 'leakyrelu':
+            print("Warning: LeakyReLU is used as a loss function.")
+            return LeakyReLU(alpha=0.2)
+        else:
+            print(f"Error: Activation function youspecified, {f}, is not supported.")
+            print(f"Available functions are {avail_act_func}")
+            exit()
+            
+    user_act_func = [func_1, func_2, func_3, func_4, func_5]
+    user_act_func = list(map(check_act_func, user_act_func))
+
+    # Loss
+    tf_loss = getmembers(tf.keras.losses, isfunction)
+    avail_loss = [i[0] for i in tf_loss]
+    if loss in avail_loss:
+        pass
+    elif loss.lower() == 'grmse':
+        print("Warning: Customized GRMSE is used as a loss function.")
+        loss = GRMSE
+    else:
+        print(f"Error: Loss function you specified, {loss}, is not supported.")
+        print(f"Available losses are {avail_loss}")
+        exit()
+
+    ##############
+    # Check output
+    ##############
+    if not os.path.isdir(out_dir):
+        print(f"Error: Output directory you specified, {out_dir}, does not exist. Please create this directory!")
+        exit()
+
     ################################
     # Build, compile and train model
     ################################
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr)
-    model.build_network(units_1, units_2, units_3, units_4, units_5, func_1, func_2, func_3, func_4, func_5)
+    model.build_network(units_1, units_2, units_3, units_4, units_5, *user_act_func)
     model.build_encoder()
     model.build_decoder()
     model.build_autoencoder()
     model.compile_model(optimizer, loss)
-    model.train_model(num_epoch, batch_size, verbosity, save_tb)    # Training model
-
     # show model info
     if show_summary:
         model.encoder.summary()
         model.decoder.summary()
         model.autoencoder.summary()
+    # Train model
+    model.train_model(num_epoch, batch_size, verbosity, save_tb)
+    print(">>> Congrats! Training model is completed.")
 
     # Prediction
     encoded_test = model.encoder_predict(test_arr)
@@ -389,7 +439,7 @@ if __name__ == "__main__":
         print(f">>> Directed graphs of all model have been saved to {os.path.abspath(out_dir)}")
 
     # summarize history for loss
-    if show_loss:
+    if save_loss:
         from matplotlib import pyplot as plt
         plt.figure(1)
         plt.plot(model.history.history["loss"])
@@ -398,9 +448,10 @@ if __name__ == "__main__":
         plt.ylabel("loss")
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
-        save_path = project + "_loss_vs_epoch.png"
+        save_path = out_parent + "/" + loss_plot
         plt.savefig(save_path)
         print(f">>> Loss history plot has been saved to {save_path}")
-        plt.show()
+        if show_loss:
+            plt.show()
 
     print("="*30 + " DONE " + "="*30)

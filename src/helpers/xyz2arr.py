@@ -14,19 +14,19 @@ info="Read cartesian coordinate file (.xyz) and save as NumPy's compress file"
 parser = argparse.ArgumentParser(description=info)
 parser.add_argument("--xyz", "-i", metavar="XYZ", required=True, type=str, 
     help="Cartesian coordinate in XYZ file format")
-parser.add_argument("--n-atoms", "-a", metavar="FIRST_N_ATOMS", required=True, type=int, 
-    help="First N atoms to be extracted")
+parser.add_argument("--no-atoms", "-a", metavar="FIRST_N_ATOMS", type=int, 
+    help="First N atoms of molecule to be extracted")
 parser.add_argument("--key", "-k", metavar="KEYWORD", type=str, default="coord", 
     help="Keyword name of the coordinate array to be saved in .npz file")
 
 args = parser.parse_args()
 
-if not args.atoms:
+if not args.no_atoms:
     f = open(args.xyz, "r")
-    no_atoms = f.readline()
+    no_atoms = int(f.readline())
     f.close()
 else:
-    no_atoms = args.n_atoms
+    no_atoms = args.no_atoms
 
 generator = ase.io.iread(args.xyz)
 # num = sum(1 for atoms in generator)
