@@ -4,7 +4,7 @@ DeepCV now accepts dataset only in NumPy's compress file formats (.npz).
 
 ## Step 1: Prepare input file for Diels-Alder reaction
 
-DeepCV's input file needed to be prepared in a JSON file format (dictionary-like). The following example show a complete input file for training the model using an autoencoder with 3 hidden layers. The first 3 hidden layers contain 2 encoded layers and 1 latent encoded layer (middle layer) and the last 2 hidden layers are decoded layers for reconstruction. On the other hand, the size of two hidden layers that opposite each other, e.g. input and output layers, 1st and 5th hidden layers, must be the same.
+DeepCV's input file needed to be prepared in a JSON file format (dictionary-like). The following example shows an input file for training model using an autoencoder with 5 hidden layers. The first 3 hidden layers contain 2 encoded layers and 1 latent encoded layer (middle layer) and the rest are 2 decoded layers for reconstruction. On the other hand, the size of 2 hidden layers that opposite each other, e.g. input and output layers, 1st and 5th hidden layers, must be the same.
 
 ```JSON
 {
@@ -37,11 +37,11 @@ DeepCV's input file needed to be prepared in a JSON file format (dictionary-like
     "units_3": 2,
     "units_4": 8,
     "units_5": 32,
-    "func_1": "tanh",
-    "func_2": "tanh",
-    "func_3": "tanh",
-    "func_4": "tanh",
-    "func_5": "tanh"
+    "func_1": "relu",
+    "func_2": "relu",
+    "func_3": "relu",
+    "func_4": "relu",
+    "func_5": "relu"
   },
   "performance": {
     "_comment": "Setting for training performance",
@@ -58,7 +58,8 @@ DeepCV's input file needed to be prepared in a JSON file format (dictionary-like
     "save_weights_npz": true,
     "save_biases_npz": true,
     "save_graph": true,
-    "show_loss": true
+    "save_loss": true,
+    "show_loss": false
   },
   "output": {
     "_comment": "Set name of output files",
@@ -107,6 +108,8 @@ Epoch 3/200
 >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.npz
 >>> Biases of model have been saved to /home/rketka/github/deepcv/output/model_biases.npz
 >>> Directed graphs of all model have been saved to /home/rketka/github/deepcv/output
->>> Loss history plot has been saved to Demo_loss_vs_epoch.png
+>>> Loss history plot has been saved to /home/rketka/github/deepcv/output/loss.png
 ============================== DONE ==============================
 ```
+
+Once you see the line "=== DONE===" the training is completed. You can then use the output saved in the folder you specified in the input file for further work, i.e., generating CV.
