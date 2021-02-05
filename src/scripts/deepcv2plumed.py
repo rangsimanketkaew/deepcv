@@ -321,26 +321,27 @@ if __name__ == "__main__":
     info = ("Generate PLUMED input file (.dat) from neural network model (weights and biases) trained by DeepCV.")
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument("--input", "-i", metavar="INPUT.json", type=str, required=True,
-        help="Input file (.json) that you used for training a model. \
+        help="Input file (.json) that is used for training model. \
         The input file must contain either absolute or relative path of the directory \
-        in which the weight and bias NumPy's compresses file format (.npz) stored")
+        in which the weight and bias NumPy's compresses file format (.npz) stored.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--num-atoms", "-n", metavar="N", type=int, default=None,
-        help="Number of atoms in the simulation system. \
-        The system should be the same kind of with which the model is trained. Cannot be used with -a option.")
+        help="The number of atoms in the simulation system that is used to train the model. \
+        Cannot be used with -a option.")
     group.add_argument("--atom-index", "-a", metavar="INDEX", type=int, nargs="+", default=None,
-        help="List of atomic index (1-based array index) that will be taken. \
-        If specified index is 0-based index, please use '--increment-index'. Cannot be used with -n option.")
+        help="List of atomic index (1-based array index) that will be used. \
+        If the specified index is 0-based index, please use '--increment-index' to change from 0-based to 1-based index. \
+        Cannot be used with -n option.")
     parser.add_argument("--sprint-index", "-s", metavar="LABEL_INDEX", type=str, default=None,
         help="Atomic type (symbol) and index of atoms to compute SPRINT coordinate. \
         Separator between index is ',' and between atomic type is ':'.\
         For example, '--sprint-index O=3,5,7,9:H=2,4,6,8,10'.")
     parser.add_argument("--increment-index", "-ii", action='store_true',
-        help="If this argument is set, the index will be incremented by 1. \
-        This option is useful if atomic index is 0-based.\
-        For example, [3, 4, 5, 6] will be changed to [4, 5, 6, 7]")
+        help="If this argument is set, the index will be changed from 0-based to 1-based index. \
+        This means that the index will be incremented by 1. For example, [3, 4, 5, 6] will become [4, 5, 6, 7]. \
+        This option is useful when the atomic index is 0-based.")
     parser.add_argument("--output", "-o", metavar="FILENAME.dat", type=str, default="plumed_NN.dat", 
-        help="Name of plumed input file (.dat). Default to 'plumed_NN.dat'")
+        help="Name of a PLUMED input file (.dat). Default to 'plumed_NN.dat'")
 
     args = parser.parse_args()
 
