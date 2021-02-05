@@ -1,18 +1,18 @@
 # Deep learning-based collective variables (DeepCV)
 
-Unsupervised learning for discovering new collective variables.
+Unsupervised learning for discovering hidden collective variables on free energy surface.
 
 ## Usage
-Example training model to extract collective variables using internal coordinates of Diels-Alder reactant trajectory as features.
+The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors:
 ```sh
 cd deepcv/
 python -m src.modules.ae_train \
     -i input_ae_DA.json \
-    -d DNN_DA_R_distance.npz DNN_DA_R_angle.npz DNN_DA_R_torsion.npz \
-    -k dist angle torsion
+    -d DNN_DA_R_distance.npz DNN_DA_R_angle.npz DNN_DA_R_torsion.npz DNN_DA_R_xSPRINT.npz \
+    -k dist angle torsion xsprint
 ```
 
-Note: A complete tutorial on Diels-Alder reaction is available at [here](tutorials/autoencoder.md).
+Note: A complete tutorial on DeepCV is available [here](tutorials/).
 
 ---
 
@@ -54,15 +54,15 @@ To install all dependencies packages of DeepCV, you can follow either following 
 1. Data sampling
     - Selected structural properties
     - SPRINT coordinates
-    - PCA components
-2. Generative model for generating data
-    - Generative adversarial networks (GANs)
-    - Variational autoencoder (future work)
-3. Dimensionality reduction
+    - PCA components (noise reduction)
+2. Dimensionality reduction
     - Linear: PCA, MDS
     - Autoencoders
       - Stacked autoencoder
       - One-Hot autoencoder
+3. Generative model for generating data
+    - Generative adversarial networks (GANs) (future work)
+    - Variational autoencoder (future work)
 
 ## To Do
 1. Development of loss function for autoencoder
@@ -70,10 +70,7 @@ To install all dependencies packages of DeepCV, you can follow either following 
 3. Time-series data with autoencoder
 
 ## In Progress
-1. Run MetaD using autoencoder-based CV
-2. Train the model with new features from MetaD
-3. Convergence analysis
-4. GAN 
+1. Analysis of CV coordinate space
 
 ## Done
 1. Dense neural nets with back propagation
