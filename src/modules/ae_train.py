@@ -10,17 +10,21 @@ Info:
 Autoencoder for learning collective variables from features
 """
 
-import os
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 import argparse
 import numpy as np
 from inspect import getmembers, isfunction
 
-from src.utils import util # needs to be loaded before calling TF
+from utils import util # needs to be loaded before calling TF
 util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 util.fix_autograph_warning()
 
-from .loss import GRMSE
+from loss import GRMSE
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU

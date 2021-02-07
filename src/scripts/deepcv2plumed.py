@@ -10,10 +10,14 @@ Info:
 Generate PLUMED input file using neural-network-based collective variable for metadynamics simulation
 """
 
-import os
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 import argparse
 import numpy as np
-from src.utils import util
+from utils import util
 from datetime import datetime
 
 

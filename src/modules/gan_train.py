@@ -10,12 +10,16 @@ Info:
 Generative adversarial networks (GANs) for generating data from sample noise space
 """
 
-import os
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 import argparse
 import time
 import numpy as np
 
-from src.utils import util # needs to be loaded before calling TF
+from utils import util # needs to be loaded before calling TF
 util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 

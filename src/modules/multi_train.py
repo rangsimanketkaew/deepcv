@@ -9,14 +9,18 @@ Info:
 """Multi-input neural network
 """
 
-import os
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 import argparse
 import numpy as np
 
-from src.utils import util  # needs to be loaded before calling TF
+from utils import util  # needs to be loaded before calling TF
 util.tf_logging(2, 3)  # warning level
 
-from src.helpers import trajectory
+from helpers import trajectory
 
 from tensorflow.keras.layers import Input, Dense, Concatenate
 from tensorflow.keras.models import Model
