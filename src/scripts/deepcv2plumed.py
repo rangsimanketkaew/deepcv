@@ -67,7 +67,8 @@ class WritePlumed:
         for i in range(num_atoms - 3):
             f.write(f"t{i+1}: TORSION ATOMS={i+4},{i+1},{i+2},{i+3}\n")
             self.num_feat += 1
-        print(f">>> A number of Z-matrix inputs: {self.num_feat}")
+        print(">>> - Input info")
+        print(f">>>   |- Number of Z-matrix inputs: {self.num_feat}")
         self.arg_input = [f'd{j+1}' for j in range(num_atoms - 1)] \
             + [f'a{j+1}' for j in range(num_atoms - 2)] \
             + [f't{j+1}' for j in range(num_atoms - 3)]
@@ -104,7 +105,7 @@ class WritePlumed:
         for i in range(len(index) - 3):
             f.write(f"t{i+1}: TORSION ATOMS={index[i+3]},{index[i]},{index[i+1]},{index[i+2]}\n")
             self.num_feat += 1
-        print(f">>> A number of Z-matrix inputs: {self.num_feat}")
+        print(f">>>   |- Number of Z-matrix inputs: {self.num_feat}")
         self.arg_input = [f'd{j+1}' for j in range(len(index) - 1)] \
             + [f'a{j+1}' for j in range(len(index) - 2)] \
             + [f't{j+1}' for j in range(len(index) - 3)]
@@ -125,16 +126,16 @@ class WritePlumed:
         for i in sprint_index:
             self.num_sprint += len(i.split('=')[1].split(','))
             f.write(f"DENSITY LABEL={i.split('=')[0]} SPECIES={i.split('=')[1]}\n")
-        print(f">>> A number of SPRINT inputs: {self.num_sprint}")
+        print(f">>>   |- Number of SPRINT inputs: {self.num_sprint}")
         self.num_feat += self.num_sprint
         f.write("\nCONTACT_MATRIX ...\n")
-        f.write("!!!----------------------------------------!!!\n")
-        f.write("!!! You have to define contact matrix here !!!\n")
-        f.write("!!!----------------------------------------!!!\n")
+        f.write("!!!----------------------------------------------------!!!\n")
+        f.write("!!! You have to define adjacency matrix (a_<ij>) below !!!\n")
+        f.write("!!!----------------------------------------------------!!!\n")
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
-        print(f">>> WARINING!!! You need to define contact matrix in SPRINT deck in {self.output_plumed}")
+        print(f">>>   |- WARINING!!! You need to explicitly define adjacency matrix (a_<ij>) in SPRINT deck in '{self.output_plumed}'.")
         arg = [f'ss.coord-{i}' for i in range(self.num_sprint)]
         self.arg_input += arg
         f.close()
@@ -175,22 +176,25 @@ class WritePlumed:
             "leakyrelu": lambda v: f"{leakyrelu_coeff}*step(-(x{v:+.8f}))+step(x{v:+.8f})*(x{v:+.8f})",
             "elu": lambda v: f"{leakyrelu_coeff}*(exp(step(-(x{v:+.8f})))-1)+step(x{v:+.8f})*(x{v:+.8f})"
         }
-        print(f">>> A number of total inputs: {self.num_feat}")
-        print(f">>> Activation functions: {func_1.lower()}, {func_2}, {func_3}")
+        print(f">>>   |- Number of total inputs: {self.num_feat}")
+
+        # Check if number of inputs and weight of the first layer are corresponding
+        if self.num_feat != weight[kw_1].shape[0]:
+            exit(f"Error: Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding")
+
+        print(">>> - Encoder info")
+        print(f">>>   |- Activation functions: {func_1.lower()}, {func_2}, {func_3}")
         func_1 = act_func[func_1.lower()]
         func_2 = act_func[func_2.lower()]
         func_3 = act_func[func_3.lower()]
         size_layer1 = weight[kw_1].shape[1]
         size_layer2 = weight[kw_2].shape[1]
         size_layer3 = weight[kw_3].shape[1]
-        print(f">>> Size of layers: {size_layer1}, {size_layer2}, {size_layer3}")
-
-        # Check if number of inputs and weight of the first layer are corresponding
-        if self.num_feat != weight[kw_1].shape[0]:
-            exit(f"Error: Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding")
+        print(f">>>   |- Size of layers: {size_layer1}, {size_layer2}, {size_layer3}")
 
         f = open(self.output_plumed, "a")
-        f.write(f"\n# Total inputs = {self.num_feat}\n")
+        f.write("\n" + "-"*60 + "\n")
+        f.write(f"\n# Total number of inputs = {self.num_feat}\n")
         f.write("\n# Neural network\n")
         self.arg_input = ",".join(self.arg_input)
         #----------- LAYER 1 -----------#
@@ -350,6 +354,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     #------- Read input -------#
+    print(">>> Reading DeepCV input file ...")
     if not os.path.isfile(args.input): exit(f'Error: No such file "{args.input}"')
     json = util.load_json(args.input)
     func_1 = json["network"]["func_1"]
@@ -358,19 +363,19 @@ if __name__ == "__main__":
     folder = json["output"]["out_dir"]
     weight = json["output"]["out_weights_npz"]
     bias = json["output"]["out_biases_npz"]
+
+    #------- Check weight file -------#
+    print(f">>> Checking weight output file: {weight}")
     weight = folder + "/" + weight
-    bias = folder + "/" + bias
     if not os.path.isfile(weight): exit(f'Error: No such file "{weight}"')
-    if not os.path.isfile(bias): exit(f'Error: No such file "{bias}"')
-
-    #------- Print info -------#
-    print(">>> Reading input file ...")
-    print(f">>> Weight: {weight}")
-    print(f">>> Bias  : {bias}")
-
-    #------- Check file -------#
     weight = np.load(weight)
+
+    #------- Check bias file -------#
+    print(f">>> Checking bias output file  : {bias}")
+    bias = folder + "/" + bias
+    if not os.path.isfile(bias): exit(f'Error: No such file "{bias}"')
     bias = np.load(bias)
+
     kw = weight.files[:3] # get keywords of first three layers
 
     #------- Start writing -------#
@@ -392,4 +397,4 @@ if __name__ == "__main__":
         p.write_SPRINT(args.sprint_index.split(":"))
     p.write_NeuralNetwork(weight, bias, kw, func_1, func_2, func_3)
     p.write_MetaD()
-    print(f">>> Plumed data have been successfully written to '{os.path.abspath(args.output)}'")
+    print(f">>> Plumed data have been written successfully to '{os.path.abspath(args.output)}'.")
