@@ -5,11 +5,7 @@ Unsupervised learning for discovering hidden collective variables on free energy
 ## Usage
 The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors:
 ```sh
-cd deepcv/
-python -m src.modules.ae_train \
-    -i input_ae_DA.json \
-    -d DNN_DA_R_distance.npz DNN_DA_R_angle.npz DNN_DA_R_torsion.npz DNN_DA_R_xSPRINT.npz \
-    -k dist angle torsion xsprint
+python ae_train.py -i input_ae_DA.json -d distance.npz angle.npz torsion.npz xSPRINT.npz
 ```
 
 Note: A complete tutorial on DeepCV is available [here](tutorials/).
@@ -50,10 +46,10 @@ To install all dependencies packages of DeepCV, you can follow either following 
     - other important scientific packages
       - scipy, scikit-learn, matplotlib, pandas
 
-## Roadmap
+## Main Features
 1. Data sampling
-    - Selected structural properties
-    - SPRINT coordinates
+    - Selected structural properties: internal coordinate
+    - SPRINT and Extended SPRINT coordinates
     - PCA components (noise reduction)
 2. Dimensionality reduction
     - Linear: PCA, MDS
@@ -65,12 +61,12 @@ To install all dependencies packages of DeepCV, you can follow either following 
     - Variational autoencoder (future work)
 
 ## To Do
-1. Development of loss function for autoencoder
-2. Development of regularizer
-3. Time-series data with autoencoder
+1. Development of regularizer
+2. Time-series data with autoencoder
 
 ## In Progress
-1. Analysis of CV coordinate space
+1. CV coordinate space propagation
+2. CV analysis
 
 ## Done
 1. Dense neural nets with back propagation
@@ -80,7 +76,8 @@ To install all dependencies packages of DeepCV, you can follow either following 
     - Mini-Batch training and normalization
     - Drop-out
 3. Generate PLUMED input file
-4. Model training
+4. Molecular-based loss function
+5. Model training
     - Avoid saturation
     - Epoch iteration
     - Penalty update
