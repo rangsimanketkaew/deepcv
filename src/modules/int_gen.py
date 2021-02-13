@@ -28,7 +28,7 @@ from PyQt5.QtWidgets import (
 class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
-        self.setWindowTitle("DeepCV input generator")
+        self.setWindowTitle("DeepCV Input Generator")
         self.resize(400, 500)
         layout = QVBoxLayout()
         # Menu bar
@@ -197,7 +197,6 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
     def preview_input(self):
         print("Test preview file", flush=True)
         print(self.size_sample.text())
-
 
     def save_file(self):
         print("Test save button", flush=True)
