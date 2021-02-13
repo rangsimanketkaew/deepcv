@@ -78,9 +78,8 @@ DeepCV's input file needed to be prepared in a JSON file format (dictionary-like
 Execute the `ae_train.py` source using `-m`, like below. Then it will start to train the model. The training time depends the size of dataset and networks, the number of epochs, etc.
 
 ```sh
-$ python -m src.modules.ae_train \
+$ python ae_train \
     -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz \
-    -k dist angle torsion \
     -i input/input_ae_DA.json
 
 ============================== Program started ==============================
