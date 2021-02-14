@@ -129,9 +129,9 @@ class WritePlumed:
         print(f">>>   |- Number of SPRINT inputs: {self.num_sprint}")
         self.num_feat += self.num_sprint
         f.write("\nCONTACT_MATRIX ...\n")
-        f.write("!!!----------------------------------------------------!!!\n")
-        f.write("!!! You have to define adjacency matrix (a_<ij>) below !!!\n")
-        f.write("!!!----------------------------------------------------!!!\n")
+        f.write("# !!!---------------------------------------------------!!!\n")
+        f.write("# !!! You have to define adjacency matrix (a_<ij>) here !!!\n")
+        f.write("# !!!---------------------------------------------------!!!\n")
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
