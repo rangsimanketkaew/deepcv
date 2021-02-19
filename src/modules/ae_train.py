@@ -29,7 +29,7 @@ from loss import GRMSE
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
-from tensorflow.keras.utils import plot_model, multi_gpu_model
+from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 
@@ -152,6 +152,7 @@ class Autoencoder(Model):
         """
         if gpus > 1:
             try:
+                from tensorflow.keras.utils import multi_gpu_model
                 self.autoencoder = multi_gpu_model(self.autoencoder, gpus=gpus)
                 print(">>> Training on multi-GPU on a single machine")
             except:
