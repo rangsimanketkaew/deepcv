@@ -11,8 +11,9 @@ This code will use a trained generator model to generate (fake) samples
 from a given set of latent points (random noise/number).
 """
 
+import argparse
 import numpy as np
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 
 
 def generate_latent_points(latent_dim, n_samples):    
