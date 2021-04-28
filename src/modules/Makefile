@@ -15,17 +15,23 @@ CXXFLAGS = -g -Wall -fPIC -std=c++11 -O2 -I$(IDIR)
 all: hello
 
 hello: 
-	@echo "Automatic compilation of DeepCV lib for PLUMED"
+	@echo "" 
+	@echo "Automatic compilation of DeepCV lib for PLUMED."
 
-deepcv.o:
+object:
 	$(CXX) $(CXXFLAGS) -c -o deepcv.o deepcv.cpp
 
-deepcv.so: deepcv.o
-	$(CXX) -fPIC -shared -o deepcv.so deepcv.o
+dynamic: object
+	$(CXX) -fPIC -shared -o libdeepcv.so deepcv.o
+	@echo "Dynamic library libdeepcv.so is successfully built!" 
 
-compile: deepcv.so
-	@echo "Compilation is completed"
+static: object
+	ar crv libdeepcv.a deepcv.o
+	@echo "Static library libdeepcv.a is successfully built!" 
+
+compile: hello dynamic
+	@echo "" 
 
 clean:
-	rm -f deepcv.o deepcv.so
+	rm -f deepcv.o libdeepcv.so libdeepcv.a
 
