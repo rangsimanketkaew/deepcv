@@ -9,6 +9,7 @@ import argparse
 import ase.io
 import numpy as np
 from scipy.spatial.distance import cdist
+import multiprocessing as mp
 try:
     from .extract_features_DA import angle_sign, dihedral
 except ImportError:
@@ -122,16 +123,21 @@ if __name__ == "__main__":
         xyz = xyz[:,index]
         print(f"List of atom index: {index}")
         print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
-    
+
+    p = mp.Pool(4)
+
+    dat = p.map(distance, xyz)
+    exit()
+
     out = filename
     print("Calculating distance ...")
     dat = distance(xyz)
-    np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dat)
+    #np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dat)
     print("Calculating angle ...")
     dat = angle(xyz)
-    np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=dat)
+    #np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=dat)
     print("Calculating torsion ...")
     dat = torsion(xyz)
-    np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dat)
+    #np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dat)
     print("All data have been saved as npz files!")
     print("-"*10 + " Done " + "-"*10)

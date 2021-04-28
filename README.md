@@ -1,11 +1,42 @@
-# Deep learning-based collective variables (DeepCV)
+# Deep Learning for Collective Variables (DeepCV)
 
-Unsupervised learning for discovering hidden collective variables on free energy surface.
+Unsupervised machine learning for discovering hidden collective variables on free energy surface.
+
+## Main Features
+1. Data sampling
+    - Selected structural properties: internal coordinate
+    - SPRINT and Extended SPRINT coordinates
+    - PCA components (noise reduction)
+2. Dimensionality reduction
+    - Linear: PCA, MDS
+    - Autoencoders
+      - Stacked autoencoder
+      - One-Hot autoencoder
+3. Generative model for generating data
+    - Generative adversarial networks (GANs) (future work)
+    - Variational autoencoder (future work)
+
+## Quick installation 
+- Python codes
+    ```sh
+    conda install --file requirements.txt
+    python setup.py install
+    ```
+- C++ codes
+    ```sh
+    g++ -c -I/path/to/plumed/src/ -o deepcv.o deepcv.cpp
+    g++ -shared -fPIC -o deepcv.so deepcv.o
+    ```
+
+    or you can use `make`
+    ```sh
+    make
+    ```
 
 ## Usage
 The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors:
 ```sh
-python ae_train.py -i input_ae_DA.json -d distance.npz angle.npz torsion.npz xSPRINT.npz
+ae_train -i input_ae_DA.json -d distance.npz angle.npz torsion.npz
 ```
 
 Note: A complete tutorial on DeepCV is available [here](tutorials/).
@@ -46,27 +77,13 @@ To install all dependencies packages of DeepCV, you can follow either following 
     - other important scientific packages
       - scipy, scikit-learn, matplotlib, pandas
 
-## Main Features
-1. Data sampling
-    - Selected structural properties: internal coordinate
-    - SPRINT and Extended SPRINT coordinates
-    - PCA components (noise reduction)
-2. Dimensionality reduction
-    - Linear: PCA, MDS
-    - Autoencoders
-      - Stacked autoencoder
-      - One-Hot autoencoder
-3. Generative model for generating data
-    - Generative adversarial networks (GANs) (future work)
-    - Variational autoencoder (future work)
-
-## To Do
-1. Development of regularizer
-2. Time-series data with autoencoder
+3. DeepCV C++ makes use of JSON parser
+    - https://github.com/nlohmann/json
 
 ## In Progress
-1. CV coordinate space propagation
-2. CV analysis
+1. Time-series data with autoencoder
+2. Improve neural network algoritm for large system
+3. Implement algorithm into MD packages and test the performance
 
 ## Done
 1. Dense neural nets with back propagation
@@ -82,8 +99,12 @@ To install all dependencies packages of DeepCV, you can follow either following 
     - Epoch iteration
     - Penalty update
     - GPU accelerated
+6. CV coordinate space propagation using loss maximization technique
+7. Analysis tools
+    - Feature importance
 
 ---
 
 ## Author
 1. Rangsiman Ketkaew (rangsiman.ketkaew@chem.uzh.ch)
+2. Sandra Luber (sandra.luber@chem.uzh.ch)

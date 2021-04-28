@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:

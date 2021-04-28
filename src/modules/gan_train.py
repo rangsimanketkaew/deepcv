@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
@@ -296,7 +296,7 @@ class GAN_Model(object):
             )
 
 
-if __name__ == "__main__":
+def main():
     info = "Generative adversarial networks (GANs) for learning latent data from features."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
@@ -552,3 +552,7 @@ if __name__ == "__main__":
         plt.show()
 
     print("="*30 + " DONE " + "="*30)
+
+if __name__ == "__main__":
+    main()
+

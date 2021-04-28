@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
@@ -24,7 +24,7 @@ util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 util.fix_autograph_warning()
 
-from loss import GRMSE
+from modules.loss import GRMSE
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
@@ -230,7 +230,7 @@ class Autoencoder(Model):
             )
 
 
-if __name__ == "__main__":
+def main():
     info = "Autoencoder for learning collective variables from features."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
@@ -460,3 +460,7 @@ if __name__ == "__main__":
             plt.show()
 
     print("="*30 + " DONE " + "="*30)
+
+if __name__ == "__main__":
+    main()
+

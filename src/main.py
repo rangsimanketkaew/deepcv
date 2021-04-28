@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
@@ -16,7 +16,7 @@ def main():
     """Welcome message and program description
     """
     print("\n------------------------------------------------")
-    print("DeepCV : Deep learning-based collective variables")
+    print("DeepCV : Deep Learning for Collective Variables")
     print("-------------------------------------------------")
     print(f"version {__version__} : {__date__}")
     print("University of Zurich, Switzerland")

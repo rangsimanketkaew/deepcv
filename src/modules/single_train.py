@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
@@ -222,7 +222,7 @@ class SingleInputNN(Model):
         self.kendalltau_testing, _ = kendalltau(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
 
 
-if __name__ == "__main__":
+def main():
     info = "Feedforward neural networks with single input."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument("input", metavar="INPUT", type=str, help="Input file (JSON)")
@@ -361,3 +361,7 @@ if __name__ == "__main__":
         print("-----------------------")
 
     print("="*30 + " DONE " + "="*30)
+
+if __name__ == "__main__":
+    main()
+

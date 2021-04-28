@@ -1,5 +1,5 @@
 """
-Deep learning-based collective variables (DeepCV)
+Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
@@ -30,7 +30,7 @@ def generate_latent_points(latent_dim, n_samples):
     latent_space = latent_space.reshape(n_samples, latent_dim)
     return latent_space
 
-if __name__ == "__main__":
+def main():
     info = "Generate output using Generator's model."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
@@ -64,3 +64,7 @@ if __name__ == "__main__":
     ############################
     model = load_model(args.model)
     X = model.predict(vector)
+
+if __name__ == "__main__":
+    main()
+
