@@ -8,7 +8,7 @@ IDIR = /home/rketka/gitlab/plumed2/src/
 CXX = g++
 # -g for debugging info
 # -Wall for showing compiler warnings
-CXXFLAGS = -g -Wall -std=c++11 -O2 -I$(IDIR)
+CXXFLAGS = -g -Wall -fPIC -std=c++11 -O2 -I$(IDIR) 
 
 .PHONY: all clean
 
@@ -17,13 +17,13 @@ all: hello
 hello: 
 	@echo "Automatic compilation of DeepCV lib for PLUMED"
 
-deepcv.o: deepcv.c json.hpp
-	$(CXX) $(CXXFLAGS) -c -o deepcv.o deepcv.c
+deepcv.o:
+	$(CXX) $(CXXFLAGS) -c -o deepcv.o deepcv.cpp
 
 deepcv.so: deepcv.o
-	$(CXX) $(CXXFLAGS) -fPIC -shared -o deepcv.so deepcv.o
+	$(CXX) -fPIC -shared -o deepcv.so deepcv.o
 
-goodbye:
+compile: deepcv.so
 	@echo "Compilation is completed"
 
 clean:
