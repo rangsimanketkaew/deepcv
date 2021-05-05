@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-from . import calculate_rmsd
+from . import calc_rmsd
 
 
 def extract_xyz(xyz):
@@ -45,6 +45,6 @@ def fitting(xyz, ref):
         traj_fitted (array): Cartesian coordinate of all frames after superposing
     """
     ref = np.squeeze(ref, axis=0)
-    traj_fitted = np.array([calculate_rmsd.kabsch_fit(x, ref) for x in xyz])
+    traj_fitted = np.array([calc_rmsd.kabsch_fit(x, ref) for x in xyz])
     
     return traj_fitted
