@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print(args.file)
+    print(f"Opening file: {args.file}")
     
     if args.type == "model":
         model = models.load_model(args.file)
