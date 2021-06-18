@@ -319,6 +319,9 @@ def main():
     else:
         dataset_arr = [np.load(i)[j] for i, j in zip(args.dataset, args.key)]
 
+    # Use FP32 for speeding training and reducing precision error
+    dataset_arr = [i.astype(np.float32) for i in dataset_arr]
+
     print("=== Shape of dataset before splitting ===")
     for i, j in enumerate(dataset_arr):
         print(f">>> {i+1}. Dataset: {j.shape}")

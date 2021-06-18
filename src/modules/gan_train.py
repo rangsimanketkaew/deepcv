@@ -379,6 +379,8 @@ def main():
     ############################
     # Extract features (input)
     dataset_arr = [np.load(i)[j] for i, j in zip(args.dataset, args.key)]
+    # Use FP32 for speeding training and reducing precision error
+    dataset_arr = [i.astype(np.float32) for i in dataset_arr]
     input_shape = (dataset_arr[0].shape[1],)
 
     print("=== Shape of dataset before merging ===")

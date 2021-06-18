@@ -47,7 +47,7 @@ class SingleInputNN(Model):
 
         # Extract labels
         self.num_label = len(labels)
-        self.label = np.loadtxt(labels[0], dtype=np.float64, skiprows=1)
+        self.label = np.loadtxt(labels[0], dtype=np.float32, skiprows=1)
 
         # Shuffle frames
         self.indices = np.arange(self.traj_fitted.shape[0])
