@@ -85,7 +85,9 @@ class Autoencoder(Model):
         # Input: I1 + I2 + ... = Inp
         self.size_inputs = [i.shape[1] for i in self.train_set]
         self.list_inputs = [self.generate_layer(self.size_inputs[i], i+1) for i in range(len(self.size_inputs))]
-        self.inputs = Concatenate(axis=-1)(self.list_inputs)    # Merge branches
+        # Check there is only one dataset provided, turn off concatenation
+        if len(self.list_inputs) == 1: self.inputs = self.list_inputs[0]
+        else: self.inputs = Concatenate(axis=-1)(self.list_inputs)    # Merge branches
 
         # Encoder: Inp --> H1 --> H2 --> H3
         self.encoded1 = Dense(self.units_1, activation=self.func_1, use_bias=True)(self.inputs)
