@@ -16,7 +16,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 
 
-def generate_latent_points(latent_dim, n_samples):    
+def generate_latent_points(latent_dim, n_samples):
     """Generate points in the latent spaces and reshape the vector
 
     Args:
@@ -30,21 +30,17 @@ def generate_latent_points(latent_dim, n_samples):
     latent_space = latent_space.reshape(n_samples, latent_dim)
     return latent_space
 
+
 def main():
     info = "Generate output using Generator's model."
     parser = argparse.ArgumentParser(description=info)
+    parser.add_argument("--model", "-m", metavar="MODEL", type=str, required=True, help="Generator's model.")
     parser.add_argument(
-        "--model", "-m", metavar="MODEL", type=str, required=True, 
-        help="Generator's model."
-        )
+        "--latent-dim", "-d", metavar="LATENT_DIM", type=int, required=True, help="Dimension of latent space."
+    )
     parser.add_argument(
-        "--latent-dim", "-d", metavar="LATENT_DIM", type=int, required=True,
-        help="Dimension of latent space."
-        )
-    parser.add_argument(
-        "--num-samples", "-n", metavar="NUM_SAMPLESKEY", type=int, required=True,
-        help="Number of samples."
-        )
+        "--num-samples", "-n", metavar="NUM_SAMPLESKEY", type=int, required=True, help="Number of samples."
+    )
 
     args = parser.parse_args()
 
@@ -64,6 +60,7 @@ def main():
     ############################
     model = load_model(args.model)
     X = model.predict(vector)
+
 
 if __name__ == "__main__":
     main()

@@ -11,6 +11,7 @@ Generative adversarial networks (GANs) for generating data from sample noise spa
 """
 
 import os, sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
@@ -19,7 +20,8 @@ import argparse
 import time
 import numpy as np
 
-from utils import util # needs to be loaded before calling TF
+from utils import util  # needs to be loaded before calling TF
+
 util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 
@@ -54,7 +56,11 @@ class GAN_Model(object):
         """
         self.model = model
         momentum, epsilon, renorm, renorm_momentum = list(param.values())
-        self.model.add(BatchNormalization(momentum=momentum, epsilon=epsilon, renorm=renorm, renorm_momentum=renorm_momentum))
+        self.model.add(
+            BatchNormalization(
+                momentum=momentum, epsilon=epsilon, renorm=renorm, renorm_momentum=renorm_momentum
+            )
+        )
 
     def build_generator(
         self,
@@ -69,8 +75,8 @@ class GAN_Model(object):
         kernel_reg=None,
         g_batch_norm=False,
         g_batch_norm_param=None,
-        name="Generator"
-        ):
+        name="Generator",
+    ):
         """Setup hyper-parameters and build Generator model using Sequential API
 
         Args:
@@ -107,7 +113,14 @@ class GAN_Model(object):
         # The layer would expect 1D array with noise shape element and it would produce e.g. 256 outputs.
         # Note: Input shape here is a tuple representing how many elements an array or tensor has in each dimension.
         # Layer 1
-        self.G.add(Dense(self.g_units_1, input_shape=self.noise_shape, name="layer1", kernel_regularizer=self.kernel_reg,))
+        self.G.add(
+            Dense(
+                self.g_units_1,
+                input_shape=self.noise_shape,
+                name="layer1",
+                kernel_regularizer=self.kernel_reg,
+            )
+        )
         if self.g_func_1.lower() == "leakyrelu":
             self.G.add(LeakyReLU(alpha=0.2))
         if self.g_batch_norm:
@@ -125,7 +138,14 @@ class GAN_Model(object):
         if self.g_batch_norm:
             self.add_batch_norm(self.G, self.g_batch_norm_param)
         # Layer 4
-        self.G.add(Dense(np.prod(self.input_shape), activation=self.g_func_4.lower(), name="output", kernel_regularizer=self.kernel_reg))
+        self.G.add(
+            Dense(
+                np.prod(self.input_shape),
+                activation=self.g_func_4.lower(),
+                name="output",
+                kernel_regularizer=self.kernel_reg,
+            )
+        )
         self.G.add(Reshape(self.input_shape))
 
         noise = Input(shape=self.noise_shape)
@@ -133,7 +153,8 @@ class GAN_Model(object):
 
         return Model(noise, inp, name=name)
 
-    def build_discriminator(self,
+    def build_discriminator(
+        self,
         d_units_1,
         d_units_2,
         d_units_3,
@@ -143,8 +164,8 @@ class GAN_Model(object):
         kernel_reg=None,
         d_batch_norm=False,
         d_batch_norm_param=None,
-        name="Discriminator"
-        ):
+        name="Discriminator",
+    ):
         """Setup hyper-parameters and build Discriminator model using Sequential API
 
         Args:
@@ -195,7 +216,14 @@ class GAN_Model(object):
         # Layer 3
         ###########
         if self.d_func_3.lower() == "sigmoid":
-            self.D.add(Dense(self.d_units_3, activation=self.d_func_3.lower(), name="output", kernel_regularizer=self.kernel_reg))
+            self.D.add(
+                Dense(
+                    self.d_units_3,
+                    activation=self.d_func_3.lower(),
+                    name="output",
+                    kernel_regularizer=self.kernel_reg,
+                )
+            )
         if self.d_batch_norm:
             self.add_batch_norm(self.D, self.d_batch_norm_param)
 
@@ -293,29 +321,44 @@ class GAN_Model(object):
             rankdir="TB",
             expand_nested=False,
             dpi=192,
-            )
+        )
 
 
 def main():
     info = "Generative adversarial networks (GANs) for learning latent data from features."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
-        "--input", "-i", metavar="INPUT", type=str, required=True, 
-        help="Input file (JSON) defining configuration, setting, parameters."
-        )
+        "--input",
+        "-i",
+        metavar="INPUT",
+        type=str,
+        required=True,
+        help="Input file (JSON) defining configuration, setting, parameters.",
+    )
     parser.add_argument(
-        "-d", "--dataset", metavar="DATASET", type=str, required=True, nargs="+",
-        help="Dataset (train + test sets) for training neural network."
-        )
+        "-d",
+        "--dataset",
+        metavar="DATASET",
+        type=str,
+        required=True,
+        nargs="+",
+        help="Dataset (train + test sets) for training neural network.",
+    )
     parser.add_argument(
-        "-k", "--key", metavar="KEY", type=str, required=True, nargs="+",
+        "-k",
+        "--key",
+        metavar="KEY",
+        type=str,
+        required=True,
+        nargs="+",
         help="Keyword name (dictionary key) of the dataset array in NumPy's compressed file. \
-            The number of keyword must consistent with that of npz files."
-        )
+            The number of keyword must consistent with that of npz files.",
+    )
 
     args = parser.parse_args()
 
-    if not os.path.isfile(args.input): exit('Error: No such file "' + str(args.input) + '"')
+    if not os.path.isfile(args.input):
+        exit('Error: No such file "' + str(args.input) + '"')
 
     # Load data from JSON input file
     json = util.load_json(args.input)
@@ -368,7 +411,7 @@ def main():
 
     # ========================================
 
-    print("="*30 + " Program started " + "="*30)
+    print("=" * 30 + " Program started " + "=" * 30)
     print(f"Project: {project}")
 
     if neural_network.lower() != "gan":
@@ -429,19 +472,25 @@ def main():
     elif regularizer["name"].lower() == "l1_l2":
         regularizer = l1_l2(float(regularizer["factor_1"]), float(regularizer["factor_2"]))
     else:
-        exit("Error: Check your regularizer and factor. Set parameter to None if you do not want to apply regularizer.")
+        exit(
+            "Error: Check your regularizer and factor. Set parameter to None if you do not want to apply regularizer."
+        )
 
     #############################
     # Prepare batch normalization
     #############################
-    if g_batch_norm: g_batch_norm_param = dict(g_batch_norm_param)
-    if d_batch_norm: d_batch_norm_param = dict(d_batch_norm_param)
+    if g_batch_norm:
+        g_batch_norm_param = dict(g_batch_norm_param)
+    if d_batch_norm:
+        d_batch_norm_param = dict(d_batch_norm_param)
 
     ###################
     # Prepare optimizer
     ###################
     if optimizer["name"].lower() == "adam":
-        optimizer = Adam(learning_rate=optimizer["learning_rate"], beta_1=optimizer["beta_1"], beta_2=optimizer["beta_2"])
+        optimizer = Adam(
+            learning_rate=optimizer["learning_rate"], beta_1=optimizer["beta_1"], beta_2=optimizer["beta_2"]
+        )
     else:
         exit("Error: Optimizer you specified is not available")
 
@@ -481,7 +530,7 @@ def main():
         d_func_3,
         regularizer,
         d_batch_norm,
-        d_batch_norm_param
+        d_batch_norm_param,
     )
     discriminator.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
     # Feed random input (noise) into Generator
@@ -496,7 +545,6 @@ def main():
     # and train only the Generator to fool the Discriminator
     gan = Model(z, valid, name="GAN")
     gan.compile(loss=loss, optimizer=optimizer)
-
 
     ####################
     # Start training GAN
@@ -532,6 +580,7 @@ def main():
 
     if show_loss:
         from matplotlib import pyplot as plt
+
         d_loss = np.array(model.history["d_loss"])
         # print(d_loss.shape)
         d_loss_real, d_loss_fake = d_loss.T
@@ -553,7 +602,8 @@ def main():
         print(f">>> Loss history plot has been saved to {save_path}")
         plt.show()
 
-    print("="*30 + " DONE " + "="*30)
+    print("=" * 30 + " DONE " + "=" * 30)
+
 
 if __name__ == "__main__":
     main()

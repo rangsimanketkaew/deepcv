@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-#------------------
+# ------------------
 # Rangsiman Ketkaew
-#------------------
+# ------------------
 
 import os
 import argparse
 import ase.io
 import numpy as np
 from scipy.spatial.distance import cdist
+
 try:
     from .extract_features_DA import angle_sign, dihedral
 except ImportError:
@@ -83,12 +84,27 @@ def torsion(xyz):
 
 
 if __name__ == "__main__":
-    info="Extract internal coordinate (Z-matrix) and save as NumPy's compressed array format (.npz)."
+    info = "Extract internal coordinate (Z-matrix) and save as NumPy's compressed array format (.npz)."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--input", "-i", dest="input", metavar="FILE", type=str, required=True,
-        help="Cartesian coordinate in XYZ file format (.xyz) or in NumPy's compressed array format (npz).")
-    parser.add_argument("--atom-index", "-a", dest="index_list", metavar="ATOM_INDEX", type=int, nargs="+", default=None,
-        help="List of atomic index that will be taken. (0-based array index)")
+    parser.add_argument(
+        "--input",
+        "-i",
+        dest="input",
+        metavar="FILE",
+        type=str,
+        required=True,
+        help="Cartesian coordinate in XYZ file format (.xyz) or in NumPy's compressed array format (npz).",
+    )
+    parser.add_argument(
+        "--atom-index",
+        "-a",
+        dest="index_list",
+        metavar="ATOM_INDEX",
+        type=int,
+        nargs="+",
+        default=None,
+        help="List of atomic index that will be taken. (0-based array index)",
+    )
 
     arg = parser.parse_args()
 
@@ -119,10 +135,10 @@ if __name__ == "__main__":
 
     index = arg.index_list
     if index:
-        xyz = xyz[:,index]
+        xyz = xyz[:, index]
         print(f"List of atom index: {index}")
         print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
-    
+
     out = filename
     print("Calculating distance ...")
     dat = distance(xyz)
@@ -134,4 +150,4 @@ if __name__ == "__main__":
     dat = torsion(xyz)
     np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dat)
     print("All data have been saved as npz files!")
-    print("-"*10 + " Done " + "-"*10)
+    print("-" * 10 + " Done " + "-" * 10)

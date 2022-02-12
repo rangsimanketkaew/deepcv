@@ -1,3 +1,12 @@
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
+
+Info:
+11/06/2021 : Rangsiman Ketkaew
+"""
+
+
 def split_dataset(dataset, split_ratio=0.8):
     """Split dataset into traing and test sets
 

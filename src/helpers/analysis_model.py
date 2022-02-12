@@ -48,13 +48,15 @@ def get_inter_model(f, layer_name="bottleneck", sum_ori=False, sum_new=False):
             model = models.load_model(f, compile=False)
 
     # Show summary of the original model to check the size of input(s)
-    if sum_ori: model.summary()
+    if sum_ori:
+        model.summary()
 
     new_model = models.Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
     # alternative to the use of index: model.layers[index of layer].output
 
     # Show summary of the new model
-    if sum_new: new_model.summary()
+    if sum_new:
+        new_model.summary()
 
     return new_model
 

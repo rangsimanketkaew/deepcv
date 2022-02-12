@@ -10,6 +10,7 @@ Info:
 """
 
 import os, sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
@@ -18,6 +19,7 @@ import argparse
 import numpy as np
 
 from utils import util  # needs to be loaded before calling TF
+
 util.tf_logging(2, 3)  # warning level
 
 from helpers import trajectory
@@ -30,6 +32,8 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
 class MultiInputNN:
+    """Multi-input neural network
+    """
     def __init__(self):
         super(MultiInputNN, self).__init__()
 
@@ -75,15 +79,14 @@ class MultiInputNN:
         max = float(np.max(self.traj_fitted))
         self.training_set_size = self.training_set.shape[0]
         self.testing_set_size = self.testing_set.shape[0]
-        self.training_set = (self.training_set.reshape(self.training_set_size, -1).astype("float32") / max)
-        self.testing_set = (self.testing_set.reshape(self.testing_set_size, -1).astype("float32") / max)
+        self.training_set = self.training_set.reshape(self.training_set_size, -1).astype("float32") / max
+        self.testing_set = self.testing_set.reshape(self.testing_set_size, -1).astype("float32") / max
 
         self.training_label = self.training_label.astype("float32") / max
         self.testing_label = self.testing_label.astype("float32") / max
 
-    def build_network(self, optimizer, loss, batch_size, num_epoch,
-        units_1, units_2, units_3, 
-        func_1, func_2, func_3,
+    def build_network(
+        self, optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
     ):
         """
         Multi-input fully-connected neural network
@@ -122,9 +125,7 @@ class MultiInputNN:
         self.branch_2 = self.branch_2_hidden_3(self.branch_2_hidden_2)
         self.branch_2_nn = Model(inputs=self.input_2, outputs=self.branch_2, name="branch_2")
 
-        self.inputs_combined = Concatenate(axis=-1)(
-            [self.branch_1_nn.output, self.branch_2_nn.output]
-        )
+        self.inputs_combined = Concatenate(axis=-1)([self.branch_1_nn.output, self.branch_2_nn.output])
 
         self.output_hidden_1 = Dense(2, activation="sigmoid", use_bias=True)
         self.output_hidden_1 = self.output_hidden_1(self.inputs_combined)
@@ -209,16 +210,16 @@ class MultiInputNN:
         """
         Evaluate model on the test data set
         """
-        return self.nn_model.evaluate([self.testing_set, self.testing_set], self.testing_label, batch_size=self.batch_size, verbose=2)
+        return self.nn_model.evaluate(
+            [self.testing_set, self.testing_set], self.testing_label, batch_size=self.batch_size, verbose=2
+        )
 
     def predict(self):
         """
         Generate predictions
         """
         # probabilities -- the output of the last layer on new data
-        self.encoded_label = self.nn_model.predict(
-            [self.traj_fitted, self.traj_fitted]
-        )  # shape: (N, 1)
+        self.encoded_label = self.nn_model.predict([self.traj_fitted, self.traj_fitted])  # shape: (N, 1)
 
     def calc_corr(self):
         """
@@ -226,16 +227,28 @@ class MultiInputNN:
         """
         # Pearson
         self.pearson_all, _ = pearsonr(self.label, self.encoded_label.flatten())
-        self.pearson_training, _ = pearsonr(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.pearson_testing, _ = pearsonr(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.pearson_training, _ = pearsonr(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.pearson_testing, _ = pearsonr(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
         # Spearman
         self.spearman_all, _ = spearmanr(self.label, self.encoded_label.flatten())
-        self.spearman_training, _ = spearmanr(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.spearman_testing, _ = spearmanr(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.spearman_training, _ = spearmanr(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.spearman_testing, _ = spearmanr(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
         # Kendall
         self.kendalltau_all, _ = kendalltau(self.label, self.encoded_label.flatten())
-        self.kendalltau_training, _ = kendalltau(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.kendalltau_testing, _ = kendalltau(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.kendalltau_training, _ = kendalltau(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.kendalltau_testing, _ = kendalltau(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
 
 
 def main():
@@ -310,9 +323,7 @@ def main():
     model = MultiInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
-        optimizer, loss, batch_size, num_epoch,
-        units_1, units_2, units_3,
-        func_1, func_2, func_3,
+        optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
     )
     model.build_model()
     model.compile_model()
@@ -369,7 +380,8 @@ def main():
         print(f"Kendall testing : {model.kendalltau_testing}")
         print("-----------------------")
 
-    print("="*30 + " DONE " + "="*30)
+    print("=" * 30 + " DONE " + "=" * 30)
+
 
 if __name__ == "__main__":
     main()

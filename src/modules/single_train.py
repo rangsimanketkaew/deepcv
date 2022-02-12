@@ -10,6 +10,7 @@ Info:
 """
 
 import os, sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
@@ -18,6 +19,7 @@ import argparse
 import numpy as np
 
 from utils import util  # needs to be loaded before calling TF
+
 util.tf_logging(2, 3)  # warning level
 
 from helpers import trajectory
@@ -30,12 +32,17 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
 class SingleInputNN(Model):
+    """Single-input neural network
+
+    Args:
+        Model (class): Keras parent class
+    """
+
     def __init__(self):
         super(SingleInputNN, self).__init__()
 
     def preprocess(self, dataset, ref_mol, training_set_ratio, labels):
-        """
-        Process data
+        """Process data
         """
         # Extract molecules
         self.traj = trajectory.extract_xyz(dataset)
@@ -75,18 +82,16 @@ class SingleInputNN(Model):
         max = float(np.max(self.traj_fitted))
         self.training_set_size = self.training_set.shape[0]
         self.testing_set_size = self.testing_set.shape[0]
-        self.training_set = (self.training_set.reshape(self.training_set_size, -1).astype("float32") / max)
-        self.testing_set = (self.testing_set.reshape(self.testing_set_size, -1).astype("float32") / max)
+        self.training_set = self.training_set.reshape(self.training_set_size, -1).astype("float32") / max
+        self.testing_set = self.testing_set.reshape(self.testing_set_size, -1).astype("float32") / max
 
         self.training_label = self.training_label.astype("float32") / max
         self.testing_label = self.testing_label.astype("float32") / max
 
-    def build_network(self, optimizer, loss, batch_size, num_epoch,
-        units_1, units_2, units_3, 
-        func_1, func_2, func_3,
+    def build_network(
+        self, optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
     ):
-        """
-        Simple fully-connected neural network
+        """Simple fully-connected neural network
         """
         self.optimizer = optimizer
         self.loss = loss
@@ -118,14 +123,12 @@ class SingleInputNN(Model):
         self.output = self.output(self.output_hidden_1)
 
     def build_model(self):
-        """
-        # Build model
+        """Build model
         """
         self.nn_model = Model(inputs=self.input, outputs=self.output, name="nn_model")
 
     def parallel_gpu(self, gpus=1):
-        """
-        Parallelization with multi-GPU
+        """Parallelization with multi-GPU
         """
         self.gpus = gpus
         if self.gpus > 1:
@@ -136,8 +139,7 @@ class SingleInputNN(Model):
                 print(">>> Warning: cannot enable multi-GPUs support for Keras")
 
     def compile_model(self):
-        """
-        Compile model
+        """Compile model
         """
         self.nn_model.compile(
             optimizer=self.optimizer,
@@ -148,14 +150,12 @@ class SingleInputNN(Model):
         )
 
     def show_model(self):
-        """
-        Show summary of model
+        """Show summary of model
         """
         self.nn_model.summary()
 
     def plot_model_img(self, model_img):
-        """
-        Plot model and save it as image
+        """Plot model and save it as image
         """
         plot_model(
             self.nn_model,
@@ -168,8 +168,7 @@ class SingleInputNN(Model):
         )
 
     def train_model(self, verbose=1):
-        """
-        Train model
+        """Train model
         """
         # TF Board
         # You can use tensorboard to visualize TensorFlow runs and graphs.
@@ -191,35 +190,45 @@ class SingleInputNN(Model):
         )
 
     def evaluate(self):
+        """Evaluate model on the test data set
         """
-        Evaluate model on the test data set
-        """
-        return self.nn_model.evaluate(self.testing_set, self.testing_label, batch_size=self.batch_size, verbose=2)
-         
+        return self.nn_model.evaluate(
+            self.testing_set, self.testing_label, batch_size=self.batch_size, verbose=2
+        )
 
     def predict(self):
-        """
-        Generate predictions
+        """Generate predictions
         """
         # probabilities -- the output of the last layer on new data
         self.encoded_label = self.nn_model.predict(self.traj_fitted)  # shape: (N, 1)
 
     def calc_corr(self):
-        """
-        Calculate correlation coefficients
+        """Calculate correlation coefficients
         """
         # Pearson
         self.pearson_all, _ = pearsonr(self.label, self.encoded_label.flatten())
-        self.pearson_training, _ = pearsonr(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.pearson_testing, _ = pearsonr(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.pearson_training, _ = pearsonr(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.pearson_testing, _ = pearsonr(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
         # Spearman
         self.spearman_all, _ = spearmanr(self.label, self.encoded_label.flatten())
-        self.spearman_training, _ = spearmanr(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.spearman_testing, _ = spearmanr(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.spearman_training, _ = spearmanr(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.spearman_testing, _ = spearmanr(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
         # Kendall
         self.kendalltau_all, _ = kendalltau(self.label, self.encoded_label.flatten())
-        self.kendalltau_training, _ = kendalltau(self.training_label, self.encoded_label.flatten()[: self.training_set_size])
-        self.kendalltau_testing, _ = kendalltau(self.testing_label, self.encoded_label.flatten()[self.training_set_size :])
+        self.kendalltau_training, _ = kendalltau(
+            self.training_label, self.encoded_label.flatten()[: self.training_set_size]
+        )
+        self.kendalltau_testing, _ = kendalltau(
+            self.testing_label, self.encoded_label.flatten()[self.training_set_size :]
+        )
 
 
 def main():
@@ -294,16 +303,7 @@ def main():
     model = SingleInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
-        optimizer,
-        loss,
-        batch_size,
-        num_epoch,
-        units_1,
-        units_2,
-        units_3,
-        func_1,
-        func_2,
-        func_3,
+        optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
     )
     model.build_model()
     model.compile_model()
@@ -360,7 +360,8 @@ def main():
         print(f"Kendall testing : {model.kendalltau_testing}")
         print("-----------------------")
 
-    print("="*30 + " DONE " + "="*30)
+    print("=" * 30 + " DONE " + "=" * 30)
+
 
 if __name__ == "__main__":
     main()

@@ -812,7 +812,13 @@ def reorder_brute(p_atoms, q_atoms, p_coord, q_coord):
 
 
 def check_reflections(
-    p_atoms, q_atoms, p_coord, q_coord, reorder_method=reorder_hungarian, rotation_method=kabsch_rmsd, keep_stereo=False
+    p_atoms,
+    q_atoms,
+    p_coord,
+    q_coord,
+    reorder_method=reorder_hungarian,
+    rotation_method=kabsch_rmsd,
+    keep_stereo=False,
 ):
     """
     Minimize RMSD using reflection planes for molecule P and Q
@@ -1298,11 +1304,15 @@ See https://github.com/charnley/rmsd for citation information
 
     # Filter
     index_group = parser.add_mutually_exclusive_group()
-    index_group.add_argument("-nh", "--no-hydrogen", action="store_true", help="ignore hydrogens when calculating RMSD")
+    index_group.add_argument(
+        "-nh", "--no-hydrogen", action="store_true", help="ignore hydrogens when calculating RMSD"
+    )
     index_group.add_argument(
         "--remove-idx", nargs="+", type=int, help="index list of atoms NOT to consider", metavar="IDX"
     )
-    index_group.add_argument("--add-idx", nargs="+", type=int, help="index list of atoms to consider", metavar="IDX")
+    index_group.add_argument(
+        "--add-idx", nargs="+", type=int, help="index list of atoms to consider", metavar="IDX"
+    )
 
     # format and print
     parser.add_argument(
@@ -1386,11 +1396,15 @@ https://github.com/charnley/rmsd for further examples.
     else:
 
         if args.reorder and args.output:
-            print("error: Cannot reorder atoms and print structure, when excluding atoms (such as --no-hydrogen)")
+            print(
+                "error: Cannot reorder atoms and print structure, when excluding atoms (such as --no-hydrogen)"
+            )
             quit()
 
         if args.use_reflections and args.output:
-            print("error: Cannot use reflections on atoms and print, when excluding atoms (such as --no-hydrogen)")
+            print(
+                "error: Cannot use reflections on atoms and print, when excluding atoms (such as --no-hydrogen)"
+            )
             quit()
 
         p_coord = copy.deepcopy(p_all[p_view])

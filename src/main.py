@@ -34,7 +34,8 @@ def main():
         ["sprint.py", "Calculate SPRINT coordinate"],
         ["deepcv2plumed.py", "Create PLUMED input file"],
         ["deepcv2colvar.py", "Create Colvar input file"],
-        ["analysis.py", "Analysis tools"],
+        ["analysis_FES.py", "FES validation"],
+        ["analysis_model.py", "DAENN model analysis and parameters extraction"],
     ]
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)

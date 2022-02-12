@@ -15,25 +15,20 @@ from scipy.spatial import distance
 import ase.io
 from ase.data import chemical_symbols
 
-#++++++++++++++++++++++++++++++++++++++++++
-# Default parameters for adjacency matrix 
-r_0 = {
-    "CoCo": 2.22, 
-    "OO": 2.22, 
-    "HH": 1.50, 
-    "CoO": 2.22, 
-    "CoH": 2.22, 
-    "OH": 2.00
-    }
+# ++++++++++++++++++++++++++++++++++++++++++
+# Default parameters for adjacency matrix
+r_0 = {"CoCo": 2.22, "OO": 2.22, "HH": 1.50, "CoO": 2.22, "CoH": 2.22, "OH": 2.00}
 n = 6
 m = 12
 M = 1
-#++++++++++++++++++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++++++++++++++++
+
 
 def distance(p1, p2):
     """Calculate bond distance between Carbon
     """
     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2))
+
 
 def angle(a, b, c):
     """Calculate angle between carbon
@@ -43,6 +38,7 @@ def angle(a, b, c):
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
     ang = np.arccos(cosine_angle)
     return np.degrees(ang)
+
 
 def angle_sign(a, b, c, degree=False):
     """Calculate angle between three atoms and return value with sign in radian.
@@ -56,6 +52,7 @@ def angle_sign(a, b, c, degree=False):
         return theta * 180.0 / np.pi
     else:
         return theta
+
 
 def dihedral(p0, p1, p2, p3, degree=False):
     """Praxeolitic formula
@@ -84,10 +81,11 @@ def dihedral(p0, p1, p2, p3, degree=False):
     else:
         return np.arctan2(y, x)
 
+
 def calc_int_coord(xyz, filename="structures"):
     no_strct, no_atoms, _ = xyz.shape
     out = filename
-    #---------------------------------------------
+    # ---------------------------------------------
     print("Calculating distance ...")
     """Calculate distance between atom A and B.
     1
@@ -110,7 +108,7 @@ def calc_int_coord(xyz, filename="structures"):
             dist[i][j + 2] = alldist[j][j + 3]
     np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dist)
 
-    #---------------------------------------------
+    # ---------------------------------------------
     print("Calculating angle ...")
     """Calculate angle between atom A, B and C.
     1
@@ -131,7 +129,7 @@ def calc_int_coord(xyz, filename="structures"):
             angle[i][j + 1] = angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
     np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=angle)
 
-    #---------------------------------------------
+    # ---------------------------------------------
     print("Calculating torsion ...")
     """Calculate dihedral angle (torsion) between atom A, B, C and D.
     1
@@ -151,6 +149,7 @@ def calc_int_coord(xyz, filename="structures"):
             dih[i][j] = dihedral(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
     np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dih)
 
+
 def calc_adj_max(xyz, r_0, n, m):
     """Calculate adjacency matrix
 
@@ -160,13 +159,17 @@ def calc_adj_max(xyz, r_0, n, m):
      1. Two loops over atomic symbols to create bond pair
      2. Get the r_0 from value of the dict defined above
     """
-    tmp = [[r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols] for first in symbols]
+    tmp = [
+        [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
+        for first in symbols
+    ]
     r_0 = np.asarray(tmp)
     r_ij = distance.cdist(xyz, xyz)
     frac = np.divide(r_ij, r_0)  # r_ij / r_0
     a_ij = np.divide(1 - np.power(frac, n), 1 - np.power(frac, m))
 
     return a_ij
+
 
 def calc_sprint(symbols, xyz, r_0, n, m, M):
     """Calculate SPRINT coordinates
@@ -213,6 +216,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M):
 
     return a_i, s
 
+
 def calc_xsprint(symbols, xyz, r_0, n, m, M):
     """Calculate Extended SPRINT (xSPRINT) coordinates
 
@@ -252,20 +256,52 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M):
 
     return a_i, s
 
+
 def main():
-    des="Calculate molecular representation for DeepCV"
+    des = "Calculate molecular representation for DeepCV"
     parser = argparse.ArgumentParser(description=des)
-    parser.add_argument("--xyz", "--input", "-i", dest="input", metavar="FILE", type=str, required=True,
-        help="Cartesian coordinate in XYZ file format (.xyz) or in NumPy's compressed array format (npz).")
-    parser.add_argument("--atom-index", "-a", dest="index_list", metavar="ATOM_INDEX", type=int, nargs="+", default=None,
-        help="List of atomic index that will be taken. (0-based array index)")
-    parser.add_argument("--rep", "-r", dest="rep",
+    parser.add_argument(
+        "--xyz",
+        "--input",
+        "-i",
+        dest="input",
+        metavar="FILE",
+        type=str,
+        required=True,
+        help="Cartesian coordinate in XYZ file format (.xyz) or in NumPy's compressed array format (npz).",
+    )
+    parser.add_argument(
+        "--atom-index",
+        "-a",
+        dest="index_list",
+        metavar="ATOM_INDEX",
+        type=int,
+        nargs="+",
+        default=None,
+        help="List of atomic index that will be taken. (0-based array index)",
+    )
+    parser.add_argument(
+        "--rep",
+        "-r",
+        dest="rep",
         choices=["int-coord", "adj-max", "sprint", "xsprint"],
-        help="Representation (descriptor) to calculate")
-    parser.add_argument("--save", "-s", dest="save", default=False, action='store_true',
-        help="Whether save output as NumPy's compressed array format (npz).")
-    parser.add_argument("--output", "--out", "-o", dest="output",
-        help="Output file. If not specified the default output filename is used")
+        help="Representation (descriptor) to calculate",
+    )
+    parser.add_argument(
+        "--save",
+        "-s",
+        dest="save",
+        default=False,
+        action="store_true",
+        help="Whether save output as NumPy's compressed array format (npz).",
+    )
+    parser.add_argument(
+        "--output",
+        "--out",
+        "-o",
+        dest="output",
+        help="Output file. If not specified the default output filename is used",
+    )
 
     args = parser.parse_args()
 
@@ -301,7 +337,7 @@ def main():
 
     index = arg.index_list
     if index:
-        xyz = xyz[:,index]
+        xyz = xyz[:, index]
         print(f"List of atom index: {index}")
         print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
 
@@ -310,18 +346,18 @@ def main():
     ############################
 
     # Internal coordinates
-    if args.rep == 'int-coord':
+    if args.rep == "int-coord":
         print("Calculate internal coordinates")
         calc_int_coord(xyz, filename)
-        print("-"*10 + " Done " + "-"*10)
+        print("-" * 10 + " Done " + "-" * 10)
 
     # Adjacency matrix
-    if args.rep == 'adj-mat':
+    if args.rep == "adj-mat":
         print("Calculate adjacency matrix")
-        print("-"*10 + " Done " + "-"*10)
+        print("-" * 10 + " Done " + "-" * 10)
 
     # SPRINT coordinates
-    if args.rep == 'sprint':
+    if args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
 
         symbols = [chemical_symbols[x] for x in numbers]
@@ -331,15 +367,15 @@ def main():
             sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
                 np.saved_compressed(f"{filename}_SPRINT.npz", index=sort_index, sprint=sorted_SPRINT)
-        print("-"*10 + " DONE " + "-"*10)
+        print("-" * 10 + " DONE " + "-" * 10)
 
     # xSPRINT coordinates
-    if args.rep == 'xsprint':
+    if args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
         if args.save:
             np.saved_compressed(f"{filename}_xSPRINT.npz")
-        print("-"*10 + " DONE " + "-"*10)
-        
+        print("-" * 10 + " DONE " + "-" * 10)
+
 
 if __name__ == "__main__":
     main()
