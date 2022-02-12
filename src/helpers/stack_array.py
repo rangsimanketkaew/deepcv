@@ -1,21 +1,53 @@
-#------------------
-# Rangsiman Ketkaew
-#------------------
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
+
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
+
+"""
+Stacking arrays
+"""
 
 import os
 import glob
 import argparse
 import numpy as np
 
-info="Merge multiple NumPy's array compressed file (npz) of internal coordinates (z-matrix) into one npz file."
+info = (
+    "Merge multiple NumPy's array compressed file (npz) of internal coordinates (z-matrix) into one npz file."
+)
 parser = argparse.ArgumentParser(description=info)
-parser.add_argument("--npz", "--input", "-i", dest="npz", metavar="INPUT.npz", type=str, required=True, nargs="*",
-    help="Internal coordinate in NumPy's compressed array format (.npz).")
-parser.add_argument("--key", "-k", dest="key_npz", metavar="KEYWORD", default="coord", type=str,
+parser.add_argument(
+    "--npz",
+    "--input",
+    "-i",
+    dest="npz",
+    metavar="INPUT.npz",
+    type=str,
+    required=True,
+    nargs="*",
+    help="Internal coordinate in NumPy's compressed array format (.npz).",
+)
+parser.add_argument(
+    "--key",
+    "-k",
+    dest="key_npz",
+    metavar="KEYWORD",
+    default="coord",
+    type=str,
     help="Keyword name that corresponds to array saved in the npz input file. \
-        Note that all npz files must have the same keyword name. Defaults to 'coord'.")
-parser.add_argument("--output", "-o", dest="output", metavar="OUTPUT.npz", type=str,
-    help="File name of output of a merged NumPy's compressed array format (.npz).")
+        Note that all npz files must have the same keyword name. Defaults to 'coord'.",
+)
+parser.add_argument(
+    "--output",
+    "-o",
+    dest="output",
+    metavar="OUTPUT.npz",
+    type=str,
+    help="File name of output of a merged NumPy's compressed array format (.npz).",
+)
 
 arg = parser.parse_args()
 
@@ -42,4 +74,4 @@ if arg.output:
 else:
     out = "data_stacked_merge.npz"
 np.savez_compressed(f"{out}", arr=dat)
-print("-"*10 + " Done " + "-"*10)
+print("-" * 10 + " Done " + "-" * 10)

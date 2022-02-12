@@ -1,13 +1,21 @@
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
+
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
+
 import os
 import math
 import numpy as np
 from calc_rep import distance, angle, angle_sign, dihedral
 
 
-if __name__ == "__main__":
+def DA():
+    """Diels-Alder (DA) reaction
 
-    """
-    Product of Diels-Alder reaction
+    Product of the DA reaction
 
      C4 --- C3           ----> Dienophile
      /       \
@@ -55,3 +63,8 @@ if __name__ == "__main__":
 
     o = os.path.join(dir, "DA_dist.npz")
     np.savez_compressed(o, dist=dist, ang=ang, dih=dih)
+
+
+if __name__ == "__main__":
+    DA()
+

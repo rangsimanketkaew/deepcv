@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
 
-# ------------------
-# Rangsiman Ketkaew
-# ------------------
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
 
 import os
 import argparse

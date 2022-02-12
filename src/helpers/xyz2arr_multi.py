@@ -1,3 +1,11 @@
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
+
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
+
 import numpy as np
 import ase.io
 import time
@@ -7,6 +15,7 @@ from multiprocessing import Pool
 class AppArr:
     """Append array in parallel process.
     """
+
     def __init__(self, arr, generator):
         self.arr = arr
         self.generator = generator

@@ -1,4 +1,13 @@
-"""Functions for manipulating xyz
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
+
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
+
+"""
+Functions for manipulating xyz
 """
 
 import numpy as np
@@ -46,5 +55,5 @@ def fitting(xyz, ref):
     """
     ref = np.squeeze(ref, axis=0)
     traj_fitted = np.array([calc_rmsd.kabsch_fit(x, ref) for x in xyz])
-    
+
     return traj_fitted

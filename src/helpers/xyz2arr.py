@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
+"""
+Deep Learning for Collective Variables (DeepCV)
+https://gitlab.uzh.ch/LuberGroup/deepcv
 
-#------------------
-# Rangsiman Ketkaew
-#------------------
+Info:
+28/11/2020 : Rangsiman Ketkaew
+"""
 
 import argparse
 import os
@@ -10,14 +12,22 @@ import numpy as np
 import ase.io
 
 
-info="Read cartesian coordinate file (.xyz) and save as NumPy's compress file"
+info = "Read cartesian coordinate file (.xyz) and save as NumPy's compress file"
 parser = argparse.ArgumentParser(description=info)
-parser.add_argument("--xyz", "-i", metavar="XYZ", required=True, type=str, 
-    help="Cartesian coordinate in XYZ file format")
-parser.add_argument("--no-atoms", "-a", metavar="FIRST_N_ATOMS", type=int, 
-    help="First N atoms of molecule to be extracted")
-parser.add_argument("--key", "-k", metavar="KEYWORD", type=str, default="coord", 
-    help="Keyword name of the coordinate array to be saved in .npz file")
+parser.add_argument(
+    "--xyz", "-i", metavar="XYZ", required=True, type=str, help="Cartesian coordinate in XYZ file format"
+)
+parser.add_argument(
+    "--no-atoms", "-a", metavar="FIRST_N_ATOMS", type=int, help="First N atoms of molecule to be extracted"
+)
+parser.add_argument(
+    "--key",
+    "-k",
+    metavar="KEYWORD",
+    type=str,
+    default="coord",
+    help="Keyword name of the coordinate array to be saved in .npz file",
+)
 
 args = parser.parse_args()
 
