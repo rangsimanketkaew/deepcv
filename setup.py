@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0",
     author="Rangsiman Ketkaew",
     author_email="rangsiman.ketkaew@chem.uzh.ch",
-    description="Unsupervised machine learning package for discovering collective varibales",
+    description="Unsupervised machine learning package for discovering collective variables",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://gitlab.uzh.ch/lubergroup/deepcv",
