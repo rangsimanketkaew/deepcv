@@ -3,6 +3,7 @@
 ## Step 1: Create PLUMED input file
 
 Once the training is completed, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `ae_train.py`. It will automatically extract the weight and bias from model and print out the file.
+
 ```sh
 $ python deepcv2plumed.py -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 
@@ -21,7 +22,9 @@ $ python deepcv2plumed.py -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 ```
 
 ## Step 2: Test plumed input file
+
 This step is to check if a generated PLUMED input file works or not. You can use plumed driver to run a trial test on one-frame simple Diels-Alder trajectory.
+
 ```sh
 $ plumed driver --ixyz reactant_DA_water_100atoms.xyz --plumed plumed-NN.dat
 $ tree

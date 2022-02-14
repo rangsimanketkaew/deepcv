@@ -22,7 +22,7 @@ from utils import util  # needs to be loaded before calling TF
 
 util.tf_logging(2, 3)  # warning level
 
-from helpers import trajectory
+from tools import trajectory
 
 from tensorflow.keras.layers import Input, Dense, Concatenate
 from tensorflow.keras.models import Model
@@ -34,6 +34,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 class MultiInputNN:
     """Multi-input neural network
     """
+
     def __init__(self):
         super(MultiInputNN, self).__init__()
 

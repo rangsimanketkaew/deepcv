@@ -6,6 +6,10 @@ Info:
 28/11/2020 : Rangsiman Ketkaew
 """
 
+"""
+Extract atomic index
+"""
+
 import argparse
 from collections import Counter
 

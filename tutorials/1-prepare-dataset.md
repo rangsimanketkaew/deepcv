@@ -26,10 +26,10 @@ traj-partial-001.xyz
 traj-partial-100.xyz
 ```
 
-## Step 3: Extract z-matrix (internal coordinate) and generate input files (dataset) for neural network 
+## Step 3: Extract z-matrix (internal coordinate) and generate input files (dataset) for neural network
 
 ```sh
-$ python deepcv/src/helpers/extract_zmat.py --input traj-partial-001.xyz
+$ python deepcv/src/tools/extract_zmat.py --input traj-partial-001.xyz
 Shape of NumPy array: (2000, 190, 3)
 Calculating distance ...
 Calculating angle ...
@@ -46,7 +46,7 @@ traj-partial-001_zmat_torsion.npz
 And you can use for loop to speed up this step
 
 ```sh
-$ for i in traj-partial-*.xyz; do echo $i; python deepcv/src/helpers/extract_zmat.py --input $i; done
+$ for i in traj-partial-*.xyz; do echo $i; python deepcv/src/tools/extract_zmat.py --input $i; done
 ```
 
 ## Step 4: Merge multiple npz files into one npz file

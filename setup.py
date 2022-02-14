@@ -19,7 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
     keywords=[
         "deep learning",
         "chemistry",
@@ -27,19 +27,19 @@ setuptools.setup(
         "theoretical chemistry",
         "enhanced sampling",
         "metadynamics",
-        "collective variables"
+        "collective variables",
     ],
     include_package_data=True,
     zip_safe=False,
     entry_points={
         "console_scripts": [
             "deepcv=src.main:main",
-            "deepcv_calc_rep=src.helpers.calc_rep:main",
-            "deepcv_gen_input=src.helpers.gen_input:main",
+            "deepcv_calc_rep=src.tools.calc_rep:main",
+            "deepcv_gen_input=src.tools.gen_input:main",
             "deepcv_ae_train=src.modules.ae_train:main",
             "deepcv_gan_train=src.modules.gan_train:main",
             "deepcv_gan_predict=src.modules.gan_predict:main",
-            "deepcv2plumed=src.utils.deepcv2plumed:main"
+            "deepcv2plumed=src.tools.deepcv2plumed:main",
         ]
     },
 )
