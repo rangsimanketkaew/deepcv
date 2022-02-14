@@ -7,7 +7,7 @@ Info:
 """
 
 __version__ = "1.0"
-__date__ = "October 2020"
+__date__ = "February 2022"
 
 from tabulate import tabulate
 
@@ -31,11 +31,11 @@ def main():
         ["ae_train.py", "Autoencoder neural network"],
         ["gan_train.py", "Training generative adversarial network (GAN)"],
         ["gan_predict.py", "Generating samples using trained GAN"],
-        ["sprint.py", "Calculate SPRINT coordinate"],
         ["deepcv2plumed.py", "Create PLUMED input file"],
         ["deepcv2colvar.py", "Create Colvar input file"],
-        ["analysis_FES.py", "FES validation"],
-        ["analysis_model.py", "DAENN model analysis and parameters extraction"],
+        ["analyze_FES.py", "FES validation"],
+        ["analyze_model.py", "DAENN model analysis and parameters extraction"],
+        ["explor_abi.py", "Exploration ability"],
     ]
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)

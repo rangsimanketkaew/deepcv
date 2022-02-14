@@ -6,6 +6,10 @@ Info:
 05/01/2022 : Rangsiman Ketkaew
 """
 
+"""
+Exploration ability of the state on configurational space
+"""
+
 import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
