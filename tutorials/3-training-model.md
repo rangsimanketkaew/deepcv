@@ -1,6 +1,9 @@
-# Training autoencoder neural network
+# Training autoencoder neural network <!-- omit in toc -->
 
-DeepCV now accepts dataset only in NumPy's compress file formats (.npz).
+- [Step 1: Prepare input file for Diels-Alder reaction](#step-1-prepare-input-file-for-diels-alder-reaction)
+- [Step 2: Train model](#step-2-train-model)
+
+Note: DeepCV now accepts dataset only in NumPy's compress file formats (.npz).
 
 ## Step 1: Prepare input file for Diels-Alder reaction
 

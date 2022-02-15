@@ -1,4 +1,9 @@
-# Running Metadynamics simulation
+# Running Metadynamics simulation <!-- omit in toc -->
+
+- [Step 1: Create PLUMED input file](#step-1-create-plumed-input-file)
+- [Step 2: Test plumed input file](#step-2-test-plumed-input-file)
+- [Step 3: Prepare CP2K input files for performing metadynamics simulation](#step-3-prepare-cp2k-input-files-for-performing-metadynamics-simulation)
+- [Step 4: Submit job on Pit Daint](#step-4-submit-job-on-pit-daint)
 
 ## Step 1: Create PLUMED input file
 

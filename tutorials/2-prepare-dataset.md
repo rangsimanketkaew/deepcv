@@ -1,4 +1,10 @@
-# Prepare everything you need before training a model
+# Prepare everything you need before training a model <!-- omit in toc -->
+
+- [Step 1: Run normal molecular dynamics (MD) simulation to generate a trajectory of, i.e., reactant state of the system.](#step-1-run-normal-molecular-dynamics-md-simulation-to-generate-a-trajectory-of-ie-reactant-state-of-the-system)
+- [Step 2: Split a trajectory file into smaller files](#step-2-split-a-trajectory-file-into-smaller-files)
+- [Step 3: Extract z-matrix (internal coordinate) and generate input files (dataset) for neural network](#step-3-extract-z-matrix-internal-coordinate-and-generate-input-files-dataset-for-neural-network)
+- [Step 4: Merge multiple npz files into one npz file](#step-4-merge-multiple-npz-files-into-one-npz-file)
+- [Optional: Convert .xyz to .npz](#optional-convert-xyz-to-npz)
 
 ## Step 1: Run normal molecular dynamics (MD) simulation to generate a trajectory of, i.e., reactant state of the system.
 
