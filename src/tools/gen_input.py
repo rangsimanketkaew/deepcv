@@ -19,7 +19,6 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QFileDialog,
     QGridLayout,
-    QFormLayout,
     QLabel,
     QLineEdit,
     QTabWidget,
@@ -204,15 +203,15 @@ class Window(QWidget):
     def infoTabUI(self):
         infoTab = QWidget()
         layout = QVBoxLayout()
-        text = "Input generator of deep learning-based collective variables (DeepCV)\n\
-Website: https://gitlab.uzh.ch/lubergroup/deepcv\n\
+        text = "Input generator of Deep Learning for Collective Variables (DeepCV)\n\
+Source code: https://gitlab.uzh.ch/lubergroup/deepcv\n\
 Version: Development version\n\n\
 Support:\n\
 - Multi-layer autoencoder\n\
-- Non-linear and linear activation functions\n\n\
+- Non-linear and linear activation functions\n\
+- Loss-like penalty functions\n\n\
 Author:\n\
 - Rangsiman Ketkaew\n\
-- Fabrizio Creazzo\n\
 - Sandra Luber\n\n\
 Developed at Department of Chemistry, University of Zurich, Switzerland"
         label_author = QLabel(text)
@@ -264,7 +263,11 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
                 "func_4": self.combo_act_func_hidden.currentText(),
                 "func_5": self.combo_act_func_hidden.currentText(),
             },
-            "performance": {"_comment": "Setting for training performance", "enable_gpu": True, "gpus": 1},
+            "performance": {
+                "_comment": "Setting for training performance",
+                "enable_gpu": True,
+                "gpus": 1,
+            },
             "settings": {
                 "_comment": "User-defined settings",
                 "verbosity": 1,
@@ -296,9 +299,12 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
 
     def save_file(self):
         name = QFileDialog.getSaveFileName(self, "Save file", "", "JSON (*.json)")
-        with open(name[0], "w") as f:
-            json.dump(self.data, f, indent=4, separators=(",", ": "))
-        print(f"Input file has been saved to {name[0]}")
+        try:
+            with open(name[0], "w") as f:
+                json.dump(self.data, f, indent=4, separators=(",", ": "))
+            print(f"Input file has been saved to {name[0]}")
+        except FileNotFoundError:
+            print("Failed to save file. Try again.")
 
 
 def main():
