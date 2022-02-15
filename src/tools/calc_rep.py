@@ -25,14 +25,31 @@ M = 1
 
 
 def distance(p1, p2):
-    """Calculate bond distance between Carbon
-    """
-    return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2))
+    """Calculate bond length between atoms
+
+    Args:
+        p1 (array): Cartesian coordinate of the first atom
+        p2 (array): Cartesian coordinate of the second atom
+
+    Returns:
+        float: Bond length
+    """    
+    return math.sqrt(
+        ((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2)
+    )
 
 
 def angle(a, b, c):
-    """Calculate angle between carbon
-    """
+    """Calculate bond angle between atoms
+
+    Args:
+        a (array): Cartesian coordinate of the first atom
+        b (array): Cartesian coordinate of the second atom (a common atom)
+        c (array): Cartesian coordinate of the third atom
+
+    Returns:
+        float: Bond angle
+    """    
     ba = a - b
     bc = c - b
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
@@ -41,8 +58,17 @@ def angle(a, b, c):
 
 
 def angle_sign(a, b, c, degree=False):
-    """Calculate angle between three atoms and return value with sign in radian.
-    """
+    """Calculate angle between three atoms and return value with sign in radian
+
+    Args:
+        a (array): Cartesian coordinate of the first atom
+        b (array): Cartesian coordinate of the second atom (a common atom)
+        c (array): Cartesian coordinate of the third atom
+        degree (bool, optional): Return bond angle in degree. Defaults to False.
+
+    Returns:
+        float: Bond angle
+    """    
     ba = a - b
     bc = c - b
     cos_theta = np.dot(ba, bc)
@@ -55,10 +81,22 @@ def angle_sign(a, b, c, degree=False):
 
 
 def dihedral(p0, p1, p2, p3, degree=False):
-    """Praxeolitic formula
+    """Calculate torsion angle
+
+    Praxeolitic formula
     1 sqrt, 1 cross product
     https://stackoverflow.com/a/34245697
-    """
+
+    Args:
+        p0 (array): Cartesian coordinate of the first atom
+        p1 (array): Cartesian coordinate of the second atom (a common atom)
+        p2 (array): Cartesian coordinate of the third atom (a common atom)
+        p3 (array): Cartesian coordinate of the third atom
+        degree (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        float: Torsion or dihedral angle
+    """    
     b0 = -1.0 * (p1 - p0)
     b1 = p2 - p1
     b2 = p3 - p2
@@ -83,6 +121,12 @@ def dihedral(p0, p1, p2, p3, degree=False):
 
 
 def calc_int_coord(xyz, filename="structures"):
+    """Compute internal coordinates of a given molecule
+
+    Args:
+        xyz (array): Cartesian coordinates of all atoms in a molecule
+        filename (str, optional): Output filename. Defaults to "structures".
+    """    
     no_strct, no_atoms, _ = xyz.shape
     out = filename
     # ---------------------------------------------
@@ -151,6 +195,17 @@ def calc_int_coord(xyz, filename="structures"):
 
 
 def calc_adj_max(xyz, r_0, n, m):
+    """Compute adjacency matrix
+
+    Args:
+        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        r_0 (float): cutoff in Angstroms
+        n (int): Switching function parameter
+        m (int): Switching function parameter
+
+    Returns:
+        array: Adjacency matrix
+    """    
     """Calculate adjacency matrix
 
     a_ij = (1 - frac^n) / (1 - frac^m)
@@ -160,7 +215,10 @@ def calc_adj_max(xyz, r_0, n, m):
      2. Get the r_0 from value of the dict defined above
     """
     tmp = [
-        [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
+        [
+            r_0[first + second] if first + second in r_0 else r_0[second + first]
+            for second in symbols
+        ]
         for first in symbols
     ]
     r_0 = np.asarray(tmp)
@@ -171,18 +229,22 @@ def calc_adj_max(xyz, r_0, n, m):
     return a_ij
 
 
-def calc_sprint(symbols, xyz, r_0, n, m, M):
-    """Calculate SPRINT coordinates
+def calc_sprint(symbols, xyz, r_0, n, m, M=1):
+    """Compute SPRINT coordinates
 
-    s_i = \sqrt{n} \lambda v_i
+    s^x_i = \sqrt{n} \lambda v_i
 
     References:
     1. https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.107.085504
     2. https://pubs.acs.org/doi/10.1021/acs.jctc.7b01289
 
     Args:
-        symbols (list, array): Atomic symbols
-        xyz (array): Atomic position with the shape of (number of atom, coordinate in xyz)
+        symbols (list, array): Atomic symbol
+        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        r_0 (float): cutoff in Angstroms
+        n (int): Switching function parameter
+        m (int): Switching function parameter
+        M (int, optional): Number of walks. Defaults to 1.
 
     Returns:
         a_i (array): Sorted index of atoms
@@ -218,15 +280,21 @@ def calc_sprint(symbols, xyz, r_0, n, m, M):
 
 
 def calc_xsprint(symbols, xyz, r_0, n, m, M):
-    """Calculate Extended SPRINT (xSPRINT) coordinates
+    """Calculate eXtended SPRINT (xSPRINT) coordinates
+
+    s_i = \sqrt{n} \lambda v_i
 
     Args:
-        symbols (list, array): Atomic symbols
-        xyz (array): Atomic position with the shape of (number of atom, coordinate in xyz)
+        symbols (list, array): Atomic symbol
+        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        r_0 (float): cutoff in Angstroms
+        n (int): Switching function parameter
+        m (int): Switching function parameter
+        M (int, optional): Number of walks. Defaults to 1.
 
     Returns:
         a_i (array): Sorted index of atoms
-        s (array): Sorted Extended SPRINT coordinate
+        s (array): Sorted SPRINT coordinate
     """
     a_ij = calc_adj_max(xyz, r_0, n, m)
     # Calculate eigenvalue and eigenvector
@@ -366,7 +434,9 @@ def main():
             print(f"Structure:\t{i+1}")
             sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
-                np.saved_compressed(f"{filename}_SPRINT.npz", index=sort_index, sprint=sorted_SPRINT)
+                np.saved_compressed(
+                    f"{filename}_SPRINT.npz", index=sort_index, sprint=sorted_SPRINT
+                )
         print("-" * 10 + " DONE " + "-" * 10)
 
     # xSPRINT coordinates
@@ -379,4 +449,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
