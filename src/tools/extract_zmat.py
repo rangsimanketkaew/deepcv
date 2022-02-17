@@ -15,9 +15,9 @@ import numpy as np
 from scipy.spatial.distance import cdist
 
 try:
-    from .extract_features import angle_sign, dihedral
+    from .extract_features import _angle_sign, _torsion
 except ImportError:
-    from extract_features import angle_sign, dihedral
+    from extract_features import _angle_sign, _torsion
 
 
 def distance(xyz):
@@ -60,9 +60,9 @@ def angle(xyz):
     no_strct, no_atoms, _ = xyz.shape
     angle = np.zeros((no_strct, no_atoms - 2))
     for i in range(no_strct):
-        angle[i][0] = angle_sign(xyz[i][2], xyz[i][0], xyz[i][1])
+        angle[i][0] = _angle_sign(xyz[i][2], xyz[i][0], xyz[i][1])
         for j in range(no_atoms - 3):
-            angle[i][j + 1] = angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
+            angle[i][j + 1] = _angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
     return angle
 
 
@@ -83,7 +83,7 @@ def torsion(xyz):
     dih = np.zeros((no_strct, no_atoms - 3))
     for i in range(no_strct):
         for j in range(no_atoms - 4):
-            dih[i][j] = dihedral(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
+            dih[i][j] = torsion(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
     return dih
 
 
