@@ -25,9 +25,9 @@ It is often that a trajectory file (.xyz) is so large. So we can split it into m
 $ split --lines=1040 --numeric-suffixes=001 --suffix-length=3 traj.xyz traj-partial- --additional-suffix=.xyz
 $ ls
 traj-partial-001.xyz
-traj-partial-001.xyz
-traj-partial-001.xyz
-traj-partial-001.xyz
+traj-partial-002.xyz
+traj-partial-003.xyz
+traj-partial-004.xyz
 ...
 traj-partial-100.xyz
 ```
