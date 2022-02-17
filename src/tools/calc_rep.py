@@ -19,7 +19,17 @@ from ase.data import chemical_symbols
 
 # ++++++++++++++++++++++++++++++++++++++++++
 # Default parameters for adjacency matrix
-r_0 = {"CoCo": 2.22, "OO": 2.22, "HH": 1.50, "CoO": 2.22, "CoH": 2.22, "OH": 2.00}
+r_0 = {
+    "CoCo": 2.22,
+    "CC": 2.65,
+    "OO": 2.22,
+    "HH": 1.50,
+    "CoO": 2.22,
+    "CoH": 2.22,
+    "OH": 2.00,
+    "CH": 2.20,
+    "CO": 2.20,
+}
 n = 6
 m = 12
 M = 1
@@ -35,10 +45,8 @@ def distance(p1, p2):
 
     Returns:
         float: Bond length
-    """    
-    return math.sqrt(
-        ((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2)
-    )
+    """
+    return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2))
 
 
 def angle(a, b, c):
@@ -51,7 +59,7 @@ def angle(a, b, c):
 
     Returns:
         float: Bond angle
-    """    
+    """
     ba = a - b
     bc = c - b
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
@@ -70,7 +78,7 @@ def angle_sign(a, b, c, degree=False):
 
     Returns:
         float: Bond angle
-    """    
+    """
     ba = a - b
     bc = c - b
     cos_theta = np.dot(ba, bc)
@@ -98,7 +106,7 @@ def dihedral(p0, p1, p2, p3, degree=False):
 
     Returns:
         float: Torsion or dihedral angle
-    """    
+    """
     b0 = -1.0 * (p1 - p0)
     b1 = p2 - p1
     b2 = p3 - p2
@@ -126,9 +134,9 @@ def calc_int_coord(xyz, filename="structures"):
     """Compute internal coordinates of a given molecule
 
     Args:
-        xyz (array): Cartesian coordinates of all atoms in a molecule
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         filename (str, optional): Output filename. Defaults to "structures".
-    """    
+    """
     no_strct, no_atoms, _ = xyz.shape
     out = filename
     # ---------------------------------------------
@@ -196,18 +204,18 @@ def calc_int_coord(xyz, filename="structures"):
     np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dih)
 
 
-def calc_adj_max(xyz, r_0, n, m):
+def calc_adj_mat(symbols, xyz, r_0, n, m):
     """Compute adjacency matrix
 
     Args:
-        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
 
     Returns:
         array: Adjacency matrix
-    """    
+    """
     """Calculate adjacency matrix
 
     a_ij = (1 - frac^n) / (1 - frac^m)
@@ -217,10 +225,7 @@ def calc_adj_max(xyz, r_0, n, m):
      2. Get the r_0 from value of the dict defined above
     """
     tmp = [
-        [
-            r_0[first + second] if first + second in r_0 else r_0[second + first]
-            for second in symbols
-        ]
+        [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
         for first in symbols
     ]
     r_0 = np.asarray(tmp)
@@ -242,17 +247,17 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
 
     Args:
         symbols (list, array): Atomic symbol
-        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
-        M (int, optional): Number of walks. Defaults to 1.
+        M (int, optional): Number of walks between atoms. Defaults to 1.
 
     Returns:
         a_i (array): Sorted index of atoms
         s (array): Sorted SPRINT coordinate
     """
-    a_ij = calc_adj_max(xyz, r_0, n, m)
+    a_ij = calc_adj_mat(symbols, xyz, r_0, n, m)
     # Calculate eigenvalue and eigenvector
     w, v = np.linalg.eig(a_ij)
 
@@ -273,58 +278,56 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
 
     # sort v_i that contains all nonzero with equal sign
     v_i_sorted = np.sort(np.abs(v_i))
+
     # Get the index of atom according to sorted v_i
     a_i = np.argsort(v_i)
+
     # Calculate sprint coord s_i
     s = np.array([np.sqrt(a_ij.shape[0]) * w_max * i for i in v_i_sorted])
 
     return a_i, s
 
 
-def calc_xsprint(symbols, xyz, r_0, n, m, M):
+def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
     """Calculate eXtended SPRINT (xSPRINT) coordinates
 
-    s_i = \sqrt{n} \lambda v_i
+         /-> s_i                       ; r_ij < r_0
+    S^x_i
+         \-> 1/w * \sum^N_i r_n * s_i  ; otherwise
+
+    where w is (\sum r_n)**2.
 
     Args:
         symbols (list, array): Atomic symbol
-        xyz (array): xyz (array): Cartesian coordinates of all atoms in a molecule
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
-        M (int, optional): Number of walks. Defaults to 1.
+        M (int, optional): Number of walks between atoms. Defaults to 1.
+        r_0x (float): Cutoff of the shell (layer) for xSPRINT in Angstroms. Default to 1.5.
+        sh (int): The number of shells. Default to 1.
 
     Returns:
         a_i (array): Sorted index of atoms
-        s (array): Sorted SPRINT coordinate
+        s_x (array): Sorted SPRINT coordinate
     """
-    a_ij = calc_adj_max(xyz, r_0, n, m)
-    # Calculate eigenvalue and eigenvector
-    w, v = np.linalg.eig(a_ij)
+    # Calculate normal SPRINT
+    a_i, s = calc_sprint(symbols, xyz, r_0, n, m, M)
 
-    # Calculate v_i max
-    # v_i max = 1 / \lambda_max^M * \sum_(j) a_ij^M * v_j^max
-    w_max = np.abs(np.max(w))  # lambda max
-    a_ij_M = np.power(a_ij, M)
-    # where M is the number of walks
+    # calculate w
+    _w = 0
+    for i in range(sh):
+        _w += (i + 1) * r_0x
+    w = _w ** 2
 
-    v_i = np.zeros(a_ij.shape[0])
-    # loop over atom i
-    for i in range(a_ij_M.shape[0]):
-        # loop over column j
-        _sum = 0.0
-        for j in range(a_ij_M.shape[1]):
-            _sum += a_ij_M[i][j] * np.max(v.T[j])
-        v_i[i] = _sum / (w_max ** M)
+    # calculate individual extended SPRINT
+    for i in range(s.shape[0]):
+        s[i] = (i + 1) * r_0x * s[i]
+        
+    # Calculate working extended SPRINT
+    s_x = s / w
 
-    # sort v_i that contains all nonzero with equal sign
-    v_i_sorted = np.sort(np.abs(v_i))
-    # Get the index of atom according to sorted v_i
-    a_i = np.argsort(v_i)
-    # Calculate sprint coord s_i
-    s = np.array([np.sqrt(a_ij.shape[0]) * w_max * i for i in v_i_sorted])
-
-    return a_i, s
+    return a_i, s_x
 
 
 def main():
@@ -354,7 +357,7 @@ def main():
         "--rep",
         "-r",
         dest="rep",
-        choices=["int-coord", "adj-max", "sprint", "xsprint"],
+        choices=["int-coord", "adj-mat", "sprint", "xsprint"],
         help="Representation (descriptor) to calculate",
     )
     parser.add_argument(
@@ -419,34 +422,40 @@ def main():
     if args.rep == "int-coord":
         print("Calculate internal coordinates")
         calc_int_coord(xyz, filename)
-        print("-" * 10 + " Done " + "-" * 10)
+
+    # find atomic symbols for adj matrix descriptors
+    if args.rep in ["adj-mat", "sprint", "xsprint"]:
+        symbols = [chemical_symbols[x] for x in numbers]
+        no_struc = xyz.shape[0]
 
     # Adjacency matrix
     if args.rep == "adj-mat":
         print("Calculate adjacency matrix")
-        print("-" * 10 + " Done " + "-" * 10)
+        for i in range(no_struc):
+            print(f"Structure:\t{i+1}")
+            calc_adj_mat(symbols, xyz[i], r_0, n, m)
 
     # SPRINT coordinates
     if args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
-
-        symbols = [chemical_symbols[x] for x in numbers]
-        no_struc = xyz.shape[0]
         for i in range(no_struc):
             print(f"Structure:\t{i+1}")
             sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
                 np.saved_compressed(
-                    f"{filename}_SPRINT.npz", index=sort_index, sprint=sorted_SPRINT
+                    f"{filename}_SPRINT_strc_{i}.npz", index=sorted_index, sprint=sorted_SPRINT
                 )
-        print("-" * 10 + " DONE " + "-" * 10)
 
     # xSPRINT coordinates
     if args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
-        if args.save:
-            np.saved_compressed(f"{filename}_xSPRINT.npz")
-        print("-" * 10 + " DONE " + "-" * 10)
+        for i in range(no_struc):
+            print(f"Structure:\t{i+1}")
+            sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], r_0, n, m, M)
+            if args.save:
+                np.saved_compressed(f"{filename}_xSPRINT_strc_{i}.npz")
+
+    print("-" * 10 + " Done " + "-" * 10)
 
 
 if __name__ == "__main__":
