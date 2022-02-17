@@ -34,10 +34,10 @@ make
 
 ## Step 3: Check if GPU is available for TF
 
-Execute this script to check if TensorFlow >= 2.x is using GPU accerelation.
+Execute this script to check if TensorFlow >= 2.x can see GPU.
 ```python
 import tensorflow as tf
 
-assert tf.test.is_gpu_available()
-assert tf.test.is_built_with_cuda()
+assert tf.test.is_gpu_available(), "TF can't see GPU on this machine."
+assert tf.test.is_built_with_cuda(), "TF was not built with CUDA."
 ```

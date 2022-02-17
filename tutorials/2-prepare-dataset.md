@@ -21,7 +21,7 @@ traj.xyz
 ## Step 2: Split a trajectory file into smaller files
 
 It is often that a trajectory file (.xyz) is so large. So we can split it into multiple smaller files using `split` command in Linux.
-For example, my trajectory contains 4000 structures with 50 atoms each. In .xyz file, each structure has 1 line denoting total number of atoms in a molecule, 1 comment line, and 50 lines of coordinates, resulting in total of 52 lines. If we want to split every 20-th structure, we have to define the `--lines` with 1040 (52x20). Other options can also be used.
+For example, my trajectory contains 4000 structures with 50 atoms each. In .xyz file, each structure has 1 line denoting total number of atoms in a molecule, 1 comment line, and 50 lines of coordinates, resulting in total of 52 lines. If we want to split every 20th structure, we have to define the `--lines` with 1040 (52x20). Other options can also be used.
 
 ```sh
 $ split --lines=1040 --numeric-suffixes=001 --suffix-length=3 traj.xyz traj-partial- --additional-suffix=.xyz

@@ -3,11 +3,15 @@
 - [Step 1: Prepare input file for Diels-Alder reaction](#step-1-prepare-input-file-for-diels-alder-reaction)
 - [Step 2: Train model](#step-2-train-model)
 
-Note: DeepCV now accepts dataset only in NumPy's compress file formats (.npz).
+Note: DeepCV now accepts datasets only in NumPy's compressed file formats (.npz).
 
 ## Step 1: Prepare input file for Diels-Alder reaction
 
-DeepCV's input file needed to be prepared in a JSON file format (dictionary-like). The following example shows an input file for training model using an autoencoder with 5 hidden layers. The first 3 hidden layers contain 2 encoded layers and 1 latent encoded layer (middle layer) and the rest are 2 decoded layers for reconstruction. On the other hand, the size of 2 hidden layers that opposite each other, e.g. input and output layers, 1st and 5th hidden layers, must be the same.
+DeepCV's input file needed to be prepared in a JSON file format (dictionary-like).
+The following example shows an input file for training a model using DAENN with five hidden layers.
+The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
+The rest layers are two decoded layers for reconstruction.
+On the other hand, the size of two hidden layers that are opposite of each other, e.g., input and output layers, 1st and 5th hidden layers, must be the same.
 
 ```JSON
 {
@@ -78,7 +82,8 @@ DeepCV's input file needed to be prepared in a JSON file format (dictionary-like
 
 ## Step 2: Train model
 
-Execute the `ae_train.py` source using `-m`, like below. Then it will start to train the model. The training time depends the size of dataset and networks, the number of epochs, etc.
+Execute the `ae_train.py` source using `-m`, like below. Then it will start to train the model. 
+The training time depends on the size of the dataset and networks, the number of epochs, etc.
 
 ```sh
 $ python ae_train \
@@ -114,4 +119,5 @@ Epoch 3/200
 ============================== DONE ==============================
 ```
 
-Once you see the line "=== DONE===" the training is completed. You can then use the output saved in the folder you specified in the input file for further work, i.e., generating CV.
+Once you see the line "=== DONE===" the training is completed.
+You can then use the output saved in the folder you specified in the input file for further work, i.e., generating CVs.

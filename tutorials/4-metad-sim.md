@@ -1,18 +1,19 @@
 # Running Metadynamics simulation <!-- omit in toc -->
 
-- [Step 1: Create PLUMED input file](#step-1-create-plumed-input-file)
+- [Step 1: Create a PLUMED input file](#step-1-create-a-plumed-input-file)
 - [Step 2: Test plumed input file](#step-2-test-plumed-input-file)
 - [Step 3: Prepare CP2K input files for performing metadynamics simulation](#step-3-prepare-cp2k-input-files-for-performing-metadynamics-simulation)
 - [Step 4: Submit job on Pit Daint](#step-4-submit-job-on-pit-daint)
 
-## Step 1: Create PLUMED input file
+## Step 1: Create a PLUMED input file
 
-Once the training is completed, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `ae_train.py`. It will automatically extract the weight and bias from model and print out the file.
+Once the training is complete, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `ae_train.py`. 
+It will automatically extract the weight and bias from the model and print out the file.
 
 ```sh
 $ python deepcv2plumed.py -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 
->>> Plumed data have been successfully written to 'plumed-NN.dat'
+>>> Plumed data have been written successfully to 'plumed-NN.dat'
 >>> In order to run metadynamics using CP2K & PLUMED, specify the following input deck in CP2K input:
 
 # Import PLUMED input file
@@ -28,7 +29,8 @@ $ python deepcv2plumed.py -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 
 ## Step 2: Test plumed input file
 
-This step is to check if a generated PLUMED input file works or not. You can use plumed driver to run a trial test on one-frame simple Diels-Alder trajectory.
+This step is to check if a generated PLUMED input file works or not. 
+You can use PLUMED driver to run a trial test on a 1-frame simple Diels-Alder trajectory.
 
 ```sh
 $ plumed driver --ixyz reactant_DA_water_100atoms.xyz --plumed plumed-NN.dat
@@ -95,7 +97,6 @@ SLURM_NTASKS_PER_NODE=12
 
 ###########CP2K#########################################################
 module load daint-mc
-#module load PrgEnv-gnu/6.0.8
 module load gcc/8.3.0
 module load cray-fftw/3.3.8.7
 module load GSL/2.5-CrayGNU-20.08
@@ -163,17 +164,6 @@ echo "${SLURM_NTASK_PER_CORE}"
 
   # run the program
   ${srun_command} ${EXE} -i ${INP} -o ${OUT}
-
-  #save in project folder
-  echo "slurm*" > exclude_list
-  echo "cp2k.psmp" >> exclude_list
-  echo "BASIS_*" >> exclude_list
-  echo "*.wfn.bak-*" >> exclude_list
-  echo "*.dat" >> exclude_list
-  echo "*_POTENTIAL*" >> exclude_list
-
-  #ssh daint101 mkdir -p $PROJECTDIR
-  #ssh daint101 rsync -arv --exclude-from=$INPDIR/exclude_list $INPDIR/ $PROJECTDIR
 
 echo ' --------------------------------------------------------------'
 echo ' |        --- DONE ---                                        |'
