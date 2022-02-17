@@ -13,7 +13,7 @@ import os
 import argparse
 import math
 import numpy as np
-from scipy.spatial import distance
+from scipy import spatial
 import ase.io
 from ase.data import chemical_symbols
 
@@ -147,7 +147,7 @@ def calc_int_coord(xyz, filename="structures"):
     """
     dist = np.zeros((no_strct, no_atoms - 1))
     for i in range(no_strct):
-        alldist = distance.cdist(xyz[i], xyz[i])
+        alldist = spatial.distance.cdist(xyz[i], xyz[i])
         dist[i][0] = alldist[0][1]
         dist[i][1] = alldist[0][2]
         for j in range(no_atoms - 3):
@@ -189,7 +189,7 @@ def calc_int_coord(xyz, filename="structures"):
     ...
     N - (N-3) - (N-2) - (N-1)      dih N-3
     """
-    torsion = np.zeros((no_strct, no_atoms - 3))
+    dih = np.zeros((no_strct, no_atoms - 3))
     for i in range(no_strct):
         for j in range(no_atoms - 4):
             dih[i][j] = dihedral(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
@@ -224,7 +224,7 @@ def calc_adj_max(xyz, r_0, n, m):
         for first in symbols
     ]
     r_0 = np.asarray(tmp)
-    r_ij = distance.cdist(xyz, xyz)
+    r_ij = spatial.distance.cdist(xyz, xyz)
     frac = np.divide(r_ij, r_0)  # r_ij / r_0
     a_ij = np.divide(1 - np.power(frac, n), 1 - np.power(frac, m))
 
@@ -379,14 +379,14 @@ def main():
     # Check input (.xyz) file #
     ###########################
 
-    filename, filext = os.path.splitext(arg.input)
+    filename, filext = os.path.splitext(args.input)
 
     if filext == ".xyz":
         print("Converting text data to NumPy array...")
-        f = open(arg.input, "r")
+        f = open(args.input, "r")
         no_atoms = int(f.readline())
         f.close()
-        generator = ase.io.iread(arg.input)
+        generator = ase.io.iread(args.input)
         # 3D empty array
         # No. of structures x No. of atoms x 3 (xyz coord)
         numbers = np.array([])
@@ -398,14 +398,14 @@ def main():
             pos = pos.reshape((1, -1, 3))
             xyz = np.append(xyz, pos, axis=0)
     elif filext == ".npz":
-        dat = np.load(arg.input)
+        dat = np.load(args.input)
         xyz = dat[dat.files[0]]
     else:
         exit(f"Error: File type {filext} is not supported.")
 
     print(f"Shape of NumPy array: {xyz.shape}")
 
-    index = arg.index_list
+    index = args.index_list
     if index:
         xyz = xyz[:, index]
         print(f"List of atom index: {index}")
