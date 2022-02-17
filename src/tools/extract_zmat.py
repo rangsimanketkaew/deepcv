@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
@@ -13,9 +15,9 @@ import numpy as np
 from scipy.spatial.distance import cdist
 
 try:
-    from .extract_features_DA import angle_sign, dihedral
+    from .extract_features import angle_sign, dihedral
 except ImportError:
-    from extract_features_DA import angle_sign, dihedral
+    from extract_features import angle_sign, dihedral
 
 
 def distance(xyz):

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
@@ -10,5 +12,5 @@ Info:
 
 import tensorflow as tf
 
-assert tf.test.is_gpu_available()
-assert tf.test.is_built_with_cuda()
+assert tf.test.is_gpu_available(), "TF can't see GPU on this machine."
+assert tf.test.is_built_with_cuda(), "TF was not built with CUDA."

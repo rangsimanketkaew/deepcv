@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
