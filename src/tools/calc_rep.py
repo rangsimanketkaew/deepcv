@@ -36,7 +36,7 @@ M = 1
 # ++++++++++++++++++++++++++++++++++++++++++
 
 
-def distance(p1, p2):
+def _distance(p1, p2):
     """Calculate bond length between atoms
 
     Args:
@@ -49,7 +49,7 @@ def distance(p1, p2):
     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2))
 
 
-def angle(a, b, c):
+def _angle(a, b, c):
     """Calculate bond angle between atoms
 
     Args:
@@ -67,7 +67,7 @@ def angle(a, b, c):
     return np.degrees(ang)
 
 
-def angle_sign(a, b, c, degree=False):
+def _angle_sign(a, b, c, degree=False):
     """Calculate angle between three atoms and return value with sign in radian
 
     Args:
@@ -90,7 +90,7 @@ def angle_sign(a, b, c, degree=False):
         return theta
 
 
-def dihedral(p0, p1, p2, p3, degree=False):
+def _torsion(p0, p1, p2, p3, degree=False):
     """Calculate torsion angle
 
     Praxeolitic formula
@@ -136,6 +136,11 @@ def calc_int_coord(xyz, filename="structures"):
     Args:
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         filename (str, optional): Output filename. Defaults to "structures".
+
+    Returns:
+        dist (array): (dims M x N) N distances for each M structure
+        angle (array): (dims M x N) N angles for each M structure
+        torsion (array): (dims M x N) N torsion angles for each M structure
     """
     no_strct, no_atoms, _ = xyz.shape
     out = filename
@@ -160,7 +165,6 @@ def calc_int_coord(xyz, filename="structures"):
         dist[i][1] = alldist[0][2]
         for j in range(no_atoms - 3):
             dist[i][j + 2] = alldist[j][j + 3]
-    np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dist)
 
     # ---------------------------------------------
     print("Calculating angle ...")
@@ -178,14 +182,13 @@ def calc_int_coord(xyz, filename="structures"):
     """
     angle = np.zeros((no_strct, no_atoms - 2))
     for i in range(no_strct):
-        angle[i][0] = angle_sign(xyz[i][2], xyz[i][0], xyz[i][1])
+        angle[i][0] = _angle_sign(xyz[i][2], xyz[i][0], xyz[i][1])
         for j in range(no_atoms - 3):
-            angle[i][j + 1] = angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
-    np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=angle)
+            angle[i][j + 1] = _angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
 
     # ---------------------------------------------
     print("Calculating torsion ...")
-    """Calculate dihedral angle (torsion) between atom A, B, C and D.
+    """Calculate torsion (dihedral) angle between atom A, B, C and D.
     1
     2 - 1
     3 - 1 - 2
@@ -197,11 +200,12 @@ def calc_int_coord(xyz, filename="structures"):
     ...
     N - (N-3) - (N-2) - (N-1)      dih N-3
     """
-    dih = np.zeros((no_strct, no_atoms - 3))
+    torsion = np.zeros((no_strct, no_atoms - 3))
     for i in range(no_strct):
         for j in range(no_atoms - 4):
-            dih[i][j] = dihedral(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
-    np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dih)
+            torsion[i][j] = _torsion(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
+
+    return dist, angle, torsion
 
 
 def calc_adj_mat(symbols, xyz, r_0, n, m):
@@ -323,7 +327,7 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
     # calculate individual extended SPRINT
     for i in range(s.shape[0]):
         s[i] = (i + 1) * r_0x * s[i]
-        
+
     # Calculate working extended SPRINT
     s_x = s / w
 
@@ -420,8 +424,17 @@ def main():
 
     # Internal coordinates
     if args.rep == "int-coord":
-        print("Calculate internal coordinates")
-        calc_int_coord(xyz, filename)
+        print("Calculate internal coordinates of all structures")
+        dist, angle, torsion = calc_int_coord(xyz, filename)
+        print("-"*26)
+        print("Shape of NumPy array:")
+        print(f"Distance : {dist.shape}")
+        print(f"Angle    : {angle.shape}")
+        print(f"Torsion  : {torsion.shape}")
+        if args.save:
+            np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dist)
+            np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=angle)
+            np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=torsion)
 
     # find atomic symbols for adj matrix descriptors
     if args.rep in ["adj-mat", "sprint", "xsprint"]:
