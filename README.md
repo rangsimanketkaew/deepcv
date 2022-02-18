@@ -21,8 +21,9 @@ DeepCV implements an unsupervised machine learning so-called DAENN for learning 
 
 - Python codes
   ```sh
-  conda install --file requirements.txt
-  python setup.py install
+  cd deepcv/
+  pip install -r requirements.txt
+  pip install .
   ```
 - C++ codes
 
@@ -42,7 +43,7 @@ DeepCV implements an unsupervised machine learning so-called DAENN for learning 
 The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors:
 
 ```sh
-ae_train -i input_ae_DA.json -d distance.npz angle.npz torsion.npz
+deepcv_daenn_train -i input_ae_DA.json -d distance.npz angle.npz torsion.npz
 ```
 
 Note: A complete tutorial on DeepCV is available [here](tutorials/).
@@ -53,7 +54,9 @@ Note: A complete tutorial on DeepCV is available [here](tutorials/).
 
 - Python 3.6 or a newer version
 - Use git control: `git clone https://gitlab.uzh.ch/lubergroup/deepcv.git`
-- Please write function docstring, comments for difficult-to-understand code and documentation for the module and package you are developing
+- Please write function docstring and comment for difficult-to-understand code
+- Document modules and packages you are developing
+- Format codes with [Black](https://github.com/psf/black)
 - Send pull-request to master with an explanation, for example, what you contribute, how it works, and usefulness
 
 ## Packages requirements
@@ -73,19 +76,16 @@ To install all dependencies packages of DeepCV, you can follow either following 
 
    - NumPy >= 1.22.2
      - `pip install --upgrade numpy==1.22.2`
-   - TensorFlow 2.8.0
-     - `pip install tensorflow-gpu`
-     - `conda install tensorflow-gpu` (recommended)
-   - Keras 2.8.0 (TF API)
-     - `pip install keras`
+   - TensorFlow + Keras 2.8.0 (CPU+GPU)
+     - `pip install tensorflow`
+     - `conda install tensorflow-gpu` (+ CUDA & cuDNN)
    - NVIDIA GPU and CUDA 10.1 (for GPU enabled)
      - https://developer.nvidia.com/cuda-toolkit-archive
    - cuDNN v7.6.4 (September 27, 2019), for CUDA 10.1
      - https://developer.nvidia.com/rdp/cudnn-archive
    - pydot (for `keras.utils.vis_utils.plot_model`)
      - `conda install pydot`
-   - other important scientific packages
-     - scipy, scikit-learn, matplotlib, pandas
+   - other important packages are listed in [requirements.txt](./requirements.txt)
 
 3. DeepCV C++ makes use of JSON parser
    - https://github.com/nlohmann/json
@@ -98,7 +98,7 @@ To install all dependencies packages of DeepCV, you can follow either following 
 
 ## Done
 
-1. Dense neural nets with back propagation
+1. Dense neural nets with backpropagation
    - Single and multi-input simple nets
    - Single and multi-input stacked autoencoder
 2. Applied techniques to overcome overfit
@@ -110,7 +110,7 @@ To install all dependencies packages of DeepCV, you can follow either following 
    - Avoid saturation
    - Epoch iteration
    - Penalty update
-   - GPU accelerated
+   - GPU acceleration
 6. CV coordinate space propagation using loss maximization technique
 7. Analysis tools
    - Feature importance

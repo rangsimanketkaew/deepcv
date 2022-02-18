@@ -28,7 +28,7 @@ def main():
         ["gen_input.py", "Neural network input generator"],
         ["single_train.py", "Single-data fully-connected neural network"],
         ["multi_train.py", "Multi-data fully-connected neural network"],
-        ["ae_train.py", "Autoencoder neural network"],
+        ["daenn_train.py", "Autoencoder neural network"],
         ["gan_train.py", "Training generative adversarial network (GAN)"],
         ["gan_predict.py", "Generating samples using trained GAN"],
         ["deepcv2plumed.py", "Create PLUMED input file"],

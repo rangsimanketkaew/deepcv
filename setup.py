@@ -36,7 +36,7 @@ setuptools.setup(
             "deepcv=src.main:main",
             "deepcv_calc_rep=src.tools.calc_rep:main",
             "deepcv_gen_input=src.tools.gen_input:main",
-            "deepcv_ae_train=src.modules.ae_train:main",
+            "deepcv_daenn_train=src.modules.daenn_train:main",
             "deepcv_gan_train=src.modules.gan_train:main",
             "deepcv_gan_predict=src.modules.gan_predict:main",
             "deepcv2plumed=src.tools.deepcv2plumed:main",
