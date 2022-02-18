@@ -429,7 +429,7 @@ def main():
             dist, angle, torsion = calc_zmat(xyz[i], filename)
             if args.save:
                 np.savez_compressed(
-                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", dist=dist, angle=angle, torsion=torsion
+                    f"{filename}_{args.rep}_strc_{i+1}.npz", dist=dist, angle=angle, torsion=torsion
                 )
     # Adjacency matrix
     elif args.rep == "adjmat":
@@ -437,7 +437,7 @@ def main():
         for i in tqdm(range(no_struc)):
             a_ij = calc_adjmat(symbols, xyz[i], r_0, n, m)
             if args.save:
-                np.savez_compressed(f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij)
+                np.savez_compressed(f"{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij)
     # SPRINT coordinates
     elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
@@ -445,7 +445,7 @@ def main():
             sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
                 np.savez_compressed(
-                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_SPRINT
+                    f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_SPRINT
                 )
     # xSPRINT coordinates
     elif args.rep == "xsprint":
@@ -454,7 +454,7 @@ def main():
             sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
                 np.savez_compressed(
-                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_xSPRINT
+                    f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, xsprint=sorted_xSPRINT
                 )
 
 
