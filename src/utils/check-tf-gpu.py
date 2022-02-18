@@ -12,5 +12,6 @@ Info:
 
 import tensorflow as tf
 
+assert tf.test.is_built_with_gpu_support(), "TF was not built with GPU support"
 assert tf.test.is_gpu_available(), "TF can't see GPU on this machine."
 assert tf.test.is_built_with_cuda(), "TF was not built with CUDA."
