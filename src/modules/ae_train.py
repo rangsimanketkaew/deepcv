@@ -7,7 +7,7 @@ Info:
 """
 
 """
-Autoencoder for learning collective variables from features
+Deep autoencoder neural net (DAENN) for learning collective variables from molecular representations
 """
 
 import os, sys
@@ -23,17 +23,25 @@ from inspect import getmembers, isfunction
 from utils import util  # needs to be loaded before calling TF
 
 util.tf_logging(2, 3)  # warning level
-util.limit_gpu_growth()
 util.fix_autograph_warning()
 
-from modules.loss import GRMSE
-
 import tensorflow as tf
+
+try:
+    assert tf.test.is_built_with_gpu_support()
+    assert tf.config.list_physical_devices("GPU")
+except AssertionError:
+    pass
+else:
+    util.limit_gpu_growth()
+
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
+
+from modules import loss
 
 
 class Autoencoder(Model):
@@ -292,7 +300,8 @@ def main():
     max_scale = json["dataset"]["max_scale"]
     # ---------
     optimizer = json["model"]["optimizer"]
-    loss = json["model"]["loss"]
+    main_loss = json["model"]["main_loss"]
+    penalty_loss = json["model"]["penalty_loss"]
     batch_size = json["model"]["batch_size"]
     num_epoch = json["model"]["num_epoch"]
     # ---------
@@ -398,13 +407,13 @@ def main():
     # Loss
     tf_loss = getmembers(tf.keras.losses, isfunction)
     avail_loss = [i[0] for i in tf_loss]
-    if loss in avail_loss:
+    if main_loss in avail_loss:
         pass
-    elif loss.lower() == "grmse":
+    elif main_loss.lower() == "grmse":
         print("Warning: Customized GRMSE is used as a loss function.")
-        loss = GRMSE
+        main_loss = loss.GRMSE
     else:
-        print(f"Error: Loss function you specified, {loss}, is not supported.")
+        print(f"Error: Loss function you specified, {main_loss}, is not supported.")
         print(f"Available losses are {avail_loss}")
         exit()
 
@@ -426,7 +435,7 @@ def main():
     model.build_encoder()
     model.build_decoder()
     model.build_autoencoder()
-    model.compile_model(optimizer, loss)
+    model.compile_model(optimizer, main_loss)
     # show model info
     if show_summary:
         model.encoder.summary()

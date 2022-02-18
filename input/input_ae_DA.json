@@ -16,7 +16,8 @@
   "model": {
     "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
     "optimizer": "adam",
-    "loss": "mean_absolute_error",
+    "main_loss": "mean_absolute_error",
+    "penalty_loss": "RMSD",
     "num_epoch": 200,
     "batch_size": 60
   },
@@ -49,6 +50,7 @@
     "save_weights_npz": true,
     "save_biases_npz": true,
     "save_graph": true,
+    "save_loss": true,
     "show_loss": true
   },
   "output": {
