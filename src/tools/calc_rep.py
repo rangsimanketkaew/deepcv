@@ -16,6 +16,7 @@ import numpy as np
 from scipy import spatial
 import ase.io
 from ase.data import chemical_symbols
+from tqdm import tqdm
 
 # ++++++++++++++++++++++++++++++++++++++++++
 # Default parameters for adjacency matrix
@@ -130,22 +131,21 @@ def _torsion(p0, p1, p2, p3, degree=False):
         return np.arctan2(y, x)
 
 
-def calc_int_coord(xyz, filename="structures"):
-    """Compute internal coordinates of a given molecule
+def calc_zmat(xyz, filename="structures"):
+    """Compute Z-matrix (internal) coordinates of a given molecule
 
     Args:
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
         filename (str, optional): Output filename. Defaults to "structures".
 
     Returns:
-        dist (array): (dims M x N) N distances for each M structure
-        angle (array): (dims M x N) N angles for each M structure
-        torsion (array): (dims M x N) N torsion angles for each M structure
+        dist (array): (dims M-1) Distances for M atoms
+        angle (array): (dims M-2) Bond angles for each M structure
+        torsion (array): (dims M-3) Torsion angles for each M structure
     """
-    no_strct, no_atoms, _ = xyz.shape
-    out = filename
+    no_atoms, _ = xyz.shape
+
     # ---------------------------------------------
-    print("Calculating distance ...")
     """Calculate distance between atom A and B.
     1
     2 - 1       bond 1
@@ -158,16 +158,15 @@ def calc_int_coord(xyz, filename="structures"):
     ...
     N - (N-3)   bond N-1
     """
-    dist = np.zeros((no_strct, no_atoms - 1))
-    for i in range(no_strct):
-        alldist = spatial.distance.cdist(xyz[i], xyz[i])
-        dist[i][0] = alldist[0][1]
-        dist[i][1] = alldist[0][2]
-        for j in range(no_atoms - 3):
-            dist[i][j + 2] = alldist[j][j + 3]
+    dist = np.zeros(no_atoms - 1)
+    # for i in range(no_strct):
+    alldist = spatial.distance.cdist(xyz, xyz)
+    dist[0] = alldist[0][1]
+    dist[1] = alldist[0][2]
+    for i in range(no_atoms - 3):
+        dist[i + 2] = alldist[i][i + 3]
 
     # ---------------------------------------------
-    print("Calculating angle ...")
     """Calculate angle between atom A, B and C.
     1
     2 - 1
@@ -180,14 +179,12 @@ def calc_int_coord(xyz, filename="structures"):
     ...
     N - (N-3) - (N-2)   bond N-2
     """
-    angle = np.zeros((no_strct, no_atoms - 2))
-    for i in range(no_strct):
-        angle[i][0] = _angle_sign(xyz[i][2], xyz[i][0], xyz[i][1])
-        for j in range(no_atoms - 3):
-            angle[i][j + 1] = _angle_sign(xyz[i][j + 3], xyz[i][j], xyz[i][j + 2])
+    angle = np.zeros(no_atoms - 2)
+    angle[0] = _angle_sign(xyz[2], xyz[0], xyz[1])
+    for i in range(no_atoms - 3):
+        angle[i + 1] = _angle_sign(xyz[i + 3], xyz[i], xyz[i + 2])
 
     # ---------------------------------------------
-    print("Calculating torsion ...")
     """Calculate torsion (dihedral) angle between atom A, B, C and D.
     1
     2 - 1
@@ -200,16 +197,21 @@ def calc_int_coord(xyz, filename="structures"):
     ...
     N - (N-3) - (N-2) - (N-1)      dih N-3
     """
-    torsion = np.zeros((no_strct, no_atoms - 3))
-    for i in range(no_strct):
-        for j in range(no_atoms - 4):
-            torsion[i][j] = _torsion(xyz[i][j + 3], xyz[i][j], xyz[i][j + 1], xyz[i][j + 2])
+    torsion = np.zeros(no_atoms - 3)
+    for i in range(no_atoms - 4):
+        torsion[i] = _torsion(xyz[i + 3], xyz[i], xyz[i + 1], xyz[i + 2])
 
     return dist, angle, torsion
 
 
-def calc_adj_mat(symbols, xyz, r_0, n, m):
+def calc_adjmat(symbols, xyz, r_0, n, m):
     """Compute adjacency matrix
+
+    a_ij = (1 - frac^n) / (1 - frac^m)
+
+    Matrix of each bond pair
+     1. Two loops over atomic symbols to create bond pair
+     2. Get the r_0 from value of the dict defined above
 
     Args:
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
@@ -219,14 +221,6 @@ def calc_adj_mat(symbols, xyz, r_0, n, m):
 
     Returns:
         array: Adjacency matrix
-    """
-    """Calculate adjacency matrix
-
-    a_ij = (1 - frac^n) / (1 - frac^m)
-
-    Matrix of each bond pair
-     1. Two loops over atomic symbols to create bond pair
-     2. Get the r_0 from value of the dict defined above
     """
     tmp = [
         [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
@@ -261,7 +255,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
         a_i (array): Sorted index of atoms
         s (array): Sorted SPRINT coordinate
     """
-    a_ij = calc_adj_mat(symbols, xyz, r_0, n, m)
+    a_ij = calc_adjmat(symbols, xyz, r_0, n, m)
     # Calculate eigenvalue and eigenvector
     w, v = np.linalg.eig(a_ij)
 
@@ -361,7 +355,7 @@ def main():
         "--rep",
         "-r",
         dest="rep",
-        choices=["int-coord", "adj-mat", "sprint", "xsprint"],
+        choices=["zmat", "adjmat", "sprint", "xsprint"],
         help="Representation (descriptor) to calculate",
     )
     parser.add_argument(
@@ -422,53 +416,46 @@ def main():
     # Calculate representation #
     ############################
 
-    # Internal coordinates
-    if args.rep == "int-coord":
-        print("Calculate internal coordinates of all structures")
-        dist, angle, torsion = calc_int_coord(xyz, filename)
-        print("-"*26)
-        print("Shape of NumPy array:")
-        print(f"Distance : {dist.shape}")
-        print(f"Angle    : {angle.shape}")
-        print(f"Torsion  : {torsion.shape}")
-        if args.save:
-            np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dist)
-            np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=angle)
-            np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=torsion)
+    no_struc, _, _ = xyz.shape
 
     # find atomic symbols for adj matrix descriptors
-    if args.rep in ["adj-mat", "sprint", "xsprint"]:
+    if args.rep in ["adjmat", "sprint", "xsprint"]:
         symbols = [chemical_symbols[x] for x in numbers]
-        no_struc = xyz.shape[0]
 
+    # Internal coordinates
+    if args.rep == "zmat":
+        print("Calculate internal coordinates of all structures")
+        for i in tqdm(range(no_struc)):
+            dist, angle, torsion = calc_zmat(xyz[i], filename)
+            if args.save:
+                np.savez_compressed(
+                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", dist=dist, angle=angle, torsion=torsion
+                )
     # Adjacency matrix
-    if args.rep == "adj-mat":
+    elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
-        for i in range(no_struc):
-            print(f"Structure:\t{i+1}")
-            calc_adj_mat(symbols, xyz[i], r_0, n, m)
-
+        for i in tqdm(range(no_struc)):
+            a_ij = calc_adjmat(symbols, xyz[i], r_0, n, m)
+            if args.save:
+                np.savez_compressed(f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij)
     # SPRINT coordinates
-    if args.rep == "sprint":
+    elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
-        for i in range(no_struc):
-            print(f"Structure:\t{i+1}")
+        for i in tqdm(range(no_struc)):
             sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
-                np.saved_compressed(
-                    f"{filename}_SPRINT_strc_{i}.npz", index=sorted_index, sprint=sorted_SPRINT
+                np.savez_compressed(
+                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_SPRINT
                 )
-
     # xSPRINT coordinates
-    if args.rep == "xsprint":
+    elif args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
-        for i in range(no_struc):
-            print(f"Structure:\t{i+1}")
+        for i in tqdm(range(no_struc)):
             sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], r_0, n, m, M)
             if args.save:
-                np.saved_compressed(f"{filename}_xSPRINT_strc_{i}.npz")
-
-    print("-" * 10 + " Done " + "-" * 10)
+                np.savez_compressed(
+                    f"tmp_{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_xSPRINT
+                )
 
 
 if __name__ == "__main__":

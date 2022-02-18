@@ -38,7 +38,7 @@ traj-partial-100.xyz
 ### 1. Z-matrix (internal coordinate)
 
 ```sh
-$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep int-coord
+$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep zmat
 Converting text data to NumPy array...
 Shape of NumPy array: (100, 16, 3)
 Calculate internal coordinates of all structures
@@ -79,7 +79,7 @@ Structure:      100
 And you can loop over all files, e.g.,
 
 ```sh
-$ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --input $i --rep int-coord ; done
+$ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --input $i --rep zmat ; done
 ```
 
 ## Step 4: Merge multiple npz files into one npz file
