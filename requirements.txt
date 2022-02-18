@@ -9,3 +9,4 @@ imageio
 natsort
 tabulate
 bayesian-optimization
+tqdm
