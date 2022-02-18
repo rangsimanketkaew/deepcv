@@ -38,48 +38,37 @@ traj-partial-100.xyz
 ### 1. Z-matrix (internal coordinate)
 
 ```sh
-$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep zmat
+$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep zmat --save
 Converting text data to NumPy array...
-Shape of NumPy array: (100, 16, 3)
+Shape of NumPy array: (50, 100, 3)
 Calculate internal coordinates of all structures
-Calculating distance ...
-Calculating angle ...
-Calculating torsion ...
---------------------------
-Shape of NumPy array:
-Distance : (100, 15)
-Angle    : (100, 14)
-Torsion  : (100, 13)
----------- Done ----------
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:00<00:00, 141.18it/s]
 ```
 
 Check files
 
 ```sh
 $ ls *zmat*
-traj-partial-001_zmat_distance.npz
-traj-partial-001_zmat_angle.npz
-traj-partial-001_zmat_torsion.npz
+traj-partial-001_zmat_strc_1.npz
+traj-partial-001_zmat_strc_2.npz
+traj-partial-001_zmat_strc_3.npz
+...
 ```
 
 ### 2. SPRINT and xSPRINT
 
 ```sh
-$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep sprint
+$ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep sprint --save
 Converting text data to NumPy array...
-Shape of NumPy array: (3, 16, 3)
-Calculate SPRINT coordinates and sorted atom index
-Structure:      1
-Structure:      2
-Structure:      ...
-Structure:      100
----------- Done ----------
+Shape of NumPy array: (50, 100, 3)
+Calculate xSPRINT coordinates and sorted atom index
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:03<00:00, 14.00it/s]
 ```
 
 And you can loop over all files, e.g.,
 
 ```sh
-$ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --input $i --rep zmat ; done
+$ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --input $i --rep zmat --save ; done
 ```
 
 ## Step 4: Merge multiple npz files into one npz file
@@ -87,21 +76,15 @@ $ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --inpu
 In this step, we will merge all individual npz files for the same kind of distance, angle, and torsion (separately).
 
 ```sh
-$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_distance.npz -k dist
-Input 1: traj-partial-001_zmat_distance.npz
-Input 2: traj-partial-002_zmat_distance.npz
-Input 3: traj-partial-003_zmat_distance.npz
-...
-Input 100: traj-partial-100_zmat_distance.npz
-Shape of output NumPy array (after stacking): (4000, 188)
----------- Done ----------
+$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_strc_* -k dist
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 49/49 [00:00<00:00, 376.17it/s]Shape of output NumPy array (after stacking): (50, 100)
 ```
 
 ---
 
 ## Optional: Convert .xyz to .npz
 
-You can use a script called `xyz2npz.py` to convert .xyz file to NumPy's compress file formats (.npz). It will also save a new file with a prefix of the key in npz (default key is `coord`).
+You can use a script called `xyz2npz.py` to convert .xyz file to NumPy's compressed file formats (.npz). It will also save a new file with a prefix of the key in npz (default key is `coord`).
 
 ```sh
 $ deepcv/src/helpers/xyz2arr.py -i traj-partial-001.xyz
