@@ -10,3 +10,5 @@ natsort
 tabulate
 bayesian-optimization
 tqdm
+pydot
+graphviz
