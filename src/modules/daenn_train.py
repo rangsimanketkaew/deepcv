@@ -66,7 +66,7 @@ class Autoencoder(Model):
             i (int): Index of layer
 
         Returns:
-            Input: Tensorflow input layer
+            Input (obj): Tensorflow input layer
         """
         return Input(shape=(units,), dtype=tf.float32, name="input_layer_" + str(i))
 
@@ -205,7 +205,7 @@ class Autoencoder(Model):
 
         # TF Board
         # You can use tensorboard to visualize TensorFlow runs and graphs.
-        # e.g. 'tensorflow --logdir ./log
+        # e.g. 'tensorflow --logdir ./log'
         tbCallBack = TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True)
 
         self.history = self.autoencoder.fit(
@@ -222,15 +222,36 @@ class Autoencoder(Model):
         )
 
     def encoder_predict(self, input_sample):
-        """Generate predictions"""
+        """Generate predictions using encoder
+
+        Args:
+            input_sample (array): Input sample
+
+        Returns:
+            array: Prediction output
+        """        
         return self.encoder.predict(input_sample)
 
     def decoder_predict(self, encoded_sample):
-        """Generate predictions"""
+        """Generate predictions using decoder
+
+        Args:
+            encoded_sample (array): Encoded sample from the latent layer of encoder
+
+        Returns:
+            array: Prediction output
+        """        
         return self.decoder.predict(encoded_sample)
 
     def autoencoder_predict(self, test_set):
-        """Generate predictions"""
+        """Generate predictions using a trained autoencoder
+
+        Args:
+            test_set (array): Sample
+
+        Returns:
+            array: Prediction output
+        """        
         return self.autoencoder.predict(test_set)
 
     def save_graph(self, model, file_name="graph", save_dir=os.getcwd(), dpi=192):
