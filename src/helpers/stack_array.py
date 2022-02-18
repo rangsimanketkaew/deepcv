@@ -37,7 +37,6 @@ if __name__ == "__main__":
         "-k",
         dest="key_npz",
         metavar="KEYWORD",
-        default="coord",
         type=str,
         help="Keyword name that corresponds to array saved in the npz input file. \
             Note that all npz files must have the same keyword name. Defaults to 'coord'.",
@@ -48,29 +47,40 @@ if __name__ == "__main__":
         dest="output",
         metavar="OUTPUT.npz",
         type=str,
-        help="File name of output of a merged NumPy's compressed array format (.npz).",
+        help="Filename of output of a merged NumPy's compressed array format (.npz).",
     )
 
-    arg = parser.parse_args()
+    args = parser.parse_args()
 
     files = []
-    for f in arg.npz:
+    for f in args.npz:
         files += glob.glob(f)
     if len(files) == 0:
-        print("Error: .npz input files not found. Please check if you specified the file name correctly.")
+        print("Error: .npz input files not found. Please check if you specified the filename correctly.")
         exit()
     npz = sorted(files)
 
+    # check npz key
+    dat_load = np.load(npz[0])
+    if not args.key_npz:
+        if len(dat_load.files) == 1:
+            print("npz file contains one array.")
+            args.key_npz = dat_load.files[0]
+        elif len(dat_load.files) > 1:
+            print(
+                "npz file contains more than one array, please specify the key name of the array you want to stack."
+            )
+            exit()
+
     # stack arrays
-    dat = np.load(npz[0])[arg.key_npz]
+    dat = dat_load[args.key_npz]
     for i in tqdm(range(1, len(npz))):
-        dat = np.vstack((dat, np.load(npz[i])[arg.key_npz]))
+        dat = np.vstack((dat, np.load(npz[i])[args.key_npz]))
 
     print(f"Shape of output NumPy array (after stacking): {dat.shape}")
 
-    filename, filext = os.path.splitext(args.npz)
-    if arg.output:
-        out = arg.output.split(".")[0] + ".npz"
+    if args.output:
+        out = args.output.split(".")[0] + ".npz"
     else:
-        out = f"{filename}_stacked.npz"
+        out = f"stacked_{len(npz)}arr_{args.key_npz}.npz"
     np.savez_compressed(f"{out}", arr=dat)
