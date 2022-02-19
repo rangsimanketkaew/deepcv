@@ -7,7 +7,7 @@
 
 ## Step 1: Create a PLUMED input file
 
-Once the training is complete, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `daenn_train.py`.
+Once the training is complete, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `daenn.py`.
 It will automatically extract the weight and bias from the model and print out the file.
 
 ```sh

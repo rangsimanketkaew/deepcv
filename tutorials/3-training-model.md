@@ -82,11 +82,11 @@ On the other hand, the size of two hidden layers that are opposite of each other
 
 ## Step 2: Train model
 
-Execute the `daenn_train.py` source using `-m`, like below. Then it will start to train the model.
+Execute the `daenn.py` source using `-m`, like below. Then it will start to train the model.
 The training time depends on the size of the dataset and networks, the number of epochs, etc.
 
 ```sh
-$ python daenn_train \
+$ python daenn \
     -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz \
     -i input/input_ae_DA.json
 

@@ -43,7 +43,7 @@ DeepCV implements an unsupervised machine learning so-called DAENN for learning 
 The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors:
 
 ```sh
-deepcv_daenn_train -i input_ae_DA.json -d distance.npz angle.npz torsion.npz
+deepcv_daenn -i input_ae_DA.json -d distance.npz angle.npz torsion.npz
 ```
 
 Note: A complete tutorial on DeepCV is available [here](tutorials/).
