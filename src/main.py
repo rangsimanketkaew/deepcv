@@ -36,7 +36,7 @@ def main():
         ["deepcv2plumed", "Create PLUMED input file"],
         ["analyze_FES", "FES validation"],
         ["analyze_model", "DAENN model analysis and parameters extraction"],
-        ["explor_abi", "Exploration ability"],
+        ["explor_abi", "Calculate exploration ability"],
     ]
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         "explore_abi",
     ]
     if not calling in modules_list:
-        print("Not match")
+        print(f"'{calling}' is not DeepCV's module. Available modules are: {modules_list}")
         exit()
 
     import modules, tools
