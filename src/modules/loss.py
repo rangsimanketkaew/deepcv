@@ -17,12 +17,26 @@ import tensorflow as tf
 
 def n2t_std(array):
     """convert numpy --> tensor using standard method
+
+    Args:
+        array (array): NumPy array
+
+    Returns:
+        tensor: TensorFlow tensor
     """
     return tf.convert_to_tensor(array)
 
 
 def n2t(y_true, y_pred):
     """convert numpy --> tensor
+
+    Args:
+        y_true (array): True values
+        y_pred (array): Prediction
+
+    Returns:
+        y_true (tensor): True values
+        y_pred (tensor): Prediction
     """
     from tensorflow.python.ops import math_ops
     from tensorflow.python.framework import ops
@@ -127,7 +141,7 @@ def GMSE(y_true, y_pred):
     N = y_pred.shape[1]
     square_err = tf.math.square(tf.math.subtract(y_true, y_pred))
     mult_sum = tf.einsum("ij,ij->", square_err, square_err)
-    return tf.math.pow(mult_sum, 1 / (N))  # 2N^th root
+    return tf.math.pow(mult_sum, 1 / (N))  # N^th root
 
 
 @tf.function
@@ -204,6 +218,9 @@ def reduced_APE(y_true, y_pred):
 
 
 def test():
+    """
+    Unit test
+    """
     ts_1 = tf.random.uniform((30, 40))
     ts_2 = tf.random.uniform((30, 40))
     ones = tf.ones((30, 40))
