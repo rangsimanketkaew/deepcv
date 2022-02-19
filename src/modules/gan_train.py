@@ -22,7 +22,6 @@ import numpy as np
 
 from utils import util  # needs to be loaded before calling TF
 
-util.tf_logging(2, 3)  # warning level
 util.limit_gpu_growth()
 
 from tensorflow.keras.models import Sequential, Model
@@ -30,7 +29,8 @@ from tensorflow.keras.layers import Input, Dense, Reshape, Flatten
 from tensorflow.keras.layers import LeakyReLU, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.regularizers import l1, l2, l1_l2
-from tensorflow.keras.utils import plot_model, multi_gpu_model
+from tensorflow.keras.utils import plot_model
+from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 
 
 class GAN_Model(object):

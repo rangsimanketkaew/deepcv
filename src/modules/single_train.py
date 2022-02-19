@@ -18,16 +18,13 @@ sys.path.append(parentdir)
 import argparse
 import numpy as np
 
-from utils import util  # needs to be loaded before calling TF
-
-util.tf_logging(2, 3)  # warning level
-
 from tools import trajectory
 
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
-from tensorflow.keras.utils import plot_model, multi_gpu_model
+from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
@@ -234,7 +231,15 @@ class SingleInputNN(Model):
 def main():
     info = "Feedforward neural networks with single input."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("input", metavar="INPUT", type=str, help="Input file (JSON)")
+    parser.add_argument(
+        "-i",
+        "--input",
+        metavar="INPUT",
+        dest="input",
+        type=str,
+        required=True,
+        help="Input file (JSON) defining configuration, setting, parameters.",
+    )
 
     args = parser.parse_args()
 

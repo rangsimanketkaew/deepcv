@@ -18,16 +18,13 @@ sys.path.append(parentdir)
 import argparse
 import numpy as np
 
-from utils import util  # needs to be loaded before calling TF
-
-util.tf_logging(2, 3)  # warning level
-
 from tools import trajectory
 
 from tensorflow.keras.layers import Input, Dense, Concatenate
 from tensorflow.keras.models import Model
-from tensorflow.keras.utils import plot_model, multi_gpu_model
+from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
