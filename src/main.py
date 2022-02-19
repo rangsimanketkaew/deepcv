@@ -11,6 +11,9 @@ __date__ = "February 2022"
 
 from tabulate import tabulate
 
+import sys
+import argparse
+
 
 def main():
     """Welcome message and program description
@@ -21,21 +24,19 @@ def main():
     print(f"version {__version__} : {__date__}")
     print("University of Zurich, Switzerland")
     print("https://gitlab.uzh.ch/lubergroup/deepcv\n")
-    print("This version contains the following modules:\n")
 
     list_of_functions = [
-        ["calc_rep.py", "Calculate molecular representation"],
-        ["gen_input.py", "Neural network input generator"],
-        ["single_train.py", "Single-data fully-connected neural network"],
-        ["multi_train.py", "Multi-data fully-connected neural network"],
-        ["daenn_train.py", "Autoencoder neural network"],
-        ["gan_train.py", "Training generative adversarial network (GAN)"],
-        ["gan_predict.py", "Generating samples using trained GAN"],
-        ["deepcv2plumed.py", "Create PLUMED input file"],
-        ["deepcv2colvar.py", "Create Colvar input file"],
-        ["analyze_FES.py", "FES validation"],
-        ["analyze_model.py", "DAENN model analysis and parameters extraction"],
-        ["explor_abi.py", "Exploration ability"],
+        ["calc_rep", "Calculate molecular representation"],
+        ["gen_input", "Neural network input generator"],
+        ["single_train", "Single-data fully-connected neural network"],
+        ["multi_train", "Multi-data fully-connected neural network"],
+        ["daenn", "Deep autoencoder neural network"],
+        ["gan_train", "Training generative adversarial network (GAN)"],
+        ["gan_predict", "Generating samples using trained GAN"],
+        ["deepcv2plumed", "Create PLUMED input file"],
+        ["analyze_FES", "FES validation"],
+        ["analyze_model", "DAENN model analysis and parameters extraction"],
+        ["explor_abi", "Exploration ability"],
     ]
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)
@@ -43,4 +44,56 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(description="DeepCV API", add_help=False)
+    args, rest = parser.parse_known_args()
+    rest_arg = []
+    rest_arg.extend(rest)
+    sys.argv = rest_arg
+
+    if len(sys.argv) == 0:
+        main()
+        exit()
+
+    calling = sys.argv[0]
+    modules_list = [
+        "single_train",
+        "multi_train",
+        "daenn",
+        "gan_train",
+        "gan_predict",
+        "gen_input",
+        "calc_rep",
+        "deepcv2plumed",
+        "analyze_FES",
+        "analyze_model",
+        "explore_abi",
+    ]
+    if not calling in modules_list:
+        print("Not match")
+        exit()
+
+    import modules, tools
+
+    if calling == "single_train":
+        modules.single_train.main()
+    elif calling == "multi_train":
+        modules.multi_train.main()
+    elif calling == "daenn":
+        modules.daenn.main()
+    elif calling == "gan_train":
+        modules.gan_train.main()
+    elif calling == "gan_predict":
+        modules.gan_predict.main()
+    elif calling == "gen_input":
+        tools.gen_input.main()
+    elif calling == "calc_rep":
+        tools.calc_rep.main()
+    elif calling == "deepcv2plumed":
+        tools.deepcv2plumed.main()
+    elif calling == "analyze_FES":
+        tools.analyze_FES.main()
+    elif calling == "analyze_model":
+        tools.analyze_model.main()
+    elif calling == "explore_abi":
+        tools.explore_abi.main()

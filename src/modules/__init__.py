@@ -5,3 +5,14 @@ https://gitlab.uzh.ch/LuberGroup/deepcv
 Info:
 28/11/2020 : Rangsiman Ketkaew
 """
+
+from utils import util
+
+util.tf_logging(2, 3)  # warning level
+
+# Bring all modules to the same level as main.py
+from . import single_train
+from . import multi_train
+from . import daenn
+from . import gan_train
+from . import gan_predict
