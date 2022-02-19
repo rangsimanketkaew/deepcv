@@ -12,6 +12,7 @@ Info:
 Exploration ability of the state on configurational space
 """
 
+import argparse
 import numpy as np
 import sympy as sp
 
@@ -54,51 +55,51 @@ def get_FES(f):
     return cv1, cv2, ener
 
 
-def z_func(x, y):
-    return x ** 2 + y ** 2
+def calc_explore_abi(fes):
+    def z_func(x, y):
+        return x ** 2 + y ** 2
 
+    cv1, cv2, ener = get_FES(fes)
 
-f = r"C:\Users\Nutt\Desktop\fes.dat"
-cv1, cv2, ener = get_FES(f)
+    print(cv1.shape)
+    print(cv2.shape)
+    print(ener.shape)
 
-print(cv1.shape)
-print(cv2.shape)
-print(ener.shape)
+    fig = plt.figure("DeepCV analyzer")
+    ax = fig.gca(projection="3d")
+    plt.figure(1, figsize=[25, 15])
+    plt.title("FES")
+    # plt.xlabel("d($C_{1}⋅⋅⋅C_{3}$) ($\AA$)")
+    # plt.ylabel("d($C_{2}⋅⋅⋅C_{4}$) ($\AA$)")
+    plt.xlabel("CV1")
+    plt.ylabel("CV2")
 
-fig = plt.figure("DeepCV analyzer")
-ax = fig.gca(projection="3d")
-plt.figure(1, figsize=[25, 15])
-plt.title("FES")
-# plt.xlabel("d($C_{1}⋅⋅⋅C_{3}$) ($\AA$)")
-# plt.ylabel("d($C_{2}⋅⋅⋅C_{4}$) ($\AA$)")
-plt.xlabel("CV1")
-plt.ylabel("CV2")
+    # Plot energy surface
+    surf = ax.plot_surface(cv1, cv2, ener, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    # invert
+    plt.gca().invert_xaxis()
+    plt.gca().invert_yaxis()
 
-# Plot energy surface
-surf = ax.plot_surface(cv1, cv2, ener, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-# invert
-plt.gca().invert_xaxis()
-plt.gca().invert_yaxis()
+    ax.set_zlabel("Free Energy $(kcal/mol)$")
+    ax.zaxis.set_major_locator(LinearLocator(5))
+    ax.zaxis.set_major_formatter(FormatStrFormatter("%.02f"))
 
-ax.set_zlabel("Free Energy $(kcal/mol)$")
-ax.zaxis.set_major_locator(LinearLocator(5))
-ax.zaxis.set_major_formatter(FormatStrFormatter("%.02f"))
+    print(cv1[0, :])
+    print(cv1[0, :].shape)
+    # print(cv1[:,50])
 
-print(cv1[0, :])
-print(cv1[0, :].shape)
-# print(cv1[:,50])
+    grad_cv1 = np.gradient(ener, cv1[0, :], axis=1)
+    grad_cv2 = np.gradient(ener, cv2[:, 0], axis=0)
 
-grad_cv1 = np.gradient(ener, cv1[0, :], axis=1)
-grad_cv2 = np.gradient(ener, cv2[:, 0], axis=0)
+    grad_cv1 = np.array(grad_cv1)
+    grad_cv2 = np.array(grad_cv2)
 
-grad_cv1 = np.array(grad_cv1)
-grad_cv2 = np.array(grad_cv2)
+    # Plot gradients
+    surf = ax.plot_surface(cv1, cv2, grad_cv1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax.plot_surface(cv1, cv2, grad_cv2, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
-# Plot gradients
-surf = ax.plot_surface(cv1, cv2, grad_cv1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-surf = ax.plot_surface(cv1, cv2, grad_cv2, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    plt.show()
 
-plt.show()
 
 # x = sp.Symbol("x")
 # y = sp.Symbol("y")
@@ -135,3 +136,25 @@ plt.show()
 # ax.set_zlabel("z-axis")
 
 # plt.show()
+
+
+def main():
+    info = "Calculate exploration ability of metadynamics simulation"
+    parser = argparse.ArgumentParser(description=info)
+    parser.add_argument(
+        "-i",
+        "--input",
+        metavar="INPUT",
+        type=str,
+        required=True,
+        help="Free energy surface data.",
+    )
+
+    args = parser.parse_args()
+
+    calc_explore_abi(args.input)
+
+
+if __name__ == "__main__":
+
+    main()
