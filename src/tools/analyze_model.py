@@ -10,6 +10,7 @@ Info:
 
 "Check, load, and show trained Model's outputs."
 
+import argparse
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import models
@@ -63,33 +64,51 @@ def get_inter_model(f, layer_name="bottleneck", sum_ori=False, sum_new=False):
     return new_model
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="DeepCV: DAENN model analysis")
+    parser.add_argument(
+        "-m", "--model", dest="model", type=str, default=None, help="Path to model file (e.g., .h5)",
+    )
+    parser.add_argument(
+        "-w", "--weight", dest="weight", type=str, default=None, help="Path to weight file (e.g., .npz)",
+    )
+    parser.add_argument(
+        "-b", "--bias", dest="bias", type=str, default=None, help="Path to bias file (e.g., .npz)",
+    )
+
+    args = parser.parse_args()
+
     ## Model
-    ori_model = r"c:\Users\Nutt\Desktop\gitlab\dataset\DA\output_2\model.h5"
-    new_model = get_inter_model(ori_model, layer_name="dense_2")
+    if args.model:
+        new_model = get_inter_model(args.model, layer_name="dense_2")
 
-    # Create/define inputs , e.g. random inputs
-    input1 = np.random.randint(2, size=(10000, 15))
-    input2 = np.random.randint(180, size=(10000, 14))
-    input3 = np.random.randint(360, size=(10000, 13))
-    output = new_model.predict([input1, input2, input3])
-    print("Shape of output: " + str(output[0].shape))
+    # # Test prediction
+    # # Create/define inputs , e.g. random inputs
+    # input1 = np.random.randint(2, size=(10000, 15))
+    # input2 = np.random.randint(180, size=(10000, 14))
+    # input3 = np.random.randint(360, size=(10000, 13))
+    # output = new_model.predict([input1, input2, input3])
+    # print("Shape of output: " + str(output[0].shape))
 
-    # Visualize output
-    plt.figure(figsize=(8, 4))
-    plt.title("Autoencoder")
-    plt.scatter(output[:10000, 0], output[:10000, 1], c=output[:5000], s=8, cmap="tab10")
-    plt.tight_layout()
-    plt.show()
+    # # Visualize output
+    # plt.figure(figsize=(8, 4))
+    # plt.title("Autoencoder")
+    # plt.scatter(output[:10000, 0], output[:10000, 1], c=output[:5000], s=8, cmap="tab10")
+    # plt.tight_layout()
+    # plt.show()
 
     ## Weight
-    file_weight = r"c:\Users\Nutt\Desktop\gitlab\dataset\DA\output_2\model_weights.npz"
-    weight = np.load(file_weight)
-    print(weight.files)
-    for i in weight.files:
-        print("Layer: " + str(i) + " => " + str(weight[i].shape))
+    if args.weight:
+        weight = np.load(args.weight)
+        print(weight.files)
+        for i in weight.files:
+            print("Layer: " + str(i) + " => " + str(weight[i].shape))
 
     ## Bias
-    file_bias = r"c:\Users\Nutt\Desktop\gitlab\dataset\DA\output_2\model_biases.npz"
-    bias = np.load(file_bias)
-    print(bias.files)
+    if args.bias:
+        bias = np.load(args.bias)
+        print(bias.files)
+
+
+if __name__ == "__main__":
+    main()
