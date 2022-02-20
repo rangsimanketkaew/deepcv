@@ -428,9 +428,9 @@ def main():
         for i in tqdm(range(no_struc)):
             dist, angle, torsion = calc_zmat(xyz[i], filename)
             if args.save:
-                np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz", dist=dist, angle=angle, torsion=torsion
-                )
+                np.savez_compressed(f"{filename}_{args.rep}_dist_strc_{i+1}.npz", dist=dist)
+                np.savez_compressed(f"{filename}_{args.rep}_angle_strc_{i+1}.npz", angle=angle)
+                np.savez_compressed(f"{filename}_{args.rep}_torsion_strc_{i+1}.npz", torsion=torsion)
     # Adjacency matrix
     elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
