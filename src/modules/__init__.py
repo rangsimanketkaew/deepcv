@@ -10,7 +10,7 @@ import sys
 import logging
 
 # printing logging messages to stdout file still does not work!
-logging.basicConfig(stream=sys.stdout, level=logging.WARN, format="%(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
 
 from utils import util
 
