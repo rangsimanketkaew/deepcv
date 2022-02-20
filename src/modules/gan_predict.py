@@ -34,12 +34,32 @@ def generate_latent_points(latent_dim, n_samples):
 def main():
     info = "Generate output using Generator's model."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--model", "-m", metavar="MODEL", type=str, required=True, help="Generator's model.")
     parser.add_argument(
-        "--latent-dim", "-d", metavar="LATENT_DIM", type=int, required=True, help="Dimension of latent space."
+        "-m",
+        "--model",
+        dest="model",
+        metavar="MODEL",
+        type=str,
+        required=True,
+        help="A pretrained generative model.",
     )
     parser.add_argument(
-        "--num-samples", "-n", metavar="NUM_SAMPLESKEY", type=int, required=True, help="Number of samples."
+        "-d",
+        "--latent-dim",
+        dest="latent_dim",
+        metavar="LATENT_DIM",
+        type=int,
+        required=True,
+        help="Dimension of the latent layer (festure representation).",
+    )
+    parser.add_argument(
+        "-n",
+        "--num-samples",
+        dest="num_samples",
+        metavar="NUM_SAMPLESKEY",
+        type=int,
+        required=True,
+        help="Number of samples.",
     )
 
     args = parser.parse_args()

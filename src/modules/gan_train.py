@@ -328,8 +328,9 @@ def main():
     info = "Generative adversarial networks (GANs) for learning latent data from features."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
-        "--input",
         "-i",
+        "--input",
+        dest="input",
         metavar="INPUT",
         type=str,
         required=True,
@@ -338,6 +339,7 @@ def main():
     parser.add_argument(
         "-d",
         "--dataset",
+        dest="dataset",
         metavar="DATASET",
         type=str,
         required=True,
@@ -347,6 +349,7 @@ def main():
     parser.add_argument(
         "-k",
         "--key",
+        dest="key",
         metavar="KEY",
         type=str,
         required=True,
