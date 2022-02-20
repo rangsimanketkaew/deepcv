@@ -71,6 +71,8 @@ def limit_gpu_growth():
 
 
 def fix_autograph_warning():
+    """Decorator to suppress autograph warning
+    """    
     import tensorflow as tf
 
     tf.autograph.experimental.do_not_convert
