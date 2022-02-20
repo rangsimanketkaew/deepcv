@@ -8,6 +8,7 @@ Info:
 11/06/2021 : Rangsiman Ketkaew
 """
 
+"Analyze free energy surface"
 
 import argparse
 import numpy as np
@@ -25,7 +26,7 @@ def readhills(files):
     return dat
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="DeepCV Analysis")
     parser.add_argument("-f", dest="file", action="store", type=str, required=True, help="FES data file")
     parser.add_argument(
@@ -51,3 +52,7 @@ if __name__ == "__main__":
 
     if args.save_npz:
         np.savez_compressed("FES.dat", dat=dat)
+
+
+if __name__ == "__main__":
+    main()
