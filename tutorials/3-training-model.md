@@ -1,94 +1,61 @@
 # Training autoencoder neural network <!-- omit in toc -->
 
 - [Step 1: Prepare input file for Diels-Alder reaction](#step-1-prepare-input-file-for-diels-alder-reaction)
-- [Step 2: Train model](#step-2-train-model)
+- [Step 2: Call DeepCV's module](#step-2-call-deepcvs-module)
+- [Step 3: Train model](#step-3-train-model)
 
 Note: DeepCV now accepts datasets only in NumPy's compressed file formats (.npz).
 
 ## Step 1: Prepare input file for Diels-Alder reaction
 
-DeepCV's input file needed to be prepared in a JSON file format (dictionary-like).
-The following example shows an input file for training a model using DAENN with five hidden layers.
+DeepCV's input file must be in a JSON file format (dictionary-like).
+An example of DAENN input in [inputs/](../input/) folder shows the configuration for training a model using DAENN with five hidden layers.
 The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
 The rest layers are two decoded layers for reconstruction.
-On the other hand, the size of two hidden layers that are opposite of each other, e.g., input and output layers, 1st and 5th hidden layers, must be the same.
+On the other hand, the size of two hidden layers that are opposite of each other,
+e.g., input and output layers, 1st and 5th hidden layers, must be the same.
 
-```JSON
-{
-  "_comment": "Configuration input file",
-  "project": {
-    "_comment": "Type of neural network to train",
-    "name": "Demo",
-    "neural_network": "ae"
-  },
-  "dataset": {
-    "_comment": "Dataset manipulation: dataset splitting and normalization",
-    "split": false,
-    "split_ratio": 0.8,
-    "shuffle": true,
-    "normalize_scale": 0.0,
-    "max_scale": 2
-  },
-  "model": {
-    "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
-    "optimizer": "adam",
-    "loss": "mean_absolute_error",
-    "num_epoch": 2,
-    "batch_size": 60
-  },
-  "network": {
-    "_comment": "Number of neurons and activation function for each hidden layer",
-    "hidden_layers": 5,
-    "units_1": 32,
-    "units_2": 8,
-    "units_3": 2,
-    "units_4": 8,
-    "units_5": 32,
-    "func_1": "relu",
-    "func_2": "relu",
-    "func_3": "relu",
-    "func_4": "relu",
-    "func_5": "relu"
-  },
-  "performance": {
-    "_comment": "Setting for training performance",
-    "enable_gpu": true,
-    "gpus": 1
-  },
-  "settings": {
-    "_comment": "User-defined settings",
-    "verbosity": 1,
-    "show_summary": true,
-    "save_tb": false,
-    "save_model": true,
-    "save_weights": true,
-    "save_weights_npz": true,
-    "save_biases_npz": true,
-    "save_graph": true,
-    "save_loss": true,
-    "show_loss": false
-  },
-  "output": {
-    "_comment": "Set name of output files",
-    "out_dir": "output",
-    "out_model": "model.h5",
-    "out_weights": "model_weights.h5",
-    "out_weights_npz": "model_weights.npz",
-    "out_biases_npz": "model_biases.npz",
-    "loss_plot": "loss.png"
-  }
-}
+## Step 2: Call DeepCV's module
+
+All DeepCV's modules can be called via `main.py` API script.
+
+```sh
+$ cd deepcv/src/
+$ python main.py
+
+------------------------------------------------
+DeepCV : Deep Learning for Collective Variables
+-------------------------------------------------
+version 1.0 : February 2022
+University of Zurich, Switzerland
+https://gitlab.uzh.ch/lubergroup/deepcv
+
+Module         Description
+-------------  ----------------------------------------------
+calc_rep       Calculate molecular representation
+gen_input      Neural network input generator
+single_train   Single-data fully-connected neural network
+multi_train    Multi-data fully-connected neural network
+daenn          Deep autoencoder neural network
+gan_train      Training generative adversarial network (GAN)
+gan_predict    Generating samples using trained GAN
+deepcv2plumed  Create PLUMED input file
+analyze_FES    FES validation
+analyze_model  DAENN model analysis and parameters extraction
+explor_abi     Calculate exploration ability
+
+For more detail, please review 'README' in the repository.
 ```
 
-## Step 2: Train model
+## Step 3: Train model
 
-Execute the `daenn.py` source using `-m`, like below. Then it will start to train the model.
+Execute the `main.py` with argument `daenn`, like below. Then it will start to train the model.
 The training time depends on the size of the dataset and networks, the number of epochs, etc.
 
 ```sh
-$ python daenn \
-    -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz \
-    -i input/input_ae_DA.json
+$ python main.py daenn \
+    -i input/input_ae_DA.json \
+    -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz
 
 ============================== Program started ==============================
 Project: Demo
