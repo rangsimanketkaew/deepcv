@@ -6,6 +6,12 @@ Info:
 28/11/2020 : Rangsiman Ketkaew
 """
 
+import sys
+import logging
+
+# printing logging messages to stdout file still does not work!
+logging.basicConfig(stream=sys.stdout, level=logging.WARN, format="%(name)s - %(levelname)s - %(message)s")
+
 from utils import util
 
 util.tf_logging(2, 3)  # warning level
