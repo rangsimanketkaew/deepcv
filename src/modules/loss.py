@@ -15,6 +15,36 @@ import numpy as np
 import tensorflow as tf
 
 
+class CustomLoss(tf.keras.losses.Loss):
+    """Custom loss
+
+    This class wraps __call__ which defines loss calculation. It can be used with model.compile, e.g.,
+
+    custom_loss = CustomLoss(loss_1, loss_2, layer, 0.8)
+    model.compile(loss=custom_loss)
+    ...
+
+    where loss_1 and loss_2 are loss functions that take y_true and y_pred and calculate its loss value 
+
+    Args:
+        tf (class): Parent class
+    """
+
+    def __init__(self, main_loss, penalty_loss, layer, alpha, name="custom_loss"):
+        super().__init__(name=name)
+        self.main_loss = main_loss
+        self.penalty_loss = penalty_loss
+        self.layer = layer
+        self.alpha = alpha
+
+    def __call__(self, y_true, y_pred, sample_weight=None):
+        return (
+            (self.alpha * self.main_loss(y_true, y_pred))
+            - ((1 - self.alpha) * self.penalty_loss(y_true, y_pred))
+            # + tf.math.reduce_mean(self.layer)
+        )
+
+
 def n2t_std(array):
     """convert numpy --> tensor using standard method
 
