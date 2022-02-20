@@ -59,7 +59,7 @@
   },
   "output": {
     "_comment": "Set name of output files",
-    "out_dir": "/mnt/c/Users/Nutt/Desktop/daenn-test/",
+    "out_dir": "output/",
     "out_model": "model.h5",
     "out_weights": "model_weights.h5",
     "out_weights_npz": "model_weights.npz",
