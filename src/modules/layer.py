@@ -44,5 +44,5 @@ class LayerWithRate(tf.keras.layers.Layer):
         self.rate = rate
 
     def call(self, inputs):
-        self.add_loss(self.rate * tf.math.reduce_sum(inputs))
+        self.add_loss(self.rate * inputs)
         return inputs
