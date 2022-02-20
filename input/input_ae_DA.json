@@ -3,10 +3,19 @@
   "project": {
     "_comment": "Type of neural network to train",
     "name": "Demo",
-    "neural_network": "ae"
+    "neural_network": "daenn"
   },
   "dataset": {
     "_comment": "Dataset manipulation: dataset splitting and normalization",
+    "primary": [
+      "stacked_50arr_dist.npz",
+      "stacked_50arr_angle.npz",
+      "stacked_50arr_torsion.npz",
+      "stacked_50arr_xsprint.npz"
+    ],
+    "secondary": [
+      "stacked_50arr_dist.npz"
+    ],
     "split": false,
     "split_ratio": 0.8,
     "shuffle": true,
@@ -16,24 +25,17 @@
   "model": {
     "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
     "optimizer": "adam",
-    "main_loss": "mean_absolute_error",
-    "penalty_loss": "RMSD",
+    "main_loss": "RMSE",
+    "penalty_loss": "RMSE",
+    "loss_weights": [1],
     "num_epoch": 200,
-    "batch_size": 60
+    "batch_size": 60,
+    "train_separately": false
   },
   "network": {
     "_comment": "Number of neurons and activation function for each hidden layer",
-    "hidden_layers": 5,
-    "units_1": 32,
-    "units_2": 8,
-    "units_3": 2,
-    "units_4": 8,
-    "units_5": 32,
-    "func_1": "tanh",
-    "func_2": "tanh",
-    "func_3": "tanh",
-    "func_4": "tanh",
-    "func_5": "tanh"
+    "units": [32, 8, 2, 8, 32],
+    "act_funcs": ["tanh", "tanh", "tanh", "tanh", "tanh"]
   },
   "performance": {
     "_comment": "Setting for training performance",
@@ -51,15 +53,18 @@
     "save_biases_npz": true,
     "save_graph": true,
     "save_loss": true,
-    "show_loss": true
+    "show_loss": true,
+    "save_metrics": true,
+    "show_metrics": true
   },
   "output": {
     "_comment": "Set name of output files",
-    "out_dir": "output",
+    "out_dir": "/mnt/c/Users/Nutt/Desktop/daenn-test/",
     "out_model": "model.h5",
     "out_weights": "model_weights.h5",
     "out_weights_npz": "model_weights.npz",
     "out_biases_npz": "model_biases.npz",
-    "loss_plot": "loss.png"
+    "loss_plot": "loss.png",
+    "metrics_plot": "metrics.png"
   }
 }
