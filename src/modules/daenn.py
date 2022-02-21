@@ -261,7 +261,7 @@ class Autoencoder(Model):
 
         return _loss
 
-    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, alpha=0.8):
+    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=0.8):
         """Method 2: add_loss
         
         Custom loss for model.add_loss(). add_loss creates loss as tensor, not function, 
@@ -270,18 +270,18 @@ class Autoencoder(Model):
         Args:
             main_loss (func): Main loss
             penalty_loss (func): Loss-like penalty function
-            alpha (_type_): Special weight. Defaults to 0.8.
+            gamma (_type_): Special weight. Defaults to 0.8.
 
         Returns:
             tensor: Return values from the closure function
         """
         return (
-            (alpha * main_loss(y_true, y_pred))
-            - ((1 - alpha) * penalty_loss(y_true, y_pred))
+            (gamma * main_loss(y_true, y_pred))
+            - ((1 - gamma) * penalty_loss(y_true, y_pred))
             # + tf.keras.backend.reduce_mean(self.latent)
         )
 
-    def custom_loss_3(self, alpha):
+    def custom_loss_3(self, gamma):
         """Method 3: external loss
 
         Define a class of loss and call it
@@ -289,10 +289,42 @@ class Autoencoder(Model):
         Returns:
             class: custom loss object
         """
-        return loss.CustomLoss(self.main_loss, self.penalty_loss, self.latent, alpha)
+        return loss.CustomLoss(self.main_loss, self.penalty_loss, self.latent, gamma)
+
+    def loss_1(self, main_loss):
+        """Custom main loss for primary dataset. Loss = (Loss * its loss_weight).
+
+        Args:
+            main_loss (func): Main loss
+
+        Returns:
+            tensor: Return values from the closure function
+        """
+
+        def _loss_1(y_true, y_pred):
+            return main_loss(y_true, y_pred)
+
+        return _loss_1
+
+    def loss_2(self, penalty_loss):
+        """Custom penalty loss for secondary dataset. Loss = (Loss * its loss_weight).
+        
+        Maximization is used for this loss.
+
+        Args:
+            penalty_loss (func): Loss-like penalty function
+
+        Returns:
+            tensor: Return values from the closure function
+        """
+
+        def _loss_2(y_true, y_pred):
+            return penalty_loss(y_true, y_pred)
+
+        return _loss_2
 
     def compile_model(self, optimizer, main_loss, penalty_loss, loss_weights):
-        """Compile neural network model
+        """Compile neural network model.
 
         Args:
             optimizer (str): Name of optimizer
@@ -314,7 +346,7 @@ class Autoencoder(Model):
 
         self.autoencoder.compile(
             optimizer=self.optimizer,
-            loss={"out_1": "mse", "out_2": "mse"},
+            loss={"out_1": self.loss_1(self.main_loss), "out_2": self.loss_2(self.penalty_loss),},
             # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=0.8),  # method 1
             # loss=None, # method 2
             # loss=self.custom_loss_3(alpha=0.8), # method 3
@@ -710,32 +742,64 @@ Please check your DAENN input file!"
 
     # summarize history for loss and accuracy
     if save_loss:
-        plt.figure(1)
-        plt.plot(model.history.history["loss"])
-        plt.plot(model.history.history["val_loss"])
-        plt.title("model loss")
-        plt.ylabel("loss")
-        plt.xlabel("epoch")
-        plt.legend(["train", "test"], loc="upper left")
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4))
+        # fig.suptitle("Loss")
+
+        ax1.set_title("Total loss")
+        ax1.plot(model.history.history["loss"])
+        ax1.plot(model.history.history["val_loss"])
+        ax1.set_ylabel("loss")
+        ax1.set_xlabel("epoch")
+        ax1.label_outer()
+        ax1.legend(["train", "test"], loc="upper right")
+
+        ax2.set_title("Main loss (primary dataset)")
+        ax2.plot(model.history.history["out_1_loss"])
+        ax2.plot(model.history.history["val_out_1_loss"])
+        ax2.set_ylabel("loss")
+        ax2.set_xlabel("epoch")
+        ax2.label_outer()
+        ax2.legend(["train", "test"], loc="upper right")
+
+        ax3.set_title("Penalty loss (secondary dataset)")
+        ax3.plot(model.history.history["out_2_loss"])
+        ax3.plot(model.history.history["val_out_2_loss"])
+        ax3.set_ylabel("loss")
+        ax3.set_xlabel("epoch")
+        ax3.label_outer()
+        ax3.legend(["train", "test"], loc="upper right")
+
         save_path = out_parent + "/" + loss_plot
-        plt.savefig(save_path)
+        fig.savefig(save_path)
         logging.info(f"Loss history plot has been saved to {save_path}")
+
         if show_loss:
-            plt.show()
+            fig.show()
 
     if save_metrics:
-        plt.figure(1)
-        plt.plot(model.history.history["out_1_mse"])
-        plt.plot(model.history.history["val_out_1_mse"])
-        plt.title("model accuracy")
-        plt.ylabel("accuracy metric")
-        plt.xlabel("epoch")
-        plt.legend(["train", "test"], loc="upper left")
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+
+        ax1.plot(model.history.history["out_1_mse"])
+        ax1.plot(model.history.history["val_out_1_mse"])
+        ax1.set_title("Accuracy for main loss (primary dataset)")
+        ax1.set_ylabel("accuracy metric")
+        ax1.set_xlabel("epoch")
+        ax1.label_outer()
+        ax1.legend(["train", "test"], loc="upper right")
+
+        ax2.plot(model.history.history["out_2_mse"])
+        ax2.plot(model.history.history["val_out_2_mse"])
+        ax2.set_title("Accuracy for penalty loss (secondary dataset)")
+        ax2.set_ylabel("accuracy metric")
+        ax2.set_xlabel("epoch")
+        ax2.label_outer()
+        ax2.legend(["train", "test"], loc="upper right")
+
         save_path = out_parent + "/" + metrics_plot
         plt.savefig(save_path)
         logging.info(f"Metric accuracy history plot has been saved to {save_path}")
         if show_metrics:
-            plt.show()
+            fig.show()
 
     print("=" * 30 + " DONE " + "=" * 30)
 
