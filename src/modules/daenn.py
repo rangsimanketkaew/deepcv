@@ -319,7 +319,7 @@ class Autoencoder(Model):
         """
 
         def _loss_2(y_true, y_pred):
-            return penalty_loss(y_true, y_pred)
+            return 1 / penalty_loss(y_true, y_pred)
 
         return _loss_2
 
