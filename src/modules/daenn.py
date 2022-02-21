@@ -18,15 +18,18 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 import argparse
-import numpy as np
-from matplotlib import pyplot as plt
-from inspect import getmembers, isfunction
+import logging
 
+logging = logging.getLogger("DeepCV")
+
+from datetime import datetime
+from inspect import getmembers, isfunction
 from utils import util  # needs to be loaded before calling TF
 
-util.fix_autograph_warning()
-
+import functools
+import numpy as np
 import tensorflow as tf
+import tensorflow_addons as tfa
 
 try:
     assert tf.test.is_built_with_gpu_support()
@@ -41,35 +44,33 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
+from matplotlib import pyplot as plt
 
 from modules import loss
+from modules import layer
 
 
 class Autoencoder(Model):
     def __init__(self):
         super(Autoencoder, self).__init__()
 
-    def add_dataset(self, train_set, test_set):
+    def add_dataset(self, train_set, test_set, num_primary, num_secondary):
         """Add dataset after creating an instance of Autoencoder class
 
         Args:
-            train_set (list): List containing train sets (NumPy array). The feature of all set must have the same shape.
-            test_set (list): List containing test sets (NumPy array). The feature of all set must have the same shape.
+            train_set (list): List containing train sets (NumPy array). 
+                            The feature of all set must have the same shape.
+            test_set (list): List containing test sets (NumPy array). 
+                            The feature of all set must have the same shape.
+            num_primary (int): Number of primary datasets (arrays).
+            num_secondary (int): Number of secondary datasets (arrays).
         """
         self.train_set = train_set
         self.test_set = test_set
+        self.num_primary = num_primary
+        self.num_secondary = num_secondary
 
-    def add_losses(self, _1st_loss, _2nd_loss):
-        """Add losses to the class
-
-        Args:
-            _1st_loss (func): Main loss
-            _2nd_loss (func): Loss-like penalty function
-        """
-        self.main_loss = _1st_loss
-        self.penalty_loss = _2nd_loss
-
-    def generate_layer(self, units, i):
+    def generate_input(self, units, i):
         """Generate input layer for model.
 
         Args:
@@ -80,6 +81,18 @@ class Autoencoder(Model):
             Input (obj): Tensorflow input layer
         """
         return Input(shape=(units,), dtype=tf.float32, name="input_layer_" + str(i))
+
+    def generate_output(self, units, i):
+        """Generate output layer for model.
+
+        Args:
+            units (int): Number of units/nodes of a layer
+            i (int): Index of layer
+
+        Returns:
+            Input (obj): Tensorflow output layer
+        """
+        return Dense(units, dtype=tf.float32, name="output_layer_" + str(i))
 
     def build_network(self, output_name="daenn_output", **layer_params):
         """Multiple input fully-connected feedforward neural network. 
@@ -95,50 +108,78 @@ class Autoencoder(Model):
         self.units_1, self.units_2, self.units_3, self.units_4, self.units_5 = layer_params["units"]
         self.func_1, self.func_2, self.func_3, self.func_4, self.func_5 = layer_params["act_funcs"]
 
+        # ---------
+        # Create initial placeholder layer for each input dataset
+        # ---------
+        self.size_inp = [i.shape[1] for i in self.train_set]
+        self.list_inp = [self.generate_input(self.size_inp[i], i + 1) for i in range(len(self.size_inp))]
+
+        # ---------
+        # Apply custom layer
+        # ---------
+        # self.list_inp[-1] = layer.LayerWithRate()(self.list_inp[-1])  # last layer
+
+        # ---------
+        # Combine primary datasets
         # Input: I1 + I2 + ... = Inp
-        self.size_inputs = [i.shape[1] for i in self.train_set]
-        self.list_inputs = [
-            self.generate_layer(self.size_inputs[i], i + 1) for i in range(len(self.size_inputs))
-        ]
-        # If there is only one dataset provided, then turn off concatenation, otherwise merge them
-        if len(self.list_inputs) == 1:
-            self.inputs = self.list_inputs[0]
+        # ---------
+        # If there is only one dataset provided, then don't need to concatenate
+        if len(self.list_inp) == 1 or len(self.list_inp) == 2:
+            self.primary_inp = self.list_inp[0]
+        # otherwise merge them (only primary layers)
         else:
-            self.inputs = Concatenate(axis=-1)(self.list_inputs)  # Merge branches
+            self.primary_inp = Concatenate(axis=-1)(self.list_inp[: self.num_primary])  # Merge branches
+
+        # merge again with the rest of placeholder layer (secondary dataset(s))
+        self.secondary_inp = self.list_inp[self.num_primary :]
+        self.inputs = Concatenate(axis=-1)([self.primary_inp] + self.secondary_inp)
 
         # ---------
         # Encoder: Inp --> H1 --> H2 --> H3
+        # latent = feature representation
         # ---------
         self.encoded1 = Dense(self.units_1, activation=self.func_1, use_bias=True)(self.inputs)
         self.encoded2 = Dense(self.units_2, activation=self.func_2, use_bias=True)(self.encoded1)
-        self.latent = Dense(self.units_3, activation=self.func_3, use_bias=True)(
-            self.encoded2
-        )  # latent layer
+        self.latent = Dense(self.units_3, activation=self.func_3, use_bias=True)(self.encoded2)
 
         # ---------
         # Decoder: H3 --> H4 --> H5 --> Out
+        # output = reconstruction
         # ---------
         self.decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(self.latent)
         self.decoded2 = Dense(self.units_5, activation=self.func_5, use_bias=True)(self.decoded1)
-        self.outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(
-            self.decoded2
-        )  # reconstruct input
+        self.outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(self.decoded2)
 
+        # ---------
+        # split output into sub-tensors
         # Output: Out --> O1 + O2 + ...
-        self.list_outputs = tf.split(
-            self.outputs, self.size_inputs, axis=1, name=output_name
-        )  # split output into sub-tensors
+        # ---------
+        # size of primary layer [ : a]
+        size_p = self.primary_inp.shape.as_list()[1]
+        # size of secondary layer [a : ]
+        size_s = functools.reduce(lambda x, y: x + y, self.size_inp[self.num_primary :])
+
+        self.list_out = tf.split(self.outputs, [size_p, size_s], axis=1, name=output_name,)
+        self.primary_out = Dense(size_p, activation=None, name="out_1")(self.list_out[0])
+        self.secondary_out = Dense(size_s, activation=None, name="out_2")(self.list_out[0])
+
+        # manually create a placeholder for each small output layer
+        # but it does not seem to work
+        # self.list_out = [
+        #     self.generate_output(self.size_inp[i], i + 1)(self.outputs)
+        #     for i in range(len(self.size_inp))
+        # ]
 
     def build_encoder(self, name="encoder"):
-        """Build encoder model
+        """Build encoder model.
 
         Args:
             name (str, optional): Name of model. Defaults to "encoder".
         """
-        self.encoder = Model(inputs=self.list_inputs, outputs=self.latent, name=name)
+        self.encoder = Model(inputs=self.list_inp, outputs=self.latent, name=name)
 
     def build_decoder(self, model_name="decoder", output_name="decoder_output"):
-        """Build decoder model
+        """Build decoder model.
 
         Args:
             model_name (str, optional): Name of model. Defaults to "decoder".
@@ -153,21 +194,30 @@ class Autoencoder(Model):
         outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(decoded2)  # reconstruct input
         self.decoder = Model(
             inputs=decoder_input,
-            outputs=[tf.split(outputs, self.size_inputs, axis=1, name=output_name)],
+            outputs=[tf.split(outputs, self.size_inp, axis=1, name=output_name)],
             name=model_name,
         )
 
     def build_autoencoder(self, model_name="daenn"):
-        """Build autoencoder model
+        """Build autoencoder model.
 
         Args:
             model_name (str, optional): Name of model. Defaults to "daenn".
         """
-        self.autoencoder = Model(inputs=self.list_inputs, outputs=self.list_outputs, name=model_name)
+        # self.autoencoder = Model(inputs=self.inputs, outputs=self.outputs, name=model_name)
+        self.autoencoder = Model(
+            inputs=[self.primary_inp] + self.secondary_inp, outputs=[self.primary_out, self.secondary_out]
+        )
+
+        # It seems that using multiple separate inputs and outputs for a model is wrong
+        # because loss calculation will be applied to each individual output layer
+        # but we need all input data in the same layer and takes once only loss computation
+        #
+        # self.autoencoder = Model(inputs=self.list_inp, outputs=self.list_out, name=model_name)
 
     def parallel_gpu(self, gpus=1):
         """
-        Parallelization with multi-GPU
+        Parallelization with multi-GPU.
 
         Args:
             gpus (int): Number of GPUs. Defaults to 1.
@@ -177,44 +227,100 @@ class Autoencoder(Model):
                 from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 
                 self.autoencoder = multi_gpu_model(self.autoencoder, gpus=gpus)
-                print(">>> Training on multi-GPU on a single machine")
+                logging.warning(">>> Training on multi-GPU on a single machine")
             except:
-                print(">>> Warning: cannot enable multi-GPUs support for Keras")
+                logging.warning(">>> Cannot enable multi-GPUs support for Keras")
 
-    # def combine_loss(self, y_true, y_pred):
-    def combine_loss(self, alpha):
-        """Use the closure to make a custom loss be able to receive additional arguments
-        But keep in mind that this could yield a potential problem when loading a model
+    def custom_loss_1(self, main_loss, penalty_loss, gamma=0.8):
+        """Method 1: encapsulation
+        
+        Use the closure to make a custom loss be able to receive additional arguments.
+        But keep in mind that this could yield a potential problem when loading a model.
+
+        Another workaround is to use 'model.add_loss' or write a new custom loss class using 
+        'tf.keras.losses.Loss' as a parent and wrap call(self, y_true, y_pred) function which does
+        math operation with custom losses and return the value of loss function for optimization.
+        See this answer https://stackoverflow.com/a/66486573/6596684 for more details.
 
         Args:
-            alpha (_type_): _description_
+            main_loss (func): Main loss
+            penalty_loss (func): Loss-like penalty function
+            gamma (_type_): Weight for scaling down the impact of a loss function. Defaults to 0.8.
 
         Returns:
             tensor: Return values from the closure function
         """
-        @tf.function
+        # tf.compat.v1.enable_eager_execution()
+
         def _loss(y_true, y_pred):
-            return tf.math.reduce_max(tf.subtract(y_true, y_pred)) * alpha
+            split_index = functools.reduce(lambda x, y: x + y, self.size_inp[: self.num_primary])
+            y_true_penalty = y_true[split_index:]
+            y_pred_penalty = y_pred[split_index:]
+
+            return (gamma * main_loss(y_true, y_pred)) - ((1 - gamma) * penalty_loss(y_true, y_pred))
 
         return _loss
 
-    def compile_model(self, optimizer, loss, loss_weights):
+    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, alpha=0.8):
+        """Method 2: add_loss
+        
+        Custom loss for model.add_loss(). add_loss creates loss as tensor, not function, 
+        which can take other variables as argument.
+
+        Args:
+            main_loss (func): Main loss
+            penalty_loss (func): Loss-like penalty function
+            alpha (_type_): Special weight. Defaults to 0.8.
+
+        Returns:
+            tensor: Return values from the closure function
+        """
+        return (
+            (alpha * main_loss(y_true, y_pred))
+            - ((1 - alpha) * penalty_loss(y_true, y_pred))
+            # + tf.keras.backend.reduce_mean(self.latent)
+        )
+
+    def custom_loss_3(self, alpha):
+        """Method 3: external loss
+
+        Define a class of loss and call it
+
+        Returns:
+            class: custom loss object
+        """
+        return loss.CustomLoss(self.main_loss, self.penalty_loss, self.latent, alpha)
+
+    def compile_model(self, optimizer, main_loss, penalty_loss, loss_weights):
         """Compile neural network model
 
         Args:
             optimizer (str): Name of optimizer
-            loss (str): Name of loss function
+            main_loss (func): Main loss
+            penalty_loss (func): Loss-like penalty function
             loss_weights (list): Weight for each loss
         """
         self.optimizer = optimizer
-        self.loss = loss
+        self.main_loss = main_loss
+        self.penalty_loss = penalty_loss
         self.loss_weights = loss_weights
+
+        # ------------------------------------------
+        # Calling loss customization function/object
+        # ------------------------------------------
+        # self.autoencoder.add_loss(
+        #     self.custom_loss_2(self.inputs, self.latent, self.main_loss, self.penalty_loss, alpha=0.8)
+        # ) # uncomment this line to use method 2
+
         self.autoencoder.compile(
             optimizer=self.optimizer,
-            # loss={"tf.split": self.combine_loss(alpha=0.5)},
-            loss={"tf.split": "mse"},
-            # loss_weights=self.loss_weights,
+            loss={"out_1": "mse", "out_2": "mse"},
+            # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=0.8),  # method 1
+            # loss=None, # method 2
+            # loss=self.custom_loss_3(alpha=0.8), # method 3
+            loss_weights=self.loss_weights,
             metrics=["mse"],
+            # run_eagerly=True,
         )
 
     def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/"):
@@ -223,7 +329,22 @@ class Autoencoder(Model):
         Args:
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
+            verbose (int): Level of prining information. Defaults to 1.
+            log_dir (str): Directory to save model logs. Defaults to "./logs/".
         """
+        # stack all dataset into a single array since both input layer and output layer are a single layer
+        # self.train_set = tf.concat(self.train_set, axis=1)
+        # self.test_set = tf.concat(self.test_set, axis=1)
+
+        self.train_set = [
+            tf.concat(self.train_set[: self.num_primary], axis=1),
+            tf.concat(self.train_set[self.num_primary :], axis=1),
+        ]
+        self.test_set = [
+            tf.concat(self.test_set[: self.num_primary], axis=1),
+            tf.concat(self.test_set[self.num_primary :], axis=1),
+        ]
+
         self.num_epoch = num_epoch
         self.batch_size = batch_size
         if self.batch_size == 0:
@@ -233,6 +354,9 @@ class Autoencoder(Model):
         # You can use tensorboard to visualize TensorFlow runs and graphs.
         # e.g. 'tensorflow --logdir ./log'
         tbCallBack = TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True)
+
+        # TQDM progress bar
+        tqdm_callback = tfa.callbacks.TQDMProgressBar()
 
         self.history = self.autoencoder.fit(
             x=self.train_set,  # input
@@ -244,7 +368,10 @@ class Autoencoder(Model):
             batch_size=self.batch_size,
             verbose=verbose,
             use_multiprocessing=True,
-            # callbacks=[tbCallBack],
+            callbacks=[
+                tqdm_callback,
+                # tbCallBack
+            ],
         )
 
     def encoder_predict(self, input_sample):
@@ -311,35 +438,20 @@ def main():
         required=True,
         help="Input file (JSON) defining configuration, setting, parameters.",
     )
-    parser.add_argument(
-        "-d",
-        "--dataset",
-        metavar="DATASET",
-        type=str,
-        required=True,
-        nargs="+",
-        help="Dataset (train + test sets) for training neural network.",
-    )
-    parser.add_argument(
-        "-k",
-        "--key",
-        metavar="KEY",
-        type=str,
-        nargs="+",
-        help="Keyword name (dictionary key) of the dataset array in NumPy's compressed file. \
-            The number of keyword must consistent with that of npz files.",
-    )
 
     args = parser.parse_args()
 
     if not os.path.isfile(args.input):
-        exit('Error: No such file "' + str(args.input) + '"')
+        logging.error('No such file "' + str(args.input) + '"')
+        sys.exit(1)
 
     # Load data from JSON input file
     json = util.load_json(args.input)
     project = json["project"]["name"]
     neural_network = json["project"]["neural_network"]
     # ---------
+    primary_data = json["dataset"]["primary"]
+    secondary_data = json["dataset"]["secondary"]
     split = json["dataset"]["split"]
     split_ratio = json["dataset"]["split_ratio"]
     shuffle = json["dataset"]["shuffle"]
@@ -383,23 +495,44 @@ def main():
 
     # ========================================
 
+    # sys.stdout = open("stdout_daenn_{:%Y_%m_%d_%H_%M_%S}.txt".format(datetime.now()), "w")
+
     print("=" * 30 + " Program started " + "=" * 30)
     print(f"Project: {project}")
+    print("Date {:%d/%m/%Y}".format(datetime.now()) + " at {:%H:%M:%S}".format(datetime.now()))
 
     if neural_network.lower() != "daenn":
-        exit(f"Error: This is a DAENN trainer, not {neural_network}.")
+        logging.error(f"This is a DAENN trainer, not {neural_network}.")
+        sys.exit(1)
 
-    ############################
-    # Check and prepare datasets
-    ############################
+    ################
+    # Check datasets
+    ################
+    # concatenate two lists of primary dataset (for main loss) and
+    # secondary dataset (for penalty loss) into a single list for convenient preprocessing
+    all_dataset = primary_data + secondary_data
+
+    # Key
+    try:
+        dataset_keys = json["dataset"]["keys"]
+        no_keys = False
+        assert len(all_dataset) == len(
+            dataset_keys
+        ), "Total number of datasets and number of keys provided in the input file are not the same"
+    except:
+        no_keys = True
+
     # Extract features (input)
-    if not args.key:
-        print("Warning: No npz keys specified, the first key found in array.files is automatically used.")
-        dataset_arr_raw = [np.load(i) for i in args.dataset]
+    if no_keys:
+        logging.warning("No npz keys specified, the first key found in array.files is automatically used.")
+        dataset_arr_raw = [np.load(i) for i in all_dataset]
         dataset_arr = [i[i.files[0]] for i in dataset_arr_raw]
     else:
-        dataset_arr = [np.load(i)[j] for i, j in zip(args.dataset, args.key)]
+        dataset_arr = [np.load(i)[j] for i, j in zip(all_dataset, dataset_keys)]
 
+    ###############
+    # Preprocessing
+    ###############
     # Use FP32 for speeding training and reducing precision error
     dataset_arr = [i.astype(np.float32) for i in dataset_arr]
 
@@ -442,42 +575,57 @@ Please check your DAENN input file!"
         if f in avail_act_func:
             return f
         if f.lower() == "leakyrelu":
-            print("Warning: LeakyReLU is used as a loss function.")
+            logging.warning("LeakyReLU is used as a loss function.")
             return LeakyReLU(alpha=0.2)
         else:
-            print(f"Error: Activation function youspecified, {f}, is not supported.")
-            print(f"Available functions are {avail_act_func}")
-            exit()
+            err = (
+                f"Activation function youspecified, {f}, is not supported."
+                + f"Available functions are {avail_act_func}"
+            )
+            logging.error(err)
+            sys.exit(1)
 
     user_act_func = list(map(check_act_func, act_funcs))
 
+    ######
     # Loss
-    tf_loss = getmembers(tf.keras.losses, isfunction)
-    avail_loss = [i[0] for i in tf_loss]
-    if main_loss in avail_loss:
-        pass
-    elif main_loss.lower() == "grmse":
-        print("Warning: Customized GRMSE is used as a loss function.")
-        main_loss = loss.GRMSE
-    else:
-        print(f"Error: Loss function you specified, {main_loss}, is not supported.")
-        print(f"Available losses are {avail_loss}")
-        exit()
+    ######
+    tf_loss = dict(getmembers(tf.keras.losses, isfunction))
 
-    # Penalty loss (loss-like function for DAENN)
-    if penalty_loss.lower() == "rmse":
-        penalty_loss = loss.RMSE
-    elif penalty_loss.lower() == "grmse":
-        penalty_loss = loss.GRMSE
+    # Main loss
+    if main_loss in tf_loss.keys():
+        main_loss = tf_loss[main_loss]
+    elif main_loss in list(vars(loss).keys()):
+        main_loss = vars(loss)[main_loss]
+    else:
+        err = (
+            f"Loss function you specified for main_loss, {main_loss}, is not supported."
+            + f"Available losses are {tf_loss.keys()} and DeepCV losses are defined in loss.py"
+        )
+        logging.error(err)
+        sys.exit(1)
+
+    # Penalty loss (loss-like penalty function for DAENN)
+    if penalty_loss in tf_loss.keys():
+        penalty_loss = tf_loss[penalty_loss]
+    elif penalty_loss in list(vars(loss).keys()):
+        penalty_loss = vars(loss)[penalty_loss]
+    else:
+        err = (
+            f"Loss function you specified for penalty_loss, {penalty_loss}, is not supported."
+            + f"Available TF losses are {tf_loss.keys()} and DeepCV losses are defined in loss.py"
+        )
+        logging.error(err)
+        sys.exit(1)
 
     ##############
     # Check output
     ##############
     if not os.path.isdir(out_dir):
-        print(
-            f"Error: Output directory you specified, {out_dir}, does not exist. Please create this directory!"
+        logging.error(
+            f"Output directory you specified, {out_dir}, does not exist. Please create this directory!"
         )
-        exit()
+        sys.exit(1)
 
     ##############################################################
     # Build, compile and train encoder & decoder models separately
@@ -492,7 +640,8 @@ Please check your DAENN input file!"
             model.decoder.summary()
 
         # Test prediction
-        encoded_test = model.encoder_predict(test_arr)
+        test_arr_ = tf.concat(test_arr, axis=1)
+        encoded_test = model.encoder_predict(test_arr_)
         decoded_test = model.decoder_predict(encoded_test)
 
         # Save TF graph
@@ -504,22 +653,22 @@ Please check your DAENN input file!"
     # Build, compile and train DAENN model
     ######################################
     model = Autoencoder()
-    model.add_dataset(train_arr, test_arr)
+    model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
     model.build_network(units=units, act_funcs=user_act_func)
     model.build_autoencoder()
-    model.add_losses(main_loss, penalty_loss)
-    model.compile_model(optimizer, main_loss, loss_weights)
+    model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
     # show model info
     if show_summary:
         model.autoencoder.summary()
     # Train model
     model.train_model(num_epoch, batch_size, verbosity, save_tb)
-    print(">>> Congrats! Training model is completed.")
+    logging.info("Congrats! Training model is completed.")
 
     # Test prediction
-    assert model.autoencoder_predict(
-        test_arr
-    ), "Failed to make a prediction. Check your network architecture again!"
+    # test_arr_ = tf.concat(test_arr, axis=1)
+    # assert model.autoencoder_predict(
+    #     test_arr_
+    # ), "Failed to make a prediction. Check your network architecture again!"
 
     ########################
     # Save model and outputs
@@ -528,12 +677,12 @@ Please check your DAENN input file!"
     if save_model:
         path = out_parent + "/" + out_model
         model.autoencoder.save(path, overwrite=True, save_format="h5")
-        print(f">>> Model has been saved to {path}")
+        logging.info(f"Model has been saved to {path}")
 
     if save_weights:
         path = out_parent + "/" + out_weights
         model.autoencoder.save_weights(path, overwrite=True, save_format="h5")
-        print(f">>> Weights of model have been saved to {path}")
+        logging.info(f"Weights of model have been saved to {path}")
 
     if save_weights_npz:
         filename = os.path.splitext(out_weights_npz)[0]
@@ -543,7 +692,7 @@ Please check your DAENN input file!"
             if layer.get_weights():
                 savez["layer" + str(i + 1)] = layer.get_weights()[0]
         np.savez_compressed(path, **savez)
-        print(f">>> Weights of model have been saved to {path}")
+        logging.info(f"Weights of model have been saved to {path}")
 
     if save_biases_npz:
         filename = os.path.splitext(out_biases_npz)[0]
@@ -553,11 +702,11 @@ Please check your DAENN input file!"
             if layer.get_weights():
                 savez["layer" + str(i + 1)] = layer.get_weights()[1]
         np.savez_compressed(path, **savez)
-        print(f">>> Biases of model have been saved to {path}")
+        logging.info(f"Biases of model have been saved to {path}")
 
     if save_graph:
         model.save_graph(model.autoencoder, model.autoencoder.name, out_dir)
-        print(f">>> Directed graphs of all model have been saved to {os.path.abspath(out_dir)}")
+        logging.info(f"Directed graphs of all model have been saved to {os.path.abspath(out_dir)}")
 
     # summarize history for loss and accuracy
     if save_loss:
@@ -570,25 +719,27 @@ Please check your DAENN input file!"
         plt.legend(["train", "test"], loc="upper left")
         save_path = out_parent + "/" + loss_plot
         plt.savefig(save_path)
-        print(f">>> Loss history plot has been saved to {save_path}")
+        logging.info(f"Loss history plot has been saved to {save_path}")
         if show_loss:
             plt.show()
 
     if save_metrics:
         plt.figure(1)
-        plt.plot(model.history.history["tf.split_mse"])
-        plt.plot(model.history.history["val_tf.split_mse"])
+        plt.plot(model.history.history["out_1_mse"])
+        plt.plot(model.history.history["val_out_1_mse"])
         plt.title("model accuracy")
         plt.ylabel("accuracy metric")
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
         save_path = out_parent + "/" + metrics_plot
         plt.savefig(save_path)
-        print(f">>> Metric accuracy history plot has been saved to {save_path}")
+        logging.info(f"Metric accuracy history plot has been saved to {save_path}")
         if show_metrics:
             plt.show()
 
     print("=" * 30 + " DONE " + "=" * 30)
+
+    # sys.stdout.close()
 
 
 if __name__ == "__main__":
