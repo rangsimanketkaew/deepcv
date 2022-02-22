@@ -8,14 +8,13 @@
   "dataset": {
     "_comment": "Dataset manipulation: dataset splitting and normalization",
     "primary": [
-      "DA_dist.npz",
-      "DA_angle.npz",
-      "DA_torsion.npz",
-      "DA_sprint.npz",
-      "DA_xsprint.npz"
+      "stacked_50arr_dist.npz",
+      "stacked_50arr_angle.npz",
+      "stacked_50arr_torsion.npz",
+      "stacked_50arr_xsprint.npz"
     ],
     "secondary": [
-      "DA_dist_6carbons.npz"
+      "stacked_50arr_dist.npz"
     ],
     "split": false,
     "split_ratio": 0.8,
@@ -29,8 +28,8 @@
     "main_loss": "RMSE",
     "penalty_loss": "RMSE",
     "loss_weights": [1, 0.1],
-    "num_epoch": 1000,
-    "batch_size": 55,
+    "num_epoch": 200,
+    "batch_size": 60,
     "train_separately": false
   },
   "network": {
