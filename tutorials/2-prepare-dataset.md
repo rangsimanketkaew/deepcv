@@ -11,7 +11,7 @@
 ## Step 1: Run a normal molecular dynamics (MD) simulation to generate a trajectory of, i.e., reactant state of the system.
 
 This step can be done by any MD packages. I recommend CP2K or GROMACS because they have an interface with
-PLUMED which is a plugin for running metadynamics simulation.
+PLUMED, which is a plugin for running metadynamics simulation.
 
 ```sh
 $ ls

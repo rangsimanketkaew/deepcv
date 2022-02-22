@@ -53,9 +53,7 @@ Execute the `main.py` with argument `daenn`, like below. Then it will start to t
 The training time depends on the size of the dataset and networks, the number of epochs, etc.
 
 ```sh
-$ python main.py daenn \
-    -i input/input_ae_DA.json \
-    -d dataset/traj_zmat_distance.npz dataset/traj_zmat_angle.npz dataset/traj_zmat_torsion.npz
+$ python main.py daenn -i input/input_ae_DA.json
 
 ============================== Program started ==============================
 Project: Demo
@@ -67,22 +65,18 @@ Project: Demo
 >>> 1. Train: (79200, 15) & Test: (19800, 15)
 >>> 2. Train: (79200, 14) & Test: (19800, 14)
 >>> 3. Train: (79200, 13) & Test: (19800, 13)
-Epoch 1/200
-1310/1320 [============================>.] - ETA: 0s - loss: 0.1711 - tf_op_layer_split_loss: 0.0480 - tf_op_layer_split_1_loss: 0.0373 - tf_op_layer_split_2_loss: 0.0857
-1320/1320 [==============================] - 3s 2ms/step - loss: 0.1708 - tf_op_layer_split_loss: 0.0479 - tf_op_layer_split_1_loss: 0.0373 - tf_op_layer_split_2_loss: 0.0856 - val_loss: 0.1334 - val_tf_op_layer_split_loss: 0.0287 - val_tf_op_layer_split_1_loss: 0.0317 - val_tf_op_layer_split_2_loss: 0.0730
-Epoch 2/200
-1320/1320 [==============================] - 3s 2ms/step - loss: 0.1243 - tf_op_layer_split_loss: 0.0262 - tf_op_layer_split_1_loss: 0.0302 - tf_op_layer_split_2_loss: 0.0679 - val_loss: 0.1066 - val_tf_op_layer_split_loss: 0.0229 - val_tf_op_layer_split_1_loss: 0.0283 - val_tf_op_layer_split_2_loss: 0.0554
-Epoch 3/200
-1320/1320 [==============================] - 3s 2ms/step - loss: 0.1014 - tf_op_layer_split_loss: 0.0215 - tf_op_layer_split_1_loss: 0.0277 - tf_op_layer_split_2_loss: 0.0522 - val_loss: 0.0967 - val_tf_op_layer_split_loss: 0.0219 - val_tf_op_layer_split_1_loss: 0.0273 - val_tf_op_layer_split_2_loss: 0.0475
 ...
 ...
 ...
->>> Model has been saved to /home/rketka/github/deepcv/output/model.h5
->>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.h5
->>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.npz
->>> Biases of model have been saved to /home/rketka/github/deepcv/output/model_biases.npz
->>> Directed graphs of all model have been saved to /home/rketka/github/deepcv/output
->>> Loss history plot has been saved to /home/rketka/github/deepcv/output/loss.png
+1/1 [==============================] - ETA: 0s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 61/1█ ETA: 00:00s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 0.0004 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_ou1/1 [==============================] - 0s 21ms/step - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_out_1_loss: 0.1160 - val_out_2_loss: 0.0156 - val_out_1_mse: 0.0013 - val_out_2_mse: 66.8437
+Training: 100%|█████████████████████████████████████████████████████████████████████████████████████████ 1000/1000 ETA: 00:00s,  42.66epochs/sDeepCV:INFO >>> Congrats! Training model is completed.
+DeepCV:INFO >>> Model has been saved to /home/rketka/github/deepcv/output/model.h5
+DeepCV:INFO >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.h5
+DeepCV:INFO >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.npz
+DeepCV:INFO >>> Biases of model have been saved to /home/rketka/github/deepcv/output/model_biases.npz
+DeepCV:INFO >>> Directed graphs of all model have been saved to /mnt/c/Users/Nutt/Desktop/daenn-test
+DeepCV:INFO >>> Loss history plot has been saved to /home/rketka/github/deepcv/output/loss.png
+DeepCV:INFO >>> Metric accuracy history plot has been saved to /home/rketka/github/deepcv/output/metrics.png
 ============================== DONE ==============================
 ```
 

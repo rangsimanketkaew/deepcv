@@ -19,7 +19,7 @@ conda create -n deepcv python==3.8
 conda activate deepcv
 conda update --all -y
 pip install -r requirements.txt # or conda install --file requirements.txt
-python setup.py install
+pip install .
 ```
 
 Optional: for C++ API
@@ -34,7 +34,7 @@ make
 
 ## Step 3: Check if GPU is available for TF
 
-Execute this script to check if TensorFlow >= 2.x can see GPU.
+Execute this script to check if TensorFlow 2.x can see GPU.
 ```python
 import tensorflow as tf
 
