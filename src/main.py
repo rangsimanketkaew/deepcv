@@ -3,7 +3,7 @@ Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
-28/11/2020 : Rangsiman Ketkaew
+23/02/2022 : Rangsiman Ketkaew
 """
 
 __version__ = "1.0"
@@ -26,7 +26,7 @@ def main():
     print("https://gitlab.uzh.ch/lubergroup/deepcv\n")
 
     list_of_functions = [
-        ["calc_rep", "Calculate molecular representation"],
+        ["calc_rep", "Calculate molecular representations"],
         ["gen_input", "Neural network input generator"],
         ["single_train", "Single-data fully-connected neural network"],
         ["multi_train", "Multi-data fully-connected neural network"],
@@ -36,7 +36,7 @@ def main():
         ["deepcv2plumed", "Create PLUMED input file"],
         ["analyze_FES", "FES validation"],
         ["analyze_model", "DAENN model analysis and parameters extraction"],
-        ["explor_abi", "Calculate exploration ability"],
+        ["explore_abi", "Calculate exploration ability"],
     ]
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)
@@ -57,13 +57,13 @@ if __name__ == "__main__":
 
     calling = sys.argv[0]
     modules_list = [
+        "calc_rep",
+        "gen_input",
         "single_train",
         "multi_train",
         "daenn",
         "gan_train",
         "gan_predict",
-        "gen_input",
-        "calc_rep",
         "deepcv2plumed",
         "analyze_FES",
         "analyze_model",
@@ -75,7 +75,11 @@ if __name__ == "__main__":
 
     import modules, tools
 
-    if calling == "single_train":
+    if calling == "calc_rep":
+        tools.calc_rep.main()
+    elif calling == "gen_input":
+        tools.gen_input.main()
+    elif calling == "single_train":
         modules.single_train.main()
     elif calling == "multi_train":
         modules.multi_train.main()
@@ -85,10 +89,6 @@ if __name__ == "__main__":
         modules.gan_train.main()
     elif calling == "gan_predict":
         modules.gan_predict.main()
-    elif calling == "gen_input":
-        tools.gen_input.main()
-    elif calling == "calc_rep":
-        tools.calc_rep.main()
     elif calling == "deepcv2plumed":
         tools.deepcv2plumed.main()
     elif calling == "analyze_FES":
