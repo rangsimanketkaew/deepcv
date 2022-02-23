@@ -1,6 +1,12 @@
 site_name: DeepCV
 site_description: DeepCV - Deep Learning Framework for Discovering Collective Variables
- 
+site_url: https://lubergroup.pages.uzh.ch/deepcv
+site_dir: public
+site_author: Luber Group, UZH
+
+repo_url: https://gitlab.uzh.ch/lubergroup/deepcv
+repo_name: GitLab
+
 theme:
   name: material
   features:
