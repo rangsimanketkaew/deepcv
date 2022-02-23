@@ -1,0 +1,48 @@
+site_name: DeepCV
+site_description: DeepCV - Deep Learning Framework for Discovering Collective Variables
+ 
+theme:
+  name: material
+  features:
+    - navigation.sections
+
+nav:
+  - Introduction: index.md
+  - Installation:
+    - Overview: installation/overview.md
+    - Environment setup: installation/env-setup.md
+    - Installing: installation/install.md
+  - Usage:
+    - Overview: usage/overview.md
+    - Datasets: usage/prepare-dataset.md
+    - Models: usage/training-model.md
+    - Enhanced sampling:
+      - Metadynamics: usage/metad-sim.md
+    - Analysis:
+      - Free energy surface: usage/fes-analysis.md
+      - Metastable states: usage/states-analysis.md
+  - Citing: citing.md
+
+plugins:
+  - search
+  - bibtex:
+      bib_file: "docs/ref.bib"
+      # cite_style: "pandoc"
+
+markdown_extensions:
+  - pymdownx.arithmatex
+  - pymdownx.extra
+  - pymdownx.magiclink
+  - pymdownx.tilde
+  - pymdownx.tasklist
+  - pymdownx.smartsymbols
+  - pymdownx.mark
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - admonition
+  - footnotes
+  - toc
+
+extra_javascript:
+    - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'

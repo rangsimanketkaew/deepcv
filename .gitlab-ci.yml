@@ -1,0 +1,14 @@
+image: python:latest
+pages:
+  stage: deploy
+  only:
+    - master 
+    - main
+  script:
+    - pip install mkdocs-material
+    - pip install mkdocs-bibtex
+    - mkdocs build --site-dir public
+  artifacts:
+    paths:
+      - public
+      
