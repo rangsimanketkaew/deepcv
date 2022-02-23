@@ -3,7 +3,7 @@
 - [Step 1: Create a PLUMED input file](#step-1-create-a-plumed-input-file)
 - [Step 2: Test plumed input file](#step-2-test-plumed-input-file)
 - [Step 3: Prepare CP2K input files for performing metadynamics simulation](#step-3-prepare-cp2k-input-files-for-performing-metadynamics-simulation)
-- [Step 4: Submit job on Pit Daint](#step-4-submit-job-on-pit-daint)
+- [Step 4: Submit job on Piz Daint](#step-4-submit-job-on-piz-daint)
 
 ## Step 1: Create a PLUMED input file
 
@@ -11,7 +11,7 @@ Once the training is complete, you can use `deecv2plumed` script to generate the
 It will automatically extract the weight and bias from the model and print out the file.
 
 ```sh
-$ python deepcv2plumed.py -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
+$ python main.py deepcv2plumed -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 
 >>> Plumed data have been written successfully to 'plumed-NN.dat'
 >>> In order to run metadynamics using CP2K & PLUMED, specify the following input deck in CP2K input:
@@ -64,7 +64,7 @@ $ tree
 └── xTB_parameters  # xTB parameter needed only you want to use extended Tight binding
 ```
 
-## Step 4: Submit job on Pit Daint
+## Step 4: Submit job on Piz Daint
 
 Prepare a SLURM input file, for example:
 
@@ -91,23 +91,17 @@ Prepare a SLURM input file, for example:
 #SBATCH --ntasks-per-core=1     # HT (default = 1, HyperThreads = 2)
 #SBATCH --constraint=gpu         # CPU partition
 
+###########CP2K#########################################################
 # -- the program and input file (basename) --
-EXE="/project/s1001/cp2k_with_plumed/CRAY_XC50-gfortran_mc_Plumed_2.6.2/cp2k.psmp"
+EXE="/full/path/to/executable/cp2k.psmp"
 SLURM_NTASKS_PER_NODE=12
 
-###########CP2K#########################################################
-module load daint-mc
-module load gcc/8.3.0
-module load cray-fftw/3.3.8.7
-module load GSL/2.5-CrayGNU-20.08
-export PLUMED_ROOT=/project/s1001/cp2k_with_plumed/plumed-2.6.2-MPI
-export PATH=$PLUMED_ROOT/bin/:$PATH
-export LD_LIBRARY_PATH=$PLUMED_ROOT/lib/:$LD_LIBRARY_PATH
+# you can also define/declare/load modules and packages needed for CP2K and PLUMED here
 
+################ NOTHING to be changed here ############################
 PROJECT=${SLURM_JOB_NAME}
 PROJECT=$(basename $PROJECT .inp)
 
-################ NOTHING to be changed here ############################
 INP="${PROJECT}.inp"
 OUT="${PROJECT}.out"
 
