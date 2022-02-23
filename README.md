@@ -52,8 +52,6 @@ or
 deepcv_daenn -i input_ae_DA.json
 ```
 
-Note: A complete tutorial on DeepCV is available [here](tutorials/).
-
 ---
 
 ## Development
