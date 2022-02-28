@@ -46,8 +46,7 @@ from tensorflow.keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
-from modules import loss
-from modules import layer
+from modules import layer, loss
 
 
 class Autoencoder(Model):
