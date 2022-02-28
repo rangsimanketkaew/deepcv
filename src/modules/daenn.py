@@ -14,7 +14,6 @@ import os, sys
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-
 sys.path.append(parentdir)
 
 import argparse
@@ -47,6 +46,7 @@ from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
 from modules import layer, loss
+from tools import ae_visual
 
 
 class Autoencoder(Model):
@@ -389,21 +389,25 @@ class Autoencoder(Model):
         # TQDM progress bar
         tqdm_callback = tfa.callbacks.TQDMProgressBar()
 
-        self.history = self.autoencoder.fit(
-            x=self.train_set,  # input
-            y=self.train_set,  # target
-            shuffle=True,
-            # validation_split=0.20,
-            validation_data=(self.test_set, self.test_set),
-            epochs=self.num_epoch,
-            batch_size=self.batch_size,
-            verbose=verbose,
-            use_multiprocessing=True,
-            callbacks=[
-                tqdm_callback,
-                # tbCallBack
-            ],
-        )
+        # train N times
+        for i in range(10):
+            self.history = self.autoencoder.fit(
+                x=self.train_set,  # input
+                y=self.train_set,  # target
+                shuffle=True,
+                # validation_split=0.20,
+                validation_data=(self.test_set, self.test_set),
+                epochs=self.num_epoch,
+                batch_size=self.batch_size,
+                verbose=verbose,
+                use_multiprocessing=True,
+                callbacks=[
+                    tqdm_callback,
+                    # tbCallBack
+                ],
+            )
+            # save latent space
+            ae_visual.encode_fig(i + 1, self.autoencoder.get_layer("concatenate_1").input, self.autoencoder.get_layer("dense_2").output, self.train_set, self.train_set)
 
     def encoder_predict(self, input_sample):
         """Generate predictions using encoder
