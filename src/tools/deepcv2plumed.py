@@ -13,6 +13,7 @@ Generate PLUMED input file using neural-network-based collective variable for me
 """
 
 import os, sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
@@ -71,13 +72,15 @@ class WritePlumed:
             self.num_feat += 1
         print(">>> - Input info")
         print(f">>>   |- Number of Z-matrix inputs: {self.num_feat}")
-        self.arg_input = [f'd{j+1}' for j in range(num_atoms - 1)] \
-            + [f'a{j+1}' for j in range(num_atoms - 2)] \
-            + [f't{j+1}' for j in range(num_atoms - 3)]
+        self.arg_input = (
+            [f"d{j+1}" for j in range(num_atoms - 1)]
+            + [f"a{j+1}" for j in range(num_atoms - 2)]
+            + [f"t{j+1}" for j in range(num_atoms - 3)]
+        )
         arg = ",".join(self.arg_input)
         f.write(f"\nPRINT FILE=input_Zmat.log STRIDE={stride} ARG={arg}\n")
         f.close()
-    
+
     def write_Zmat_by_index(self, index: list, stride=10):
         """Write internal coordinate (Z-matrix) based on user-defined atom index.
 
@@ -108,13 +111,15 @@ class WritePlumed:
             f.write(f"t{i+1}: TORSION ATOMS={index[i+3]},{index[i]},{index[i+1]},{index[i+2]}\n")
             self.num_feat += 1
         print(f">>>   |- Number of Z-matrix inputs: {self.num_feat}")
-        self.arg_input = [f'd{j+1}' for j in range(len(index) - 1)] \
-            + [f'a{j+1}' for j in range(len(index) - 2)] \
-            + [f't{j+1}' for j in range(len(index) - 3)]
+        self.arg_input = (
+            [f"d{j+1}" for j in range(len(index) - 1)]
+            + [f"a{j+1}" for j in range(len(index) - 2)]
+            + [f"t{j+1}" for j in range(len(index) - 3)]
+        )
         arg = ",".join(self.arg_input)
         f.write(f"\nPRINT FILE=input_Zmat.log STRIDE={stride} ARG={arg}\n")
         f.close()
-    
+
     def write_SPRINT(self, sprint_index, stride=10):
         """Write function to calculate SPRINT coordinate of specified atom index.
 
@@ -126,7 +131,7 @@ class WritePlumed:
         f.write("\n# SPRINT coordinate\n")
         self.num_sprint = 0
         for i in sprint_index:
-            self.num_sprint += len(i.split('=')[1].split(','))
+            self.num_sprint += len(i.split("=")[1].split(","))
             f.write(f"DENSITY LABEL={i.split('=')[0]} SPECIES={i.split('=')[1]}\n")
         print(f">>>   |- Number of SPRINT inputs: {self.num_sprint}")
         self.num_feat += self.num_sprint
@@ -137,13 +142,26 @@ class WritePlumed:
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
-        print(f">>>   |- WARINING!!! You need to explicitly define adjacency matrix (a_<ij>) in SPRINT deck in '{self.output_plumed}'.")
-        arg = [f'ss.coord-{i}' for i in range(self.num_sprint)]
+        print(
+            f">>>   |- WARINING!!! You need to explicitly define adjacency matrix (a_<ij>) in SPRINT deck in '{self.output_plumed}'."
+        )
+        arg = [f"ss.coord-{i}" for i in range(self.num_sprint)]
         self.arg_input += arg
         f.close()
 
-    def write_NeuralNetwork(self, weight, bias, kw, func_1: str, func_2: str, func_3: str, leakyrelu_coeff=0.1, 
-                            elu_coeff=0.1, stride=10, stride_flush=50):
+    def write_NeuralNetwork(
+        self,
+        weight,
+        bias,
+        kw,
+        func_1: str,
+        func_2: str,
+        func_3: str,
+        leakyrelu_coeff=0.1,
+        elu_coeff=0.1,
+        stride=10,
+        stride_flush=50,
+    ):
         """Initialize class with a set of required parameters.
         Input vector will be multiplied by weights for each node. Bias will also be added.
         Activation function will be applied for each node. 
@@ -176,13 +194,15 @@ class WritePlumed:
             "tanh": lambda v: f"exp(x{v:+.8f})-exp(-x{v:+.8f}))/(exp(x{v:+.8f})+exp(-x{v:+.8f})",
             "relu": lambda v: f"step(x{v:+.8f})*(x{v:+.8f})",
             "leakyrelu": lambda v: f"{leakyrelu_coeff}*step(-(x{v:+.8f}))+step(x{v:+.8f})*(x{v:+.8f})",
-            "elu": lambda v: f"{leakyrelu_coeff}*(exp(step(-(x{v:+.8f})))-1)+step(x{v:+.8f})*(x{v:+.8f})"
+            "elu": lambda v: f"{leakyrelu_coeff}*(exp(step(-(x{v:+.8f})))-1)+step(x{v:+.8f})*(x{v:+.8f})",
         }
         print(f">>>   |- Number of total inputs: {self.num_feat}")
 
         # Check if number of inputs and weight of the first layer are corresponding
         if self.num_feat != weight[kw_1].shape[0]:
-            exit(f"Error: Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding")
+            exit(
+                f"Error: Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding"
+            )
 
         print(">>> - Encoder info")
         print(f">>>   |- Activation functions: {func_1.lower()}, {func_2}, {func_3}")
@@ -195,11 +215,11 @@ class WritePlumed:
         print(f">>>   |- Size of layers: {size_layer1}, {size_layer2}, {size_layer3}")
 
         f = open(self.output_plumed, "a")
-        f.write("\n" + "-"*60 + "\n")
+        f.write("\n" + "-" * 60 + "\n")
         f.write(f"\n# Total number of inputs = {self.num_feat}\n")
         f.write("\n# Neural network\n")
         self.arg_input = ",".join(self.arg_input)
-        #----------- LAYER 1 -----------#
+        # ----------- LAYER 1 -----------#
         f.write("#===== Hidden layer 1 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer1):
@@ -207,7 +227,7 @@ class WritePlumed:
             f.write("COMBINE ...\n")
             f.write(f"\tLABEL=hl1_n{i+1}_mult\n")
             f.write(f"\tARG={self.arg_input}\n")
-            w = map(str, weight[kw_1][:,i])
+            w = map(str, weight[kw_1][:, i])
             # print(len(list(w)))
             w = ",".join(w)
             f.write(f"\tCOEFFICIENTS={w}\n")
@@ -223,20 +243,20 @@ class WritePlumed:
             f.write(f"\tFUNC=({func_1(bias[kw_1][i])})\n")
             f.write("\tPERIODIC=NO\n")
             f.write("... MATHEVAL\n")
-        arg = ','.join([f'hl1_n{i+1}_out' for i in range(size_layer1)])
+        arg = ",".join([f"hl1_n{i+1}_out" for i in range(size_layer1)])
         f.write(f"\nPRINT FILE=layer1.log STRIDE={stride} ARG={arg}\n")
 
-        #----------- LAYER 2 -----------#
+        # ----------- LAYER 2 -----------#
         f.write("\n#===== Hidden layer 2 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer2):
             # Multiply input by weight
             f.write("COMBINE ...\n")
             f.write(f"\tLABEL=hl2_n{i+1}_mult\n")
-            arg = [f'hl1_n{j+1}_out' for j in range(size_layer1)]
+            arg = [f"hl1_n{j+1}_out" for j in range(size_layer1)]
             arg = ",".join(arg)
             f.write(f"\tARG={arg}\n")
-            w = map(str, weight[kw_2][:,i])
+            w = map(str, weight[kw_2][:, i])
             w = ",".join(w)
             f.write(f"\tCOEFFICIENTS={w}\n")
             f.write(f"\tPOWERS={','.join(['1'] * size_layer1)}\n")
@@ -251,20 +271,20 @@ class WritePlumed:
             f.write(f"\tFUNC=({func_2(bias[kw_2][i])})\n")
             f.write("\tPERIODIC=NO\n")
             f.write("... MATHEVAL\n")
-        arg = ','.join([f'hl2_n{i+1}_out' for i in range(size_layer2)])
+        arg = ",".join([f"hl2_n{i+1}_out" for i in range(size_layer2)])
         f.write(f"\nPRINT FILE=layer2.log STRIDE={stride} ARG={arg}\n")
 
-        #----------- LAYER 3 -----------#
+        # ----------- LAYER 3 -----------#
         f.write("\n#===== Hidden layer 3 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer3):
             # Multiply input by weight
             f.write("COMBINE ...\n")
             f.write(f"\tLABEL=hl3_n{i+1}_mult\n")
-            arg = [f'hl2_n{j+1}_out' for j in range(size_layer2)]
+            arg = [f"hl2_n{j+1}_out" for j in range(size_layer2)]
             arg = ",".join(arg)
             f.write(f"\tARG={arg}\n")
-            w = map(str, weight[kw_3][:,i])
+            w = map(str, weight[kw_3][:, i])
             w = ",".join(w)
             f.write(f"\tCOEFFICIENTS={w}\n")
             f.write(f"\tPOWERS={','.join(['1'] * size_layer2)}\n")
@@ -279,7 +299,7 @@ class WritePlumed:
             f.write(f"\tFUNC=({func_3(bias[kw_3][i])})\n")
             f.write("\tPERIODIC=NO\n")
             f.write("... MATHEVAL\n")
-        arg = ','.join([f'hl3_n{i+1}_out' for i in range(size_layer3)])
+        arg = ",".join([f"hl3_n{i+1}_out" for i in range(size_layer3)])
         f.write(f"\nPRINT FILE=layer3.log STRIDE={stride} ARG={arg}\n")
 
         # Update PLUMED output files
@@ -287,14 +307,25 @@ class WritePlumed:
         f.write(f"FLUSH STRIDE={stride_flush}\n")
 
         # Save/Print CVs
-        self.colvar = [f'hl3_n{j+1}_out' for j in range(size_layer3)]
+        self.colvar = [f"hl3_n{j+1}_out" for j in range(size_layer3)]
         colvar = ",".join(self.colvar)
         f.write(f"\nPRINT ARG={colvar} STRIDE=1 FILE={self.colvar_file}\n")
         f.write(f"\n# You can use the following variables as CVs: {colvar}\n")
         f.close()
 
-    def write_MetaD(self, metad_label="metad", sigma=0.05, height=2.0, pace=50, well_tempered=True, temp=300, 
-                    bias_factor=25, hill_name="HILLS", bias_name="bias.log", stride_metad=1):
+    def write_MetaD(
+        self,
+        metad_label="metad",
+        sigma=0.05,
+        height=2.0,
+        pace=50,
+        well_tempered=True,
+        temp=300,
+        bias_factor=25,
+        hill_name="HILLS",
+        bias_name="bias.log",
+        stride_metad=1,
+    ):
         """Write input for well-tempered metadynamics simulation
 
         Args:
@@ -328,36 +359,74 @@ class WritePlumed:
 
 
 def main():
-    info = ("Generate PLUMED input file (.dat) from neural network model (weights and biases) trained by DeepCV.")
+    info = (
+        "Generate PLUMED input file (.dat) from neural network model (weights and biases) trained by DeepCV."
+    )
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("--input", "-i", metavar="INPUT.json", type=str, required=True,
+    parser.add_argument(
+        "--input",
+        "-i",
+        metavar="INPUT.json",
+        type=str,
+        required=True,
         help="Input file (.json) that is used for training model. \
         The input file must contain either absolute or relative path of the directory \
-        in which the weight and bias NumPy's compresses file format (.npz) stored.")
+        in which the weight and bias NumPy's compresses file format (.npz) stored.",
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--num-atoms", "-n", metavar="N", type=int, default=None,
+    group.add_argument(
+        "--num-atoms",
+        "-n",
+        metavar="N",
+        type=int,
+        default=None,
         help="The number of atoms in the simulation system that is used to train the model. \
-        Cannot be used with -a option.")
-    group.add_argument("--atom-index", "-a", metavar="INDEX", type=int, nargs="+", default=None,
+        Cannot be used with -a option.",
+    )
+    group.add_argument(
+        "--atom-index",
+        "-a",
+        metavar="INDEX",
+        type=int,
+        nargs="+",
+        default=None,
         help="List of atomic index (1-based array index) that will be used. \
         If the specified index is 0-based index, please use '--increment-index' to change from 0-based to 1-based index. \
-        Cannot be used with -n option.")
-    parser.add_argument("--sprint-index", "-s", metavar="LABEL_INDEX", type=str, default=None,
+        Cannot be used with -n option.",
+    )
+    parser.add_argument(
+        "--sprint-index",
+        "-s",
+        metavar="LABEL_INDEX",
+        type=str,
+        default=None,
         help="Atomic type (symbol) and index of atoms to compute SPRINT coordinate. \
         Separator between index is ',' and between atomic type is ':'.\
-        For example, '--sprint-index O=3,5,7,9:H=2,4,6,8,10'.")
-    parser.add_argument("--increment-index", "-ii", action='store_true',
+        For example, '--sprint-index O=3,5,7,9:H=2,4,6,8,10'.",
+    )
+    parser.add_argument(
+        "--increment-index",
+        "-ii",
+        action="store_true",
         help="If this argument is set, the index will be changed from 0-based to 1-based index. \
         This means that the index will be incremented by 1. For example, [3, 4, 5, 6] will become [4, 5, 6, 7]. \
-        This option is useful when the atomic index is 0-based.")
-    parser.add_argument("--output", "-o", metavar="FILENAME.dat", type=str, default="plumed_NN.dat", 
-        help="Name of a PLUMED input file (.dat). Default to 'plumed_NN.dat'")
+        This option is useful when the atomic index is 0-based.",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        metavar="FILENAME.dat",
+        type=str,
+        default="plumed_NN.dat",
+        help="Name of a PLUMED input file (.dat). Default to 'plumed_NN.dat'",
+    )
 
     args = parser.parse_args()
 
-    #------- Read input -------#
+    # ------- Read input -------#
     print(">>> Reading DeepCV input file ...")
-    if not os.path.isfile(args.input): exit(f'Error: No such file "{args.input}"')
+    if not os.path.isfile(args.input):
+        exit(f'Error: No such file "{args.input}"')
     json = util.load_json(args.input)
     func_1 = json["network"]["func_1"]
     func_2 = json["network"]["func_2"]
@@ -366,21 +435,23 @@ def main():
     weight = json["output"]["out_weights_npz"]
     bias = json["output"]["out_biases_npz"]
 
-    #------- Check weight file -------#
+    # ------- Check weight file -------#
     print(f">>> Checking weight output file: {weight}")
     weight = folder + "/" + weight
-    if not os.path.isfile(weight): exit(f'Error: No such file "{weight}"')
+    if not os.path.isfile(weight):
+        exit(f'Error: No such file "{weight}"')
     weight = np.load(weight)
 
-    #------- Check bias file -------#
+    # ------- Check bias file -------#
     print(f">>> Checking bias output file  : {bias}")
     bias = folder + "/" + bias
-    if not os.path.isfile(bias): exit(f'Error: No such file "{bias}"')
+    if not os.path.isfile(bias):
+        exit(f'Error: No such file "{bias}"')
     bias = np.load(bias)
 
-    kw = weight.files[:3] # get keywords of first three layers
+    kw = weight.files[:3]  # get keywords of first three layers
 
-    #------- Start writing -------#
+    # ------- Start writing -------#
     p = WritePlumed(output_plumed=args.output)
     if not args.num_atoms and not args.atom_index:
         parser.error("either --num-atoms (-n) or --atom-index (-a) must be specified.")
@@ -391,7 +462,7 @@ def main():
     elif args.atom_index:
         if args.increment_index:
             print(">>> Increment all atomic index by 1")
-            args.atom_index = [i+1 for i in args.atom_index]
+            args.atom_index = [i + 1 for i in args.atom_index]
         else:
             print(">>> Atomic index incrementation is turned off")
         p.write_Zmat_by_index(args.atom_index)
@@ -400,6 +471,7 @@ def main():
     p.write_NeuralNetwork(weight, bias, kw, func_1, func_2, func_3)
     p.write_MetaD()
     print(f">>> Plumed data have been written successfully to '{os.path.abspath(args.output)}'.")
+
 
 if __name__ == "__main__":
     main()
