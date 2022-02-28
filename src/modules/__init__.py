@@ -6,7 +6,12 @@ Info:
 28/11/2020 : Rangsiman Ketkaew
 """
 
-import sys
+import os, sys
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 import logging
 
 # printing logging messages to stdout file still does not work!
