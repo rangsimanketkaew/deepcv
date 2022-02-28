@@ -16,35 +16,43 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 
 
-def explained_variance(projections):
+def explained_variance(projections, k=2):
     """Calculate explained variance
 
     Args:
         projections (array): Projection data
+        k (int): Number of neurons. Defaults to 2.
 
     Returns:
         float: Variance
     """
+    n_sample = projections.shape[0]
     var = np.array([(projections[:, i] ** 2).sum() / (n_sample - 1) for i in range(k)]).round(2)
     return var
 
 
-def encode_fig(i, model, x_train, y_train, out_name="dense_2", folder="."):
+def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", folder="."):
     """Plot encoded data (representation) from the encoder model
 
     Args:
         i (int): i-th epoch
-        model (tensor): TensorFlow tensor
+        model_inp (tensor): TensorFlow's input layer
+        model_out (tensor): TensorFlow's output layer
         x_train (array): Input
         y_train (array): True values
         out_name (str, optional): Name of the output layer of the encoder. Defaults to "dense_2".
         folder (str, optional): Nameo the output folder for saving images. Defaults to ".".
     """
-    encoder = Model(model.input, ae.get_layer(out_name).output)
-    Zenc = encoder.predict(x_train)
-    print("At epoch ", i, ", explained variance: ", explained_variance(Zenc))
-    plt.title("Encoded data visualization")
-    plt.scatter(Zenc[:, 0], Zenc[:, 1], c=y_train[:], s=8, cmap="tab10")
+    enc = Model(model_inp, model_out)
+    Z_enc = enc.predict(x_train)
+    ev = explained_variance(Z_enc)
+    print("------------------------------------")
+    print(f"At epoch {i} explained variance: {ev}")
+    print("------------------------------------")
+    plt.title(f"Encoded data visualization: EV = {ev}")
+    plt.scatter(
+        Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10"
+    )
     plt.savefig(folder + "/" + str(i) + ".png")
     plt.clf()
 
