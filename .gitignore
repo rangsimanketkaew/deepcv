@@ -21,6 +21,9 @@ logs/*
 examples/
 *.png
 
+# mkdocs
+!docs/img/*.png
+
 # Readme
 !README.md
 
