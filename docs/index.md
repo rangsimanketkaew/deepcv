@@ -4,5 +4,5 @@ DeepCV is a deep learning framework for training a machine learning model on mol
 
 <figure markdown>
   ![Image title](img/autoencoder.png){ width="1200" }
-  <figcaption>Encoder architecture of DAENN</figcaption>
+  <figcaption>The architecture of encoder engine in DAENN</figcaption>
 </figure>
