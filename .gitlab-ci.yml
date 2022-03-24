@@ -7,7 +7,7 @@ test:
   script:
     - pip install mkdocs-material
     - pip install mkdocs-bibtex
-    - mkdocs build --strict --verbose --site-dir test
+    - mkdocs build --strict --verbose --site-dir mkdocs_test
   artifacts:
     paths:
     - test
