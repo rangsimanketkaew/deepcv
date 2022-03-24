@@ -1,6 +1,6 @@
 # Citing DeepCV
 
-If you use DeepCV or find it useful for your researcy, please cite this:
+If you use DeepCV or find it useful for your research, please cite this:
 
 > Rangsiman Ketkaew, Fabrizio Creazzo, and Sandra Luber <br/>
 > J. Phys. Chem. Lett. 2022, 13, 7, 1797–1805 <br/>
