@@ -1,7 +1,9 @@
-# Running Metadynamics simulation
+# Running metadynamics simulation
 
 ## Create a PLUMED input file
 
+DeepCV can be interfaced with PLUMED, a plugin for enhanced sampling simulations 
+which supports several standard molecular simulation packages, e.g., CP2K, LAMMPS, and GROMACS.
 Once the training is complete, you can use `deecv2plumed` script to generate the PLUMED input file. It takes the same input as you used for `daenn.py`.
 It will automatically extract the weight and bias from the model and print out the file.
 
@@ -59,7 +61,18 @@ $ tree
 └── xTB_parameters  # xTB parameter needed only you want to use extended Tight binding
 ```
 
-## Step 4: Submit job on Piz Daint
+## Run a metadynamics simulation using CP2K
+
+```sh
+cp2k-8.2-Linux-x86_64.ssmp -i MetaD.inp -o MetaD.out &
+```
+
+CP2K is an open-source  a quantum chemistry and solid state physics software for performing atomistic simulations. 
+CP2K source code can be obtained free of charge: https://www.cp2k.org.
+
+---
+
+## Optional: Run CP2K on Piz Daint supercomputer
 
 Prepare a SLURM input file, for example:
 
