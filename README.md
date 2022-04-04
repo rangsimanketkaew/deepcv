@@ -2,6 +2,8 @@
 
 DeepCV implements an unsupervised machine learning so-called DAENN for learning molecules and computing collective variables.
 
+Website: https://lubergroup.pages.uzh.ch/deepcv/
+
 ## Main Features
 
 1. Data sampling
