@@ -8,6 +8,8 @@ Info:
 05/02/2022 : Rangsiman Ketkaew
 """
 
+"Calculate and analyze feature importance"
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,6 +17,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+# Test!!
 # Load dataset
 f_dir = "/home/rketka/server/projects/04_deepcv/daenn-test/"
 arr_1 = f_dir + "stacked_50arr_dist.npz"

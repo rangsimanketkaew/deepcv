@@ -8,7 +8,7 @@ Info:
 16/08/2022 : Rangsiman Ketkaew
 """
 
-"visualize DAENN feature representation"
+"Visualize latent space of DAENN"
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ def explained_variance(projections, k=2):
 
 
 def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", folder="."):
-    """Plot encoded data (representation) from the encoder model
+    """Plot encoded data (latent space) from the encoder model
 
     Args:
         i (int): i-th epoch
