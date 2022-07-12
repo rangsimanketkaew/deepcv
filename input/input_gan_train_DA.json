@@ -30,6 +30,7 @@
   "generator": {
     "_comment": "Hyperparameters for the Generator",
     "noise_shape": [100],
+    "noise_strength": 1,
     "units_1": 256,
     "units_2": 512,
     "units_3": 1024,
