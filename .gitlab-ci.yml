@@ -1,16 +1,16 @@
 image: python:latest
 
-test:
-  stage: test
-  only:
-    - master
-  script:
-    - pip install mkdocs-material
-    - pip install mkdocs-bibtex
-    - mkdocs build --strict --verbose --site-dir test
-  artifacts:
-    paths:
-    - test
+# test:
+#   stage: test
+#   only:
+#     - master
+#   script:
+#     - pip install mkdocs-material
+#     - pip install mkdocs-bibtex
+#     - mkdocs build --strict --verbose --site-dir test
+#   artifacts:
+#     paths:
+#     - test
 
 pages:
   stage: deploy

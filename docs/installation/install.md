@@ -2,6 +2,27 @@
 
 ## Installing dependencies
 
+DeepCV requires the following libraries (the supported version for each library is as of the current version of DeepCV):
+
+```
+numpy==1.22.2
+tensorflow==2.8.0
+tensorflow-addons
+scikit_learn==1.0.2
+scipy==1.8.0
+sympy==1.9
+matplotlib
+ase
+imageio
+natsort
+tabulate
+bayesian-optimization
+tqdm
+pydot
+graphviz
+```
+
+One can use this command to install all of them
 ```sh
 pip install -r requirements.txt # or conda install --file requirements.txt
 ```
