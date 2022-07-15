@@ -21,6 +21,7 @@ nav:
   - Usage:
     - Overview: usage/overview.md
     - Datasets: usage/prepare-dataset.md
+    - Input file: usage/input-file.md
     - Models: usage/training-model.md
     - Enhanced sampling:
       - Metadynamics: usage/metad-sim.md

@@ -2,15 +2,6 @@
 
 Note: the current version of DeepCV accepts only datasets that are in NumPy's compressed file formats (.npz).
 
-## Prepare input file for Diels-Alder reaction
-
-DeepCV's input file must be in a JSON file format (dictionary-like).
-An example of DAENN input in [inputs/](../input/) folder shows the configuration for training a model using DAENN with five hidden layers.
-The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
-The rest layers are two decoded layers for reconstruction.
-On the other hand, the size of two hidden layers that are opposite of each other,
-e.g., input and output layers, 1st and 5th hidden layers, must be the same.
-
 ## Call DeepCV's module
 
 All DeepCV's modules can be called via `main.py` API script.
