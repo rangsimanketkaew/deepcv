@@ -13,7 +13,9 @@ theme:
     - navigation.sections
 
 nav:
-  - Introduction: index.md
+  - Introduction: 
+    - Why DeepCV?: introduction/index.md
+    - DAENN: introduction/daenn.md
   - Installation:
     - Overview: installation/overview.md
     - Environment setup: installation/env-setup.md
