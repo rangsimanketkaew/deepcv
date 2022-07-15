@@ -14,7 +14,7 @@ theme:
 
 nav:
   - Introduction: 
-    - Why DeepCV?: introduction/index.md
+    - Why DeepCV?: index.md
     - DAENN: introduction/daenn.md
   - Installation:
     - Overview: installation/overview.md
