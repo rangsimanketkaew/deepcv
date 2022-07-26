@@ -16,6 +16,7 @@ nav:
   - Introduction: 
     - Why DeepCV?: index.md
     - DAENN: introduction/daenn.md
+    - Descriptors: introduction/descriptors.md
   - Installation:
     - Overview: installation/overview.md
     - Environment setup: installation/env-setup.md
