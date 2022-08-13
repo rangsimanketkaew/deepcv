@@ -1,23 +1,30 @@
 # Deep Learning for Collective Variables (DeepCV)
 
-DeepCV implements an unsupervised machine learning so-called DAENN for learning molecules and computing collective variables.
+DeepCV implements an unsupervised machine learning called *deep autoencoder neural network* (DAENN) for learning low-dimensional collective variables (CVs) aka slow-mode reaction coordinates of a set of molecules.
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
 ## Main Features
 
-1. Data sampling
-   - Selected structural properties: internal coordinate
+1. Molecular features
+   - Internal coordinates
    - SPRINT and Extended SPRINT coordinates
-   - PCA components (noise reduction)
-2. Dimensionality reduction
-   - Linear: PCA, MDS
-   - Autoencoders
-     - Stacked autoencoder
-     - One-Hot autoencoder
-3. Generative model for generating data
+2. Dense autoencoder neural nets
+   - Single and multi-input simple and stacked autoencoder
+   - Avoid saturation
+   - Penalty update
+   - Mini-Batch training and normalization
+   - Drop-out
+   - GPU acceleration
+3. CV space expansion
+   - Customized loss functions with minimaxation technique
+4. Generative model for generating data
    - Generative adversarial networks (GANs)
    - Variational autoencoder (future work)
+5. Generate input file for PLUMED and CP2K
+6. Analysis tools
+   - Feature importance
+   - Sampling convergence assessment
 
 ## Quick installation
 
@@ -67,7 +74,7 @@ deepcv_daenn -i input_ae_DA.json
 
 ## Packages requirements
 
-To install all dependencies packages of DeepCV, you can follow either following ways:
+To install all dependencies packages of DeepCV, you can follow either following way:
 
 1. All at once (for the users)
 
@@ -98,28 +105,9 @@ To install all dependencies packages of DeepCV, you can follow either following 
 
 ## In Progress
 
-1. Time-series data with autoencoder
-2. Improve neural network algorithm for large systems
-3. Implement algorithm into MD packages and test the performance
-
-## Done
-
-1. Dense neural nets with backpropagation
-   - Single and multi-input simple nets
-   - Single and multi-input stacked autoencoder
-2. Applied techniques to overcome overfit
-   - Mini-Batch training and normalization
-   - Drop-out
-3. Generate PLUMED input file
-4. Molecular-based loss function
-5. Model training
-   - Avoid saturation
-   - Epoch iteration
-   - Penalty update
-   - GPU acceleration
-6. CV coordinate space propagation using loss maximization technique
-7. Analysis tools
-   - Feature importance
+1. Variational autoencoder
+2. Improve neural network algorithm for large systems e.g. metal-oxide surface
+3. Implement algorithm in CP2K and test the performance
 
 ---
 
