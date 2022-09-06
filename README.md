@@ -1,6 +1,6 @@
 # Deep Learning for Collective Variables (DeepCV)
 
-DeepCV implements an unsupervised machine learning called *deep autoencoder neural network* (DAENN) for learning low-dimensional collective variables (CVs) aka slow-mode reaction coordinates of a set of molecules.
+DeepCV is a computer code that implements an unsupervised machine learning called *deep autoencoder neural network* (DAENN) for learning low-dimensional collective variables (CVs) aka slow-mode reaction coordinates of a set of molecules for enhanced sampling.
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
@@ -8,16 +8,14 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
 
 1. Molecular features
    - Internal coordinates
-   - SPRINT and Extended SPRINT coordinates
+   - SPRINT and eXtended SPRINT coordinates
 2. Dense autoencoder neural nets
    - Single and multi-input simple and stacked autoencoder
    - Avoid saturation
-   - Penalty update
-   - Mini-Batch training and normalization
-   - Drop-out
    - GPU acceleration
 3. CV space expansion
    - Customized loss functions with minimaxation technique
+   - Self-directed expansion of phase space
 4. Generative model for generating data
    - Generative adversarial networks (GANs)
    - Variational autoencoder (future work)
@@ -49,7 +47,7 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
 
 ## Usage
 
-The following is an example command for training model of collective variables for Diels-Alder reaction using reactant trajectory's descriptors. You can call DeepCV's DAENN via either `main.py` API or `deepcv_daenn` command (register entrypoint).
+The following is an example command for training model of CVs for Diels-Alder reaction using features extracted from reactant trajectory. You can call DeepCV's DAENN via either `main.py` API or `deepcv_daenn` command (register entrypoint).
 
 ```sh
 python main.py daenn -i input_ae_DA.json
