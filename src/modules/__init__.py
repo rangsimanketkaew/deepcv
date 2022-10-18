@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(mes
 
 from utils import util
 
-util.tf_logging(2, 3)  # warning level
+util.tf_logging(3, 3)  # warning level
 
 # Bring all modules to the same level as main.py
 from . import single_train
