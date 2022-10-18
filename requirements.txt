@@ -1,9 +1,9 @@
-numpy==1.22.2
-tensorflow==2.8.0
+tensorflow-gpu==2.10.0
 tensorflow-addons
-scikit_learn==1.0.2
-scipy==1.8.0
-sympy==1.9
+numpy
+scikit-learn
+scipy
+sympy
 matplotlib
 ase
 imageio
