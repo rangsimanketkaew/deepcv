@@ -338,7 +338,7 @@ class Autoencoder(Model):
             # run_eagerly=True,
         )
 
-    def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/"):
+    def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
         """Train model
 
         Args:
@@ -346,6 +346,7 @@ class Autoencoder(Model):
             batch_size (int): Batch size
             verbose (int): Level of prining information. Defaults to 1.
             log_dir (str): Directory to save model logs. Defaults to "./logs/".
+            out_dir (str): Directory to save visualization outputs. Defaults to "./".
         """
         # stack all dataset into a single array since both input layer and output layer are a single layer
         # self.train_set = tf.concat(self.train_set, axis=1)
@@ -397,6 +398,7 @@ class Autoencoder(Model):
                 self.autoencoder.get_layer("dense_2").output,
                 self.train_set,
                 self.train_set,
+                folder=out_dir,
             )
 
     def encoder_predict(self, input_sample):
@@ -652,6 +654,8 @@ Please check your DAENN input file!"
         )
         sys.exit(1)
 
+    out_parent = os.path.abspath(out_dir)
+
     ##############################################################
     # Build, compile and train encoder & decoder models separately
     ##############################################################
@@ -706,7 +710,7 @@ Please check your DAENN input file!"
     if show_summary:
         model.autoencoder.summary()
     # Train model
-    model.train_model(num_epoch, batch_size, verbosity, save_tb)
+    model.train_model(num_epoch, batch_size, verbosity, save_tb, out_parent)
     logging.info("Congrats! Training model is completed.")
 
     # Test prediction
@@ -718,7 +722,6 @@ Please check your DAENN input file!"
     ########################
     # Save model and outputs
     ########################
-    out_parent = os.path.abspath(out_dir)
     if save_model:
         path = out_parent + "/" + out_model
         model.autoencoder.save(path, overwrite=True, save_format="h5")

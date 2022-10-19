@@ -51,7 +51,7 @@ def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", fo
     ev = explained_variance(Z_enc)
     plt.title(f"Encoded data visualization: EV = {ev}")
     plt.scatter(Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10")
-    plt.savefig(folder + "/" + "train_" + str(i) + "_epochs.png")
+    plt.savefig(folder + "/" + "latent_space_" + str(i) + "_epochs.png")
     plt.clf()
 
     return ev
