@@ -723,8 +723,17 @@ Please check your DAENN input file!"
     # Save model and outputs
     ########################
     if save_model:
+        # Save at low-level (SavedModel format)
+        tf.saved_model.save(model.autoencoder, out_dir)
+        # Save at high-level (h5 format)
         path = out_parent + "/" + out_model
-        model.autoencoder.save(path, overwrite=True, save_format="h5")
+        model.autoencoder.save(
+            path,
+            overwrite=True,
+            include_optimizer=True,
+            save_format="h5",
+            signatures=None,
+        )
         logging.info(f"Model has been saved to {path}")
 
     if save_weights:
