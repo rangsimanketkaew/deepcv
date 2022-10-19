@@ -50,9 +50,6 @@ def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", fo
     print(f"At epoch {i} explained variance: {ev}")
     print("------------------------------------")
     plt.title(f"Encoded data visualization: EV = {ev}")
-    plt.scatter(
-        Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10"
-    )
+    plt.scatter(Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10")
     plt.savefig(folder + "/" + str(i) + ".png")
     plt.clf()
-

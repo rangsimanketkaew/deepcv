@@ -29,7 +29,8 @@ optimizer = BayesianOptimization(
 
 # fine tune parameter to maximize accuracy of model
 optimizer.maximize(
-    init_points=10, n_iter=10,
+    init_points=10,
+    n_iter=10,
 )
 
 

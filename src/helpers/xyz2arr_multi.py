@@ -15,8 +15,7 @@ from multiprocessing import Pool
 
 
 class AppArr:
-    """Append array in parallel process.
-    """
+    """Append array in parallel process."""
 
     def __init__(self, arr, generator):
         self.arr = arr

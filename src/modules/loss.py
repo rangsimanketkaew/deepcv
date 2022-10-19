@@ -11,7 +11,6 @@ Info:
 Ref: https://doi.org/10.1016/j.trechm.2020.12.004
 """
 
-import numpy as np
 import tensorflow as tf
 
 
@@ -24,7 +23,7 @@ class CustomLoss(tf.keras.losses.Loss):
     model.compile(loss=custom_loss)
     ...
 
-    where loss_1 and loss_2 are loss functions that take y_true and y_pred and calculate its loss value 
+    where loss_1 and loss_2 are loss functions that take y_true and y_pred and calculate its loss value
 
     Args:
         tf (class): Parent class
@@ -96,7 +95,7 @@ def deviate(y_true, y_pred):
 def MaxAE(y_true, y_pred):
     """Maximum absolute error
 
-    max{y_true - y_pred} 
+    max{y_true - y_pred}
 
     Args:
         y_true (tensor, array): True values
@@ -112,7 +111,7 @@ def MaxAE(y_true, y_pred):
 def MaxAPE(y_true, y_pred):
     """Maximum absolute percentage error
 
-    max{|(y_true - y_pred)/y_true|*100} 
+    max{|(y_true - y_pred)/y_true|*100}
 
     Args:
         y_true (tensor, array): True values

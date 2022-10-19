@@ -41,10 +41,10 @@ def tf_logging(log=2, vlog=2):
 
     if log and vlog in [0, 1, 2, 3]:
         # It seems that this works only for Linux
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = f"{log}"
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = f"{log}"
         # os.system(f"export TF_CPP_MIN_LOG_LEVEL={log}")
         print(f"Set TensorFlow Log info to level {log}")
-        os.environ['TF_CPP_MIN_VLOG_LEVEL'] = f"{vlog}"
+        os.environ["TF_CPP_MIN_VLOG_LEVEL"] = f"{vlog}"
         # os.system(f"export TF_CPP_MIN_VLOG_LEVEL={vlog}")
         print(f"Set TensorFlow VLog info to level {vlog}")
     else:
@@ -58,7 +58,7 @@ def limit_gpu_growth():
     import tensorflow as tf
 
     gpus = tf.config.list_physical_devices("GPU")
-    
+
     if gpus:
         try:
             # Currently, memory growth needs to be the same across GPUs
@@ -72,9 +72,7 @@ def limit_gpu_growth():
 
 
 def fix_autograph_warning():
-    """Decorator to suppress autograph warning
-    """    
+    """Decorator to suppress autograph warning"""
     import tensorflow as tf
 
     tf.autograph.experimental.do_not_convert
-

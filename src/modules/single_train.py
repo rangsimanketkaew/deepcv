@@ -38,8 +38,7 @@ class SingleInputNN(Model):
         super(SingleInputNN, self).__init__()
 
     def preprocess(self, dataset, ref_mol, training_set_ratio, labels):
-        """Process data
-        """
+        """Process data"""
         # Extract molecules
         self.traj = trajectory.extract_xyz(dataset)
         self.ref_mol = trajectory.extract_xyz(ref_mol)
@@ -85,10 +84,19 @@ class SingleInputNN(Model):
         self.testing_label = self.testing_label.astype("float32") / max
 
     def build_network(
-        self, optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        self,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     ):
-        """Simple fully-connected neural network
-        """
+        """Simple fully-connected neural network"""
         self.optimizer = optimizer
         self.loss = loss
         self.batch_size = batch_size
@@ -119,13 +127,11 @@ class SingleInputNN(Model):
         self.output = self.output(self.output_hidden_1)
 
     def build_model(self):
-        """Build model
-        """
+        """Build model"""
         self.nn_model = Model(inputs=self.input, outputs=self.output, name="nn_model")
 
     def compile_model(self):
-        """Compile model
-        """
+        """Compile model"""
         self.nn_model.compile(
             optimizer=self.optimizer,
             loss=self.loss,
@@ -135,13 +141,11 @@ class SingleInputNN(Model):
         )
 
     def show_model(self):
-        """Show summary of model
-        """
+        """Show summary of model"""
         self.nn_model.summary()
 
     def plot_model_img(self, model_img):
-        """Plot model and save it as image
-        """
+        """Plot model and save it as image"""
         plot_model(
             self.nn_model,
             to_file=model_img,
@@ -153,8 +157,7 @@ class SingleInputNN(Model):
         )
 
     def train_model(self, verbose=1):
-        """Train model
-        """
+        """Train model"""
         # TF Board
         # You can use tensorboard to visualize TensorFlow runs and graphs.
         # e.g. 'tensorflow --logdir ./log
@@ -175,21 +178,18 @@ class SingleInputNN(Model):
         )
 
     def evaluate(self):
-        """Evaluate model on the test data set
-        """
+        """Evaluate model on the test data set"""
         return self.nn_model.evaluate(
             self.testing_set, self.testing_label, batch_size=self.batch_size, verbose=2
         )
 
     def predict(self):
-        """Generate predictions
-        """
+        """Generate predictions"""
         # probabilities -- the output of the last layer on new data
         self.encoded_label = self.nn_model.predict(self.traj_fitted)  # shape: (N, 1)
 
     def calc_corr(self):
-        """Calculate correlation coefficients
-        """
+        """Calculate correlation coefficients"""
         # Pearson
         self.pearson_all, _ = pearsonr(self.label, self.encoded_label.flatten())
         self.pearson_training, _ = pearsonr(
@@ -296,7 +296,16 @@ def main():
     model = SingleInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
-        optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     )
     model.build_model()
     model.compile_model()
@@ -358,4 +367,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

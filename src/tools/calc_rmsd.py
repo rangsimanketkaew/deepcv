@@ -309,7 +309,7 @@ def kabsch(P, Q):
 def kabsch_weighted(P, Q, W=None):
     """
     Using the Kabsch algorithm with two sets of paired point P and Q.
-    Each vector set is represented as an NxD matrix, where D is the 
+    Each vector set is represented as an NxD matrix, where D is the
     dimension of the space.
     An optional vector of weights W may be provided.
 
@@ -654,8 +654,8 @@ def reorder_hungarian(p_atoms, q_atoms, p_coord, q_coord):
 
 def reorder_inertia_hungarian(p_atoms, q_atoms, p_coord, q_coord):
     """
-    Align the principal intertia axis and then re-orders the input atom 
-    list and xyz coordinates using the Hungarian method 
+    Align the principal intertia axis and then re-orders the input atom
+    list and xyz coordinates using the Hungarian method
     (using optimized column results)
 
     Parameters

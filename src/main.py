@@ -16,8 +16,7 @@ import argparse
 
 
 def main():
-    """Welcome message and program description
-    """
+    """Welcome message and program description"""
     print("\n------------------------------------------------")
     print("DeepCV : Deep Learning for Collective Variables")
     print("-------------------------------------------------")

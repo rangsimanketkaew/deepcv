@@ -28,8 +28,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
 class MultiInputNN:
-    """Multi-input neural network
-    """
+    """Multi-input neural network"""
 
     def __init__(self):
         super(MultiInputNN, self).__init__()
@@ -83,7 +82,17 @@ class MultiInputNN:
         self.testing_label = self.testing_label.astype("float32") / max
 
     def build_network(
-        self, optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        self,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     ):
         """
         Multi-input fully-connected neural network
@@ -308,7 +317,16 @@ def main():
     model = MultiInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
-        optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     )
     model.build_model()
     model.compile_model()
@@ -370,4 +388,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

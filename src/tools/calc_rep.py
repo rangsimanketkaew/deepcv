@@ -272,7 +272,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
         _sum = 0.0
         for j in range(a_ij_M.shape[1]):
             _sum += a_ij_M[i][j] * np.max(v.T[j])
-        v_i[i] = _sum / (w_max ** M)
+        v_i[i] = _sum / (w_max**M)
 
     # sort v_i that contains all nonzero with equal sign
     v_i_sorted = np.sort(np.abs(v_i))
@@ -316,7 +316,7 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
     _w = 0
     for i in range(sh):
         _w += (i + 1) * r_0x
-    w = _w ** 2
+    w = _w**2
 
     # calculate individual extended SPRINT
     for i in range(s.shape[0]):
