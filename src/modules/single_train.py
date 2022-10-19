@@ -24,7 +24,6 @@ from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
@@ -123,17 +122,6 @@ class SingleInputNN(Model):
         """Build model
         """
         self.nn_model = Model(inputs=self.input, outputs=self.output, name="nn_model")
-
-    def parallel_gpu(self, gpus=1):
-        """Parallelization with multi-GPU
-        """
-        self.gpus = gpus
-        if self.gpus > 1:
-            try:
-                self.nn_model = multi_gpu_model(self.nn_model, gpus=self.gpus)
-                print(">>> Training on multi-GPU on a single machine")
-            except:
-                print(">>> Warning: cannot enable multi-GPUs support for Keras")
 
     def compile_model(self):
         """Compile model
