@@ -78,7 +78,6 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
         else:
             self.secondary = names[:-1][0]
 
-
     def autoencoderTabUI(self):
         networkTab = QFrame()
         # networkTab.setStyleSheet("margin:5px; border:1px solid")
@@ -274,7 +273,11 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
                     str(self.combo_act_func_hidden.currentText()) for i in range(len(self.list_num_neuron))
                 ],
             },
-            "performance": {"_comment": "Setting for training performance", "enable_gpu": True, "gpus": 1,},
+            "performance": {
+                "_comment": "Setting for training performance",
+                "enable_gpu": True,
+                "gpus": 1,
+            },
             "settings": {
                 "_comment": "User-defined settings",
                 "verbosity": 1,

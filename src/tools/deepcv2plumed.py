@@ -164,8 +164,8 @@ class WritePlumed:
     ):
         """Initialize class with a set of required parameters.
         Input vector will be multiplied by weights for each node. Bias will also be added.
-        Activation function will be applied for each node. 
-        
+        Activation function will be applied for each node.
+
         Available activation functions
         ------------------------------
         linear: y = x
@@ -475,4 +475,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -17,8 +17,7 @@ import tensorflow as tf
 
 
 class LayerWithRMS(tf.keras.layers.Layer):
-    """Root mean squared
-    """
+    """Root mean squared"""
 
     def __init__(self):
         super().__init__()

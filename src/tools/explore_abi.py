@@ -57,7 +57,7 @@ def get_FES(f):
 
 def calc_explore_abi(fes):
     def z_func(x, y):
-        return x ** 2 + y ** 2
+        return x**2 + y**2
 
     cv1, cv2, ener = get_FES(fes)
 

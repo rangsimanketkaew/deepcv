@@ -19,7 +19,17 @@ logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(mes
 
 from utils import util
 
-util.tf_logging(2, 3)  # warning level
+util.tf_logging(3, 3)  # warning level
+
+import tensorflow as tf
+
+try:
+    assert tf.test.is_built_with_gpu_support()
+    assert tf.config.list_physical_devices("GPU")
+except AssertionError:
+    pass
+else:
+    util.limit_gpu_growth()
 
 # Bring all modules to the same level as main.py
 from . import single_train

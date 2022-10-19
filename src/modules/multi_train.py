@@ -24,13 +24,11 @@ from tensorflow.keras.layers import Input, Dense, Concatenate
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
 
 class MultiInputNN:
-    """Multi-input neural network
-    """
+    """Multi-input neural network"""
 
     def __init__(self):
         super(MultiInputNN, self).__init__()
@@ -84,7 +82,17 @@ class MultiInputNN:
         self.testing_label = self.testing_label.astype("float32") / max
 
     def build_network(
-        self, optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        self,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     ):
         """
         Multi-input fully-connected neural network
@@ -136,18 +144,6 @@ class MultiInputNN:
         """
         self.inputs = [self.branch_1_nn.input, self.branch_2_nn.input]
         self.nn_model = Model(inputs=self.inputs, outputs=self.output, name="nn_model")
-
-    def parallel_gpu(self, gpus=1):
-        """
-        Parallelization with multi-GPU
-        """
-        self.gpus = gpus
-        if self.gpus > 1:
-            try:
-                self.nn_model = multi_gpu_model(self.nn_model, gpus=self.gpus)
-                print(">>> Training on multi-GPU on a single machine")
-            except:
-                print(">>> Warning: cannot enable multi-GPUs support for Keras")
 
     def compile_model(self):
         """
@@ -321,7 +317,16 @@ def main():
     model = MultiInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
-        optimizer, loss, batch_size, num_epoch, units_1, units_2, units_3, func_1, func_2, func_3,
+        optimizer,
+        loss,
+        batch_size,
+        num_epoch,
+        units_1,
+        units_2,
+        units_3,
+        func_1,
+        func_2,
+        func_3,
     )
     model.build_model()
     model.compile_model()
@@ -383,4 +388,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

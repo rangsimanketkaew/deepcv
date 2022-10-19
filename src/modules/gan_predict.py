@@ -22,7 +22,7 @@ def generate_latent_points(latent_dim, n_samples):
     Args:
         latent_dim (int): Dimension of latent space
         n_samples (int): Number of samples
-    
+
     Returns:
         latent_space (array): Points in the latent spaces
     """
@@ -84,4 +84,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

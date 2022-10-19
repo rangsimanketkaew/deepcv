@@ -19,8 +19,7 @@ import matplotlib.pyplot as plt
 # Loss for custom_object
 @tf.function
 def GRMSE(y_true, y_pred):
-    """Calculate Geometric root mean-squared error (GRMSE)
-    """
+    """Calculate Geometric root mean-squared error (GRMSE)"""
     N = y_pred.shape[1]
     square_err = tf.math.square(tf.math.subtract(y_true, y_pred))
     mult_sum = tf.einsum("ij,ij->", square_err, square_err)
@@ -28,8 +27,8 @@ def GRMSE(y_true, y_pred):
 
 
 def get_inter_model(f, layer_name="bottleneck", sum_ori=False, sum_new=False):
-    """Load Keras model, show the summary of the model, get the intermediate layer (CV) 
-    and build a new model that will output this layer. 
+    """Load Keras model, show the summary of the model, get the intermediate layer (CV)
+    and build a new model that will output this layer.
 
     Args:
         f (str): Relative or absolute path to Keras model (.h5)
@@ -67,13 +66,28 @@ def get_inter_model(f, layer_name="bottleneck", sum_ori=False, sum_new=False):
 def main():
     parser = argparse.ArgumentParser(description="DeepCV: DAENN model analysis")
     parser.add_argument(
-        "-m", "--model", dest="model", type=str, default=None, help="Path to model file (e.g., .h5)",
+        "-m",
+        "--model",
+        dest="model",
+        type=str,
+        default=None,
+        help="Path to model file (e.g., .h5)",
     )
     parser.add_argument(
-        "-w", "--weight", dest="weight", type=str, default=None, help="Path to weight file (e.g., .npz)",
+        "-w",
+        "--weight",
+        dest="weight",
+        type=str,
+        default=None,
+        help="Path to weight file (e.g., .npz)",
     )
     parser.add_argument(
-        "-b", "--bias", dest="bias", type=str, default=None, help="Path to bias file (e.g., .npz)",
+        "-b",
+        "--bias",
+        dest="bias",
+        type=str,
+        default=None,
+        help="Path to bias file (e.g., .npz)",
     )
 
     args = parser.parse_args()

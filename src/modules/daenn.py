@@ -30,14 +30,6 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-try:
-    assert tf.test.is_built_with_gpu_support()
-    assert tf.config.list_physical_devices("GPU")
-except AssertionError:
-    pass
-else:
-    util.limit_gpu_growth()
-
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
@@ -57,9 +49,9 @@ class Autoencoder(Model):
         """Add dataset after creating an instance of Autoencoder class
 
         Args:
-            train_set (list): List containing train sets (NumPy array). 
+            train_set (list): List containing train sets (NumPy array).
                             The feature of all set must have the same shape.
-            test_set (list): List containing test sets (NumPy array). 
+            test_set (list): List containing test sets (NumPy array).
                             The feature of all set must have the same shape.
             num_primary (int): Number of primary datasets (arrays).
             num_secondary (int): Number of secondary datasets (arrays).
@@ -94,7 +86,7 @@ class Autoencoder(Model):
         return Dense(units, dtype=tf.float32, name="output_layer_" + str(i))
 
     def build_network(self, output_name="daenn_output", **layer_params):
-        """Multiple input fully-connected feedforward neural network. 
+        """Multiple input fully-connected feedforward neural network.
         This network comprises input layer(s), 5 hidden layers, and output layer(s).
 
         Args:
@@ -158,7 +150,12 @@ class Autoencoder(Model):
         # size of secondary layer [a : ]
         size_s = functools.reduce(lambda x, y: x + y, self.size_inp[self.num_primary :])
 
-        self.list_out = tf.split(self.outputs, [size_p, size_s], axis=1, name=output_name,)
+        self.list_out = tf.split(
+            self.outputs,
+            [size_p, size_s],
+            axis=1,
+            name=output_name,
+        )
         self.primary_out = Dense(size_p, activation=None, name="out_1")(self.list_out[0])
         self.secondary_out = Dense(size_s, activation=None, name="out_2")(self.list_out[0])
 
@@ -214,29 +211,13 @@ class Autoencoder(Model):
         #
         # self.autoencoder = Model(inputs=self.list_inp, outputs=self.list_out, name=model_name)
 
-    def parallel_gpu(self, gpus=1):
-        """
-        Parallelization with multi-GPU.
-
-        Args:
-            gpus (int): Number of GPUs. Defaults to 1.
-        """
-        if gpus > 1:
-            try:
-                from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
-
-                self.autoencoder = multi_gpu_model(self.autoencoder, gpus=gpus)
-                logging.warning(">>> Training on multi-GPU on a single machine")
-            except:
-                logging.warning(">>> Cannot enable multi-GPUs support for Keras")
-
     def custom_loss_1(self, main_loss, penalty_loss, gamma=0.8):
         """Method 1: encapsulation
-        
+
         Use the closure to make a custom loss be able to receive additional arguments.
         But keep in mind that this could yield a potential problem when loading a model.
 
-        Another workaround is to use 'model.add_loss' or write a new custom loss class using 
+        Another workaround is to use 'model.add_loss' or write a new custom loss class using
         'tf.keras.losses.Loss' as a parent and wrap call(self, y_true, y_pred) function which does
         math operation with custom losses and return the value of loss function for optimization.
         See this answer https://stackoverflow.com/a/66486573/6596684 for more details.
@@ -262,8 +243,8 @@ class Autoencoder(Model):
 
     def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=0.8):
         """Method 2: add_loss
-        
-        Custom loss for model.add_loss(). add_loss creates loss as tensor, not function, 
+
+        Custom loss for model.add_loss(). add_loss creates loss as tensor, not function,
         which can take other variables as argument.
 
         Args:
@@ -307,7 +288,7 @@ class Autoencoder(Model):
 
     def loss_2(self, penalty_loss):
         """Custom penalty loss for secondary dataset. Loss = (Loss * its loss_weight).
-        
+
         Maximization is used for this loss.
 
         Args:
@@ -345,7 +326,10 @@ class Autoencoder(Model):
 
         self.autoencoder.compile(
             optimizer=self.optimizer,
-            loss={"out_1": self.loss_1(self.main_loss), "out_2": self.loss_2(self.penalty_loss),},
+            loss={
+                "out_1": self.loss_1(self.main_loss),
+                "out_2": self.loss_2(self.penalty_loss),
+            },
             # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=0.8),  # method 1
             # loss=None, # method 2
             # loss=self.custom_loss_3(alpha=0.8), # method 3
@@ -354,14 +338,15 @@ class Autoencoder(Model):
             # run_eagerly=True,
         )
 
-    def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/"):
+    def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
         """Train model
-        
+
         Args:
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
             verbose (int): Level of prining information. Defaults to 1.
             log_dir (str): Directory to save model logs. Defaults to "./logs/".
+            out_dir (str): Directory to save visualization outputs. Defaults to "./".
         """
         # stack all dataset into a single array since both input layer and output layer are a single layer
         # self.train_set = tf.concat(self.train_set, axis=1)
@@ -407,7 +392,14 @@ class Autoencoder(Model):
                 ],
             )
             # save latent space
-            ae_visual.encode_fig(i + 1, self.autoencoder.get_layer("concatenate_1").input, self.autoencoder.get_layer("dense_2").output, self.train_set, self.train_set)
+            ev = ae_visual.encode_fig(
+                (i + 1) * self.num_epoch,
+                self.autoencoder.get_layer("concatenate_1").input,
+                self.autoencoder.get_layer("dense_2").output,
+                self.train_set,
+                self.train_set,
+                folder=out_dir,
+            )
 
     def encoder_predict(self, input_sample):
         """Generate predictions using encoder
@@ -614,7 +606,7 @@ Please check your DAENN input file!"
             return LeakyReLU(alpha=0.2)
         else:
             err = (
-                f"Activation function youspecified, {f}, is not supported."
+                f"Activation function that you specified, {f}, is not supported."
                 + f"Available functions are {avail_act_func}"
             )
             logging.error(err)
@@ -662,6 +654,8 @@ Please check your DAENN input file!"
         )
         sys.exit(1)
 
+    out_parent = os.path.abspath(out_dir)
+
     ##############################################################
     # Build, compile and train encoder & decoder models separately
     ##############################################################
@@ -689,14 +683,34 @@ Please check your DAENN input file!"
     ######################################
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
-    model.build_network(units=units, act_funcs=user_act_func)
-    model.build_autoencoder()
-    model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    # Check if multi-GPU parallelization is possible
+    if gpus == 1:
+        model.build_network(units=units, act_funcs=user_act_func)
+        model.build_autoencoder()
+        model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    elif gpus > 1:
+        try:
+            logging.warning(">>> Training on multi-GPU on a single machine")
+            # Use all available GPUs
+            strategy = tf.distribute.MirroredStrategy(devices=None)
+            with strategy.scope():
+                model.build_network(units=units, act_funcs=user_act_func)
+                model.build_autoencoder()
+                model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+        except:
+            logging.warning(">>> Cannot enable multi-GPUs support for Keras")
+            model.build_network(units=units, act_funcs=user_act_func)
+            model.build_autoencoder()
+            model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    else:
+        err = "Number of GPUs must be equal to or greater than 1"
+        logging.error(err)
+        sys.exit(1)
     # show model info
     if show_summary:
         model.autoencoder.summary()
     # Train model
-    model.train_model(num_epoch, batch_size, verbosity, save_tb)
+    model.train_model(num_epoch, batch_size, verbosity, save_tb, out_parent)
     logging.info("Congrats! Training model is completed.")
 
     # Test prediction
@@ -708,7 +722,6 @@ Please check your DAENN input file!"
     ########################
     # Save model and outputs
     ########################
-    out_parent = os.path.abspath(out_dir)
     if save_model:
         path = out_parent + "/" + out_model
         model.autoencoder.save(path, overwrite=True, save_format="h5")
@@ -811,4 +824,3 @@ Please check your DAENN input file!"
 
 if __name__ == "__main__":
     main()
-
