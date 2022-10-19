@@ -30,14 +30,6 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-try:
-    assert tf.test.is_built_with_gpu_support()
-    assert tf.config.list_physical_devices("GPU")
-except AssertionError:
-    pass
-else:
-    util.limit_gpu_growth()
-
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
@@ -213,22 +205,6 @@ class Autoencoder(Model):
         # but we need all input data in the same layer and takes once only loss computation
         #
         # self.autoencoder = Model(inputs=self.list_inp, outputs=self.list_out, name=model_name)
-
-    def parallel_gpu(self, gpus=1):
-        """
-        Parallelization with multi-GPU.
-
-        Args:
-            gpus (int): Number of GPUs. Defaults to 1.
-        """
-        if gpus > 1:
-            try:
-                from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
-
-                self.autoencoder = multi_gpu_model(self.autoencoder, gpus=gpus)
-                logging.warning(">>> Training on multi-GPU on a single machine")
-            except:
-                logging.warning(">>> Cannot enable multi-GPUs support for Keras")
 
     def custom_loss_1(self, main_loss, penalty_loss, gamma=0.8):
         """Method 1: encapsulation
@@ -614,7 +590,7 @@ Please check your DAENN input file!"
             return LeakyReLU(alpha=0.2)
         else:
             err = (
-                f"Activation function youspecified, {f}, is not supported."
+                f"Activation function that you specified, {f}, is not supported."
                 + f"Available functions are {avail_act_func}"
             )
             logging.error(err)
@@ -689,9 +665,29 @@ Please check your DAENN input file!"
     ######################################
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
-    model.build_network(units=units, act_funcs=user_act_func)
-    model.build_autoencoder()
-    model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    # Check if multi-GPU parallelization is possible
+    if gpus == 1:
+        model.build_network(units=units, act_funcs=user_act_func)
+        model.build_autoencoder()
+        model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    elif gpus > 1:
+        try:
+            logging.warning(">>> Training on multi-GPU on a single machine")
+            # Use all available GPUs
+            strategy = tf.distribute.MirroredStrategy(devices=None)
+            with strategy.scope():
+                model.build_network(units=units, act_funcs=user_act_func)
+                model.build_autoencoder()
+                model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+        except:
+            logging.warning(">>> Cannot enable multi-GPUs support for Keras")
+            model.build_network(units=units, act_funcs=user_act_func)
+            model.build_autoencoder()
+            model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+    else:
+        err = "Number of GPUs must be equal to or greater than 1"
+        logging.error(err)
+        sys.exit(1)
     # show model info
     if show_summary:
         model.autoencoder.summary()
