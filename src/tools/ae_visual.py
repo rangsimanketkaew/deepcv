@@ -24,7 +24,7 @@ def explained_variance(projections, k=2):
         k (int): Number of neurons. Defaults to 2.
 
     Returns:
-        float: Variance
+        var (float): Variance
     """
     n_sample = projections.shape[0]
     var = np.array([(projections[:, i] ** 2).sum() / (n_sample - 1) for i in range(k)]).round(2)
@@ -42,14 +42,16 @@ def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", fo
         y_train (array): True values
         out_name (str, optional): Name of the output layer of the encoder. Defaults to "dense_2".
         folder (str, optional): Nameo the output folder for saving images. Defaults to ".".
+    
+    Returns:
+        ev (float): Variance
     """
     enc = Model(model_inp, model_out)
     Z_enc = enc.predict(x_train)
     ev = explained_variance(Z_enc)
-    print("------------------------------------")
-    print(f"At epoch {i} explained variance: {ev}")
-    print("------------------------------------")
     plt.title(f"Encoded data visualization: EV = {ev}")
     plt.scatter(Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10")
-    plt.savefig(folder + "/" + str(i) + ".png")
+    plt.savefig(folder + "/" + "train_" + str(i) + "_epochs.png")
     plt.clf()
+
+    return ev

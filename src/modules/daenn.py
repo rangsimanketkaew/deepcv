@@ -49,9 +49,9 @@ class Autoencoder(Model):
         """Add dataset after creating an instance of Autoencoder class
 
         Args:
-            train_set (list): List containing train sets (NumPy array). 
+            train_set (list): List containing train sets (NumPy array).
                             The feature of all set must have the same shape.
-            test_set (list): List containing test sets (NumPy array). 
+            test_set (list): List containing test sets (NumPy array).
                             The feature of all set must have the same shape.
             num_primary (int): Number of primary datasets (arrays).
             num_secondary (int): Number of secondary datasets (arrays).
@@ -86,7 +86,7 @@ class Autoencoder(Model):
         return Dense(units, dtype=tf.float32, name="output_layer_" + str(i))
 
     def build_network(self, output_name="daenn_output", **layer_params):
-        """Multiple input fully-connected feedforward neural network. 
+        """Multiple input fully-connected feedforward neural network.
         This network comprises input layer(s), 5 hidden layers, and output layer(s).
 
         Args:
@@ -150,7 +150,12 @@ class Autoencoder(Model):
         # size of secondary layer [a : ]
         size_s = functools.reduce(lambda x, y: x + y, self.size_inp[self.num_primary :])
 
-        self.list_out = tf.split(self.outputs, [size_p, size_s], axis=1, name=output_name,)
+        self.list_out = tf.split(
+            self.outputs,
+            [size_p, size_s],
+            axis=1,
+            name=output_name,
+        )
         self.primary_out = Dense(size_p, activation=None, name="out_1")(self.list_out[0])
         self.secondary_out = Dense(size_s, activation=None, name="out_2")(self.list_out[0])
 
@@ -208,11 +213,11 @@ class Autoencoder(Model):
 
     def custom_loss_1(self, main_loss, penalty_loss, gamma=0.8):
         """Method 1: encapsulation
-        
+
         Use the closure to make a custom loss be able to receive additional arguments.
         But keep in mind that this could yield a potential problem when loading a model.
 
-        Another workaround is to use 'model.add_loss' or write a new custom loss class using 
+        Another workaround is to use 'model.add_loss' or write a new custom loss class using
         'tf.keras.losses.Loss' as a parent and wrap call(self, y_true, y_pred) function which does
         math operation with custom losses and return the value of loss function for optimization.
         See this answer https://stackoverflow.com/a/66486573/6596684 for more details.
@@ -238,8 +243,8 @@ class Autoencoder(Model):
 
     def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=0.8):
         """Method 2: add_loss
-        
-        Custom loss for model.add_loss(). add_loss creates loss as tensor, not function, 
+
+        Custom loss for model.add_loss(). add_loss creates loss as tensor, not function,
         which can take other variables as argument.
 
         Args:
@@ -283,7 +288,7 @@ class Autoencoder(Model):
 
     def loss_2(self, penalty_loss):
         """Custom penalty loss for secondary dataset. Loss = (Loss * its loss_weight).
-        
+
         Maximization is used for this loss.
 
         Args:
@@ -321,7 +326,10 @@ class Autoencoder(Model):
 
         self.autoencoder.compile(
             optimizer=self.optimizer,
-            loss={"out_1": self.loss_1(self.main_loss), "out_2": self.loss_2(self.penalty_loss),},
+            loss={
+                "out_1": self.loss_1(self.main_loss),
+                "out_2": self.loss_2(self.penalty_loss),
+            },
             # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=0.8),  # method 1
             # loss=None, # method 2
             # loss=self.custom_loss_3(alpha=0.8), # method 3
@@ -332,7 +340,7 @@ class Autoencoder(Model):
 
     def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/"):
         """Train model
-        
+
         Args:
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
@@ -383,7 +391,13 @@ class Autoencoder(Model):
                 ],
             )
             # save latent space
-            ae_visual.encode_fig(i + 1, self.autoencoder.get_layer("concatenate_1").input, self.autoencoder.get_layer("dense_2").output, self.train_set, self.train_set)
+            ev = ae_visual.encode_fig(
+                (i + 1) * self.num_epoch,
+                self.autoencoder.get_layer("concatenate_1").input,
+                self.autoencoder.get_layer("dense_2").output,
+                self.train_set,
+                self.train_set,
+            )
 
     def encoder_predict(self, input_sample):
         """Generate predictions using encoder
@@ -807,4 +821,3 @@ Please check your DAENN input file!"
 
 if __name__ == "__main__":
     main()
-
