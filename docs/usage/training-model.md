@@ -1,10 +1,12 @@
 # Training a DAENN model
 
-Note: the current version of DeepCV accepts only datasets that are in NumPy's compressed file formats (.npz).
+Train a model with DeepCV is very easy. All parameters needed to train a model are defined in one input file, that is all you need.
+
+> Note that the current version of DeepCV accepts only datasets that are in NumPy's compressed file formats (.npz).
 
 ## Call DeepCV's module
 
-All DeepCV's modules can be called via `main.py` API script.
+All DeepCV's modules can be called via `main.py` API script (Do not forget to activate to the environment where you installed dependencies packages for DeepCV).
 
 ```sh
 $ cd deepcv/src/
@@ -57,6 +59,7 @@ Project: Demo
 ...
 1/1 [==============================] - ETA: 0s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 61/1█ ETA: 00:00s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 0.0004 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_ou1/1 [==============================] - 0s 21ms/step - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_out_1_loss: 0.1160 - val_out_2_loss: 0.0156 - val_out_1_mse: 0.0013 - val_out_2_mse: 66.8437
 Training: 100%|█████████████████████████████████████████████████████████████████████████████████████████ 1000/1000 ETA: 00:00s,  42.66epochs/sDeepCV:INFO >>> Congrats! Training model is completed.
+DeepCV:INFO >>> Congrats! Training model is completed.
 DeepCV:INFO >>> Model has been saved to /home/rketka/github/deepcv/output/model.h5
 DeepCV:INFO >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.h5
 DeepCV:INFO >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.npz
@@ -67,5 +70,33 @@ DeepCV:INFO >>> Metric accuracy history plot has been saved to /home/rketka/gith
 ============================== DONE ==============================
 ```
 
-Once you see the line "=== DONE===" the training is completed.
-You can then use the output saved in the folder you specified in the input file for further work, i.e., generating CVs.
+Once you see the line `=== DONE===` it means that the training is completed.
+You can then use the output saved in the folder you specified in the input file for further works, i.e., generating CVs.
+
+## Outputs
+
+Example of a list of output generated and saved by DeepCV (sorted by name).
+
+```sh
+assets
+latent_space_100_epochs.png
+latent_space_120_epochs.png
+latent_space_140_epochs.png
+latent_space_160_epochs.png
+latent_space_180_epochs.png
+latent_space_200_epochs.png
+latent_space_20_epochs.png
+latent_space_40_epochs.png
+latent_space_60_epochs.png
+latent_space_80_epochs.png
+loss.png
+metrics.png
+model_biases.npz
+model.h5
+model.png
+model_summary.txt
+model_weights.h5
+model_weights.npz
+saved_model.pb
+variables
+```

@@ -5,12 +5,12 @@
 DeepCV requires the following libraries (the supported version for each library is as of the current version of DeepCV):
 
 ```
-numpy==1.22.2
-tensorflow==2.8.0
+tensorflow-gpu==2.10.0
 tensorflow-addons
-scikit_learn==1.0.2
-scipy==1.8.0
-sympy==1.9
+numpy
+scikit-learn
+scipy
+sympy
 matplotlib
 ase
 imageio
@@ -27,24 +27,36 @@ One can use this command to install all of them
 pip install -r requirements.txt # or conda install --file requirements.txt
 ```
 
-## Installing DeepCV
+Note that installing tensorflow may be sometimes tricky, depending on system environment. 
+Please consult its official website in case you have errors.
+
+## Installing DeepCV (Python)
 
 ```sh
 cd deepcv/
-conda create -n deepcv python==3.8
-conda activate deepcv
-conda update --all -y
-pip install -r requirements.txt # or conda install --file requirements.txt
+python3 -m pip install .
+# Test calling the main API
+main.py # or deepcv
 ```
 
-Optional: for C++ API
+## Installing DeepCV (C++)
+
+Standalone shared library file
 ```sh
-g++ -c -I/path/to/plumed/src/ -o deepcv.o deepcv.cpp
-g++ -shared -fPIC -o deepcv.so deepcv.o
+export LIB_TF=/usr/local/tensorflow/
+
+g++ -Wall -fPIC -o deepcv.o deepcv.cpp \
+    -O3 -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++14 -fPIC \
+    -I${LIB_TF}/include/ -L${LIB_TF}/lib \
+    -ltensorflow -ltensorflow_cc -ltensorflow_framework
 ```
 or just type
 ```sh
-make
+make CXXFLAGS="-std=c++14 -fPIC"
+```
+and then build an object file
+```sh
+g++ -shared -o deepcv.so deepcv.o
 ```
 
 ## Check if GPU is available for TF
