@@ -24,6 +24,7 @@ logging = logging.getLogger("DeepCV")
 from datetime import datetime
 from inspect import getmembers, isfunction
 from utils import util  # needs to be loaded before calling TF
+from contextlib import redirect_stdout
 
 import functools
 import numpy as np
@@ -709,6 +710,11 @@ Please check your DAENN input file!"
     # show model info
     if show_summary:
         model.autoencoder.summary()
+        # save summary to a text file
+        path = out_parent + "/" + "model_summary.txt"
+        with open(path, 'w') as f:
+            with redirect_stdout(f):
+                model.autoencoder.summary()
     # Train model
     model.train_model(num_epoch, batch_size, verbosity, save_tb, out_parent)
     logging.info("Congrats! Training model is completed.")
