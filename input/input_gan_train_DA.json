@@ -24,7 +24,7 @@
       "factor": 1e-4
     },
     "num_epoch": 100,
-    "batch_size": 512,
+    "batch_size": 64,
     "save_interval": 10
   },
   "generator": {
@@ -70,16 +70,16 @@
   "settings": {
     "_comment": "User-defined settings",
     "show_summary": true,
-    "save_graph": false,
-    "save_model": false,
-    "show_loss": false
+    "save_graph": true,
+    "save_model": true,
+    "show_loss": true
   },
   "output": {
     "_comment": "Set name of output files",
-    "out_dir": "output",
-    "out_G_model": "G_model.h5",
-    "out_D_model": "D_model.h5",
-    "out_GAN_model": "GAN_model.h5",
+    "out_dir": "output/",
+    "out_dir_G": "G_model/",
+    "out_dir_D": "D_model/",
+    "out_dir_GAN": "GAN_model/",
     "loss_plot": "loss.png"
   }
 }
