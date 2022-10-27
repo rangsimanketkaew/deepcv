@@ -13,7 +13,7 @@ from a given set of latent points (random noise/number).
 
 import argparse
 import numpy as np
-from tensorflow.keras.models import load_model
+import tensorflow as tf
 
 
 def generate_latent_points(latent_dim, n_samples):
@@ -74,12 +74,14 @@ def main():
 
     # 2. Generate latent space fot multiple samples
     vector = generate_latent_points(args.latent_dim, args.num_samples)
+    # print(vector.shape)
 
     ############################
     # Predict (generate results)
     ############################
-    model = load_model(args.model)
-    X = model.predict(vector)
+    imported = tf.saved_model.load(args.model)
+    model = imported.signatures["serving_default"]
+    model(vector)
 
 
 if __name__ == "__main__":
