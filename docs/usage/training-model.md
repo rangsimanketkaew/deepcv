@@ -75,6 +75,8 @@ You can then use the output saved in the folder you specified in the input file 
 
 ## Outputs
 
+DeepCV save autoencoder, encoder, and decoder models separately in output directory.
+
 Example of a list of output generated and saved by DeepCV (sorted by name).
 
 ```sh

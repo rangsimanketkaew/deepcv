@@ -6,7 +6,7 @@ shows the configuration for training a model using DAENN with five hidden layers
 The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
 The rest layers are two decoded layers for reconstruction.
 On the other hand, the size of two hidden layers that are opposite of each other,
-e.g., input and output layers, 1st and 5th hidden layers, must be the same.
+e.g., input and output layers (the 1st and 5th hidden layers) must be the same.
 
 ## Keys
 
@@ -25,7 +25,7 @@ e.g., input and output layers, 1st and 5th hidden layers, must be the same.
 | `split_ratio`     | Ratio for splitting (for training set)              | Integer: `0.8`           |
 | `shuffle`         | Shuffle the data points                             | Logical: `true`, `false` |
 | `normalize_scale` | Normalization scaling value                         | Float: `0.0`             |
-| `max_scale`       | Maximum scaling value                               | Integer: `2`             |
+| `max_scale`       | Maximum scaling value                               | Integer: `1`             |
 
 #### Model
 | Key                | Definition                     | Value                                                                      |
@@ -36,7 +36,6 @@ e.g., input and output layers, 1st and 5th hidden layers, must be the same.
 | `loss_weights`     | A list of weight for each loss | `[1, 0.1]`                                                                 |
 | `num_epoch`        | Number of training epoch       | Integer: `1000`                                                            |
 | `batch_size`       | Batch size                     | Integer: `55`                                                              |
-| `train_separately` | Train separately               | Logical: `true`, `false`                                                   |
 
 #### Neural network
 | Key         | Definition                                          | Value                     |
