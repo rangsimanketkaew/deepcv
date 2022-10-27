@@ -24,6 +24,7 @@ logging = logging.getLogger("DeepCV")
 from datetime import datetime
 from inspect import getmembers, isfunction
 from utils import util  # needs to be loaded before calling TF
+from pathlib import Path
 from contextlib import redirect_stdout
 
 import functools
@@ -435,7 +436,44 @@ class Autoencoder(Model):
         """
         return self.autoencoder.predict(test_set)
 
-    def save_graph(self, model, file_name="graph", save_dir=os.getcwd(), dpi=192):
+    @staticmethod
+    def save_summary(model, save_dir):
+        """Save summary of a model
+
+        Args:
+            model (Class): Model to save
+            save_dir (str): Output directory
+        """
+        model.summary()
+        # save summary to a text file
+        path = save_dir + "/" + "model_summary.txt"
+        with open(path, "w") as f:
+            with redirect_stdout(f):
+                model.summary()
+
+    @staticmethod
+    def save_model(model, save_dir, model_name, model_type):
+        """Save model in SavedModel format (low-level) and in h5 format (Keras-supported)
+
+        Args:
+            model (Class): Model to save
+            save_dir (str): Output directory
+            model_name (str): Name of the model to save
+            model_type (str): Type of the model: Autoencoder, Encoder, or Decoder
+        """
+        tf.saved_model.save(model, save_dir)
+        path = save_dir + "/" + model_name
+        model.save(
+            path,
+            overwrite=True,
+            include_optimizer=True,
+            save_format="h5",
+            signatures=None,
+        )
+        logging.info(f"{model_type} model has been saved to {save_dir}")
+
+    @staticmethod
+    def save_graph(model, file_name="graph", save_dir=os.getcwd(), dpi=192):
         """Plot model and save it as image
 
         Args:
@@ -492,7 +530,6 @@ def main():
     loss_weights = json["model"]["loss_weights"]
     num_epoch = json["model"]["num_epoch"]
     batch_size = json["model"]["batch_size"]
-    train_separately = json["model"]["train_separately"]
     # ---------
     units = json["network"]["units"]
     act_funcs = json["network"]["act_funcs"]
@@ -525,9 +562,9 @@ def main():
 
     # sys.stdout = open("stdout_daenn_{:%Y_%m_%d_%H_%M_%S}.txt".format(datetime.now()), "w")
 
-    print("=" * 30 + " Program started " + "=" * 30)
-    print(f"Project: {project}")
-    print("Date {:%d/%m/%Y}".format(datetime.now()) + " at {:%H:%M:%S}".format(datetime.now()))
+    logging.info("=" * 30 + " Program started " + "=" * 30)
+    logging.info(f"Project: {project}")
+    logging.info("Date {:%d/%m/%Y}".format(datetime.now()) + " at {:%H:%M:%S}".format(datetime.now()))
 
     if neural_network.lower() != "daenn":
         logging.error(f"This is a DAENN trainer, not {neural_network}.")
@@ -564,24 +601,43 @@ def main():
     # Use FP32 for speeding training and reducing precision error
     dataset_arr = [i.astype(np.float32) for i in dataset_arr]
 
-    print("=== Shape of dataset before splitting ===")
+    logging.info("=== Shape of dataset before splitting ===")
     for i, j in enumerate(dataset_arr):
-        print(f">>> {i+1}. Dataset: {j.shape}")
+        logging.info(f">>> {i+1}. Dataset: {j.shape}")
 
     # Split dataset
+    if not split:
+        logging.error("Error: Supports only spitting. Please set split to true.")
+        sys.exit(1)
     train_arr, test_arr = [], []
     for i, j in enumerate(dataset_arr):
-        train, test = train_test_split(j, train_size=split_ratio, shuffle=True, random_state=42)
+        train, test = train_test_split(j, train_size=split_ratio, shuffle=shuffle, random_state=42)
         train_arr.append(train)
         test_arr.append(test)
 
-    print("=== Shape of dataset after splitting ===")
+    logging.info("=== Shape of dataset after splitting ===")
     for i, j in enumerate(train_arr):
-        print(f">>> {i+1}. Train: {j.shape} & Test: {test_arr[i].shape}")
+        logging.info(f">>> {i+1}. Train: {j.shape} & Test: {test_arr[i].shape}")
 
     # Normalization
-    train_arr = [i / i.max() for i in train_arr]
-    test_arr = [i / i.max() for i in test_arr]
+    if float(max_scale) == 0.0:
+        try:
+            max_scale_train = [i.max() for i in train_arr]
+            max_scale_test = [i.max() for i in test_arr]
+        except:
+            logging.error("Error: Cannot determine maximum scale")
+            sys.exit(1)
+    else:
+        max_scale_train = [max_scale for i in train_arr]
+        max_scale_test = [max_scale for i in test_arr]
+
+    try:
+        # train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
+        train_arr = [(j -  normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)]
+        test_arr = [(j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)]
+    except:
+        logging.error("Error: Normalization failed. Please check scaling parameters")
+        sys.exit(1)
 
     # Train on GPU?
     if not enable_gpu:
@@ -590,10 +646,11 @@ def main():
     ########################
     # Check layer parameters
     ########################
-    assert len(units) == len(
-        act_funcs
-    ), "Number of units/hidden layer [units] is not equal to number of activation functions [act_funcs]. \
-Please check your DAENN input file!"
+    error_assert = (
+        "Number of units/hidden layer [units] is not equal to number of activation functions "
+        + "[act_funcs]. Please check your DAENN input file!"
+    )
+    assert len(units) == len(act_funcs), error_assert
 
     # Activation function
     tf_act_func = getmembers(tf.keras.activations, isfunction)
@@ -649,39 +706,24 @@ Please check your DAENN input file!"
     ##############
     # Check output
     ##############
-    if not os.path.isdir(out_dir):
-        logging.error(
-            f"Output directory you specified, {out_dir}, does not exist. Please create this directory!"
-        )
-        sys.exit(1)
-
+    # Make sure that the top output directory exists
     out_parent = os.path.abspath(out_dir)
+    try:
+        Path(out_parent).mkdir(parents=True, exist_ok=True)
+    except:
+        logging.error(f"Can't create output directory you specified, {out_dir}!")
+        sys.exit(1)
+    # Create output directory for autoencoder, encoder and decoder
+    out_autoencoder = out_parent + "/autoencoder/"
+    Path(out_autoencoder).mkdir(parents=True, exist_ok=True)
+    out_encoder = out_parent + "/encoder/"
+    Path(out_encoder).mkdir(parents=True, exist_ok=True)
+    out_decoder = out_parent + "/decoder/"
+    Path(out_decoder).mkdir(parents=True, exist_ok=True)
 
     ##############################################################
     # Build, compile and train encoder & decoder models separately
     ##############################################################
-    if train_separately:
-        model.build_encoder()
-        model.build_decoder()
-
-        # Show model info
-        if show_summary:
-            model.encoder.summary()
-            model.decoder.summary()
-
-        # Test prediction
-        test_arr_ = tf.concat(test_arr, axis=1)
-        encoded_test = model.encoder_predict(test_arr_)
-        decoded_test = model.decoder_predict(encoded_test)
-
-        # Save TF graph
-        if save_graph:
-            model.save_graph(model.encoder, model.encoder.name, out_dir)
-            model.save_graph(model.decoder, model.decoder.name, out_dir)
-
-    ######################################
-    # Build, compile and train DAENN model
-    ######################################
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
     # Check if multi-GPU parallelization is possible
@@ -707,16 +749,24 @@ Please check your DAENN input file!"
         err = "Number of GPUs must be equal to or greater than 1"
         logging.error(err)
         sys.exit(1)
+
+    # Construct encoder and decoder separately as well
+    model.build_encoder()
+    model.build_decoder()
+
     # show model info
     if show_summary:
-        model.autoencoder.summary()
-        # save summary to a text file
-        path = out_parent + "/" + "model_summary.txt"
-        with open(path, 'w') as f:
-            with redirect_stdout(f):
-                model.autoencoder.summary()
+        model.save_summary(model.autoencoder, out_autoencoder)
+        model.save_summary(model.encoder, out_encoder)
+        model.save_summary(model.decoder, out_decoder)
+
+    # Test prediction
+    # test_arr_ = tf.concat(test_arr, axis=1)
+    # encoded_test = model.encoder_predict(test_arr_)
+    # decoded_test = model.decoder_predict(encoded_test)
+
     # Train model
-    model.train_model(num_epoch, batch_size, verbosity, save_tb, out_parent)
+    model.train_model(num_epoch, batch_size, verbosity, save_tb, out_autoencoder)
     logging.info("Congrats! Training model is completed.")
 
     # Test prediction
@@ -727,29 +777,20 @@ Please check your DAENN input file!"
 
     ########################
     # Save model and outputs
-    ########################
+    ########################\
     if save_model:
-        # Save at low-level (SavedModel format)
-        tf.saved_model.save(model.autoencoder, out_dir)
-        # Save at high-level (h5 format)
-        path = out_parent + "/" + out_model
-        model.autoencoder.save(
-            path,
-            overwrite=True,
-            include_optimizer=True,
-            save_format="h5",
-            signatures=None,
-        )
-        logging.info(f"Model has been saved to {path}")
+        model.save_model(model.autoencoder, out_autoencoder, out_model, "Autoencoder")
+        model.save_model(model.encoder, out_encoder, out_model, "Encoder")
+        model.save_model(model.decoder, out_decoder, out_model, "Decoder")
 
     if save_weights:
-        path = out_parent + "/" + out_weights
+        path = out_autoencoder + "/" + out_weights
         model.autoencoder.save_weights(path, overwrite=True, save_format="h5")
         logging.info(f"Weights of model have been saved to {path}")
 
     if save_weights_npz:
         filename = os.path.splitext(out_weights_npz)[0]
-        path = out_parent + "/" + filename + ".npz"
+        path = out_autoencoder + "/" + filename + ".npz"
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
             if layer.get_weights():
@@ -759,7 +800,7 @@ Please check your DAENN input file!"
 
     if save_biases_npz:
         filename = os.path.splitext(out_biases_npz)[0]
-        path = out_parent + "/" + filename + ".npz"
+        path = out_autoencoder + "/" + filename + ".npz"
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
             if layer.get_weights():
@@ -768,8 +809,12 @@ Please check your DAENN input file!"
         logging.info(f"Biases of model have been saved to {path}")
 
     if save_graph:
-        model.save_graph(model.autoencoder, model.autoencoder.name, out_dir)
-        logging.info(f"Directed graphs of all model have been saved to {os.path.abspath(out_dir)}")
+        model.save_graph(model.autoencoder, model.autoencoder.name, out_autoencoder)
+        model.save_graph(model.encoder, model.encoder.name, out_encoder)
+        model.save_graph(model.decoder, model.decoder.name, out_decoder)
+        logging.info(
+            f"Directed graphs of all models have been saved to subfolder in {os.path.abspath(out_dir)}"
+        )
 
     # summarize history for loss and accuracy
     if save_loss:
@@ -800,7 +845,7 @@ Please check your DAENN input file!"
         ax3.label_outer()
         ax3.legend(["train", "test"], loc="upper right")
 
-        save_path = out_parent + "/" + loss_plot
+        save_path = out_autoencoder + "/" + loss_plot
         fig.savefig(save_path)
         logging.info(f"Loss history plot has been saved to {save_path}")
 
@@ -826,13 +871,13 @@ Please check your DAENN input file!"
         ax2.label_outer()
         ax2.legend(["train", "test"], loc="upper right")
 
-        save_path = out_parent + "/" + metrics_plot
+        save_path = out_autoencoder + "/" + metrics_plot
         plt.savefig(save_path)
         logging.info(f"Metric accuracy history plot has been saved to {save_path}")
         if show_metrics:
             fig.show()
 
-    print("=" * 30 + " DONE " + "=" * 30)
+    logging.info("=" * 30 + " DONE " + "=" * 30)
 
     # sys.stdout.close()
 
