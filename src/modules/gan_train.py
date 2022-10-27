@@ -19,8 +19,11 @@ sys.path.append(parentdir)
 import argparse
 import time
 import numpy as np
+import tensorflow as tf
 
 from utils import util  # needs to be loaded before calling TF
+from pathlib import Path
+from contextlib import redirect_stdout
 
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten
@@ -230,7 +233,7 @@ class GAN_Model(object):
 
         return Model(inp, validity, name=name)
 
-    def train_gan(self, epochs, batch_size, save_interval):
+    def train_gan(self, generator, discriminator, gan, epochs, batch_size, save_interval):
         """Tran GAN model with given hyperparameters and pre-defined Generator and Discriminator
 
         Args:
@@ -248,6 +251,11 @@ class GAN_Model(object):
         self.save_interval = save_interval
 
         self.batch_per_epoch = int(self.train_set.shape[0] / self.batch_size)
+        if self.batch_per_epoch == 0:
+            exit(
+                f"Error: Batch per epoch is 0. Batch size ({self.batch_size}) should be smaller than "
+                f"input size ({self.train_set.shape[0]}). Try decreasing batch size!"
+            )
         half_batch = int(self.batch_size / 2)
         self.history = {"d_loss": [], "g_loss": []}
 
@@ -297,7 +305,14 @@ class GAN_Model(object):
             name (str): Name of model file (.h5)
         """
         path = os.path.splitext(name)[0]
-        model.save(path, save_format="h5")
+        tf.saved_model.save(model, path)
+        # model.save(
+        #     path,
+        #     overwrite=True,
+        #     include_optimizer=True,
+        #     save_format="h5",
+        #     signatures=None,
+        # )
         print(f">>> Model has been saved to {path}")
 
     @staticmethod
@@ -404,9 +419,9 @@ def main():
     show_loss = json["settings"]["show_loss"]
     # ---------
     out_dir = json["output"]["out_dir"]
-    out_G_model = json["output"]["out_G_model"]
-    out_D_model = json["output"]["out_D_model"]
-    out_GAN_model = json["output"]["out_GAN_model"]
+    out_dir_G = json["output"]["out_dir_G"]
+    out_dir_D = json["output"]["out_dir_D"]
+    out_dir_GAN = json["output"]["out_dir_GAN"]
     loss_plot = json["output"]["loss_plot"]
 
     # ========================================
@@ -537,37 +552,59 @@ def main():
     gan = Model(z, valid, name="GAN")
     gan.compile(loss=loss, optimizer=optimizer)
 
+    ################################
+    # Check and create output folder
+    ################################
+    out_parent = os.path.abspath(out_dir)
+    Path(out_parent).mkdir(parents=True, exist_ok=True)
+    Path(out_parent + "/" + out_dir_G).mkdir(parents=True, exist_ok=True)
+    Path(out_parent + "/" + out_dir_D).mkdir(parents=True, exist_ok=True)
+    Path(out_parent + "/" + out_dir_GAN).mkdir(parents=True, exist_ok=True)
+
+    # show and save model info
+    if show_summary:
+        print("=== Generator (G) ===")
+        model.G.summary()
+        path = out_parent + "/" + "G_model_summary.txt"
+        with open(path, 'w') as f:
+            with redirect_stdout(f):
+                model.G.summary()
+        print("=== Discriminator (D) ===")
+        model.D.summary()
+        path = out_parent + "/" + "D_model_summary.txt"
+        with open(path, 'w') as f:
+            with redirect_stdout(f):
+                model.D.summary()
+        print("=== GAN (combined G and D) ===")
+        gan.summary()
+        path = out_parent + "/" + "GAN_model_summary.txt"
+        with open(path, 'w') as f:
+            with redirect_stdout(f):
+                gan.summary()
+
     ####################
     # Start training GAN
     ####################
     start_time = time.time()  # timing
-    model.train_gan(epochs=num_epoch, batch_size=batch_size, save_interval=save_interval)
+    model.train_gan(
+        generator, discriminator, gan, epochs=num_epoch, batch_size=batch_size, save_interval=save_interval
+    )
     end_time = time.time()
-    print(">>> Training Done!!")
+    print(">>> Congrats! Training model is completed.")
     print(f">>> Elapsed time:  {end_time - start_time:.3f} second")
-
-    # show model info
-    if show_summary:
-        print("=== Generator (G) ===")
-        model.G.summary()
-        print("=== Discriminator (D) ===")
-        model.D.summary()
-        print("=== GAN (combined G and D) ===")
-        gan.summary()
 
     ########################
     # Save model and outputs
     ########################
-    out_parent = os.path.abspath(out_dir)
     if save_model:
-        model.save_model(model.G, name=f"{out_parent}/{out_G_model}")
-        model.save_model(model.D, name=f"{out_parent}/{out_D_model}")
-        model.save_model(gan, name=f"{out_parent}/{out_GAN_model}")
+        model.save_model(model.G, out_parent + "/" + out_dir_G)
+        model.save_model(model.D, out_parent + "/" + out_dir_D)
+        model.save_model(gan, out_parent + "/" + out_dir_GAN)
 
     if save_graph:
-        model.save_graph(gan, name=f"{out_parent}/{gan.name}")
         model.save_graph(generator, name=f"{out_parent}/{generator.name}")
         model.save_graph(discriminator, name=f"{out_parent}/{discriminator.name}")
+        model.save_graph(gan, name=f"{out_parent}/{gan.name}")
 
     if show_loss:
         from matplotlib import pyplot as plt
@@ -584,14 +621,14 @@ def main():
         plt.plot(d_loss_real, label="Discriminator loss: Real")
         plt.plot(d_loss_fake, label="Discriminator loss: Fake")
         plt.plot(model.history["g_loss"], label="Generator loss")
-        plt.title("Leaky ReLU training")
+        plt.title("GAN training by DeepCV")
         plt.ylabel("Loss value")
         plt.xlabel("Epoch")
         plt.legend(loc="upper left")
-        save_path = project + "_loss_vs_epoch.png"
+        save_path = out_parent + "/" + loss_plot
         plt.savefig(save_path)
         print(f">>> Loss history plot has been saved to {save_path}")
-        plt.show()
+        # plt.show()
 
     print("=" * 30 + " DONE " + "=" * 30)
 
