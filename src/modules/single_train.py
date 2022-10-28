@@ -16,6 +16,10 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 import argparse
+import logging
+
+logging = logging.getLogger("DeepCV")
+
 import numpy as np
 
 from tools import trajectory
@@ -232,7 +236,8 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isfile(args.input):
-        exit('Error: No such file "' + str(args.input) + '"')
+        logging.error('No such file "' + str(args.input) + '"')
+        sys.exit(1)
 
     # Load data from JSON input file
     json = util.load_json(args.input)
@@ -243,14 +248,10 @@ def main():
     labelset = json["input"]["labelset"]
     ref_mol = json["input"]["ref_mol"]
     # ---------
-    out_trained = json["output"]["out_trained"]
     out_model = json["output"]["out_model"]
-    out_plumed = json["output"]["out_plumed"]
     model_img = json["output"]["model_img"]
     # ---------
-    split = json["dataset"]["split"]
     split_ratio = json["dataset"]["split_ratio"]
-    shuffle = json["dataset"]["shuffle"]
     # ---------
     optimizer = json["model"]["optimizer"]
     loss = json["model"]["loss"]
@@ -270,25 +271,31 @@ def main():
     # ---------
     verbosity = json["settings"]["verbosity"]
     save_model = json["settings"]["save_model"]
-    save_cv = json["settings"]["save_cv"]
     show_summary = json["settings"]["show_summary"]
     show_layer = json["settings"]["show_layer"]
     show_eva = json["settings"]["show_eva"]
     show_loss = json["settings"]["show_loss"]
     show_corr = json["settings"]["show_corr"]
-    show_layer_table = json["settings"]["show_layer_table"]
 
     # ========================================
 
-    print("=========== Program started ===========")
-    print(f"Project: {project}")
+    logging.info("=========== Program started ===========")
+    logging.info(f"Project: {project}")
 
     if neural_network.lower() != "single":
-        exit(f"Error: This is a Single-input NN trainer, not {neural_network}.")
+        logging.error(f"This is a Single-input NN trainer, not {neural_network}.")
+        sys.exit(1)
 
     # Train on GPU?
     if not enable_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    else:
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpus
+
+    if num_layers != 3:
+        logging.error("Supports only 3 hidden layers")
+        sys.exit(1)
 
     ################################
     # Build, compile and train model
@@ -320,17 +327,17 @@ def main():
     if save_model:
         path = os.path.abspath(out_model)
         model.nn_model.save(path, save_format="h5")
-        print(f">>> Model saved to {path}")
+        logging.info(f"Model saved to {path}")
 
     if show_summary:
         model.show_model()
 
     if show_layer:
-        print(model.nn_model.layers)
+        logging.info(model.nn_model.layers)
 
     if show_eva:
-        print("===== Evaluate results ======")
-        print(f">>> test loss: {model.evaluate()}")
+        logging.info("===== Evaluate results ======")
+        logging.info(f"Test loss: {model.evaluate()}")
 
     # summarize history for loss
     if show_loss:
@@ -344,25 +351,24 @@ def main():
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
         # plt.show(block=False)
-        plt.show()
+        # plt.show()
 
     if show_corr:
         model.calc_corr()
-        print("===== Corre coeff =====")
-        print(f"Pearson: {model.pearson_all}")
-        print(f"Pearson training: {model.pearson_training}")
-        print(f"Pearson testing : {model.pearson_testing}")
-        print("-----------------------")
-        print(f"Spearman: {model.spearman_all}")
-        print(f"Spearman training: {model.spearman_training}")
-        print(f"Spearman testing : {model.spearman_testing}")
-        print("-----------------------")
-        print(f"Kendall: {model.kendalltau_all}")
-        print(f"Kendall training: {model.kendalltau_training}")
-        print(f"Kendall testing : {model.kendalltau_testing}")
-        print("-----------------------")
+        logging.info("===== Corre coeff =====")
+        logging.info(f"Pearson: {model.pearson_all}")
+        logging.info(f"Pearson training: {model.pearson_training}")
+        logging.info(f"Pearson testing : {model.pearson_testing}")
+        logging.info("-----------------------")
+        logging.info(f"Spearman: {model.spearman_all}")
+        logging.info(f"Spearman training: {model.spearman_training}")
+        logging.info(f"Spearman testing : {model.spearman_testing}")
+        logging.info("-----------------------")
+        logging.info(f"Kendall: {model.kendalltau_all}")
+        logging.info(f"Kendall training: {model.kendalltau_training}")
+        logging.info(f"Kendall testing : {model.kendalltau_testing}")
 
-    print("=" * 30 + " DONE " + "=" * 30)
+    logging.info("=" * 30 + " DONE " + "=" * 30)
 
 
 if __name__ == "__main__":

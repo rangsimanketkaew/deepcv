@@ -18,14 +18,11 @@
   "output": {
     "_comment": "Set name of output files",
     "out_model": "model.h5",
-    "out_plumed": "plumed_inp.dat",
     "model_img": "model.png"
   },
   "dataset": {
     "_comment": "Splitting ratio (%) for preparing training and testing sets",
-    "split": false,
-    "split_ratio": 80,
-    "shuffle": true
+    "split_ratio": 80
   },
   "model": {
     "_comment": "Define the optimizer, loss function, number of epochs, and batch size",
@@ -47,18 +44,16 @@
   "performance": {
     "_comment": "Setting for training performance",
     "enable_gpu": true,
-    "gpus": 1
+    "gpus": "0"
   },
   "settings": {
     "_comment": "User-defined settings",
     "verbosity": 1,
     "save_model": false,
-    "save_cv": false,
     "show_summary": false,
     "show_layer": false,
     "show_eva": false,
     "show_loss": false,
-    "show_corr": false,
-    "show_layer_table": false
+    "show_corr": false
   }
 }
