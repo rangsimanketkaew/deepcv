@@ -8,12 +8,12 @@
   "input": {
     "_comment": "Trajectories, cartesian coordinate, perperties of molecule as features",
     "dataset": "dataset/DA/dataset.xyz",
+    "ref_mol": "dataset/DA/ref_mol.xyz",
     "labelset": [
       "dataset/DA/DA_distance.npz",
       "dataset/DA/DA_angle.npz",
       "dataset/DA/DA_torsional.npz"
-    ],
-    "ref_mol": "dataset/DA/ref_mol.xyz"
+    ]
   },
   "output": {
     "_comment": "Set name of output files",

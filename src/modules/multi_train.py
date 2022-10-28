@@ -22,6 +22,7 @@ logging = logging.getLogger("DeepCV")
 
 import numpy as np
 
+from utils import util  # needs to be loaded before calling TF
 from tools import trajectory
 
 from tensorflow.keras.layers import Input, Dense, Concatenate
@@ -51,7 +52,7 @@ class MultiInputNN:
 
         # Extract labels
         self.num_label = len(labels)
-        self.label = np.loadtxt(labels[0], dtype=np.float32, skiprows=1)
+        self.label = np.load(labels[0])
 
         # Shuffle frames
         self.indices = np.arange(self.traj_fitted.shape[0])
@@ -135,6 +136,7 @@ class MultiInputNN:
         self.branch_2 = self.branch_2_hidden_3(self.branch_2_hidden_2)
         self.branch_2_nn = Model(inputs=self.input_2, outputs=self.branch_2, name="branch_2")
 
+        # combine two input branches
         self.inputs_combined = Concatenate(axis=-1)([self.branch_1_nn.output, self.branch_2_nn.output])
 
         self.output_hidden_1 = Dense(2, activation="sigmoid", use_bias=True)
@@ -252,7 +254,14 @@ class MultiInputNN:
 def main():
     info = "Feedforward neural networks with multiple inputs and mixed data."
     parser = argparse.ArgumentParser(description=info)
-    parser.add_argument("input", metavar="INPUT", type=str, help="Input file (JSON)")
+    parser.add_argument(
+        "-i",
+        "--input",
+        metavar="INPUT",
+        type=str,
+        required=True,
+        help="Input file (JSON) defining configuration, setting, parameters.",
+    )
 
     args = parser.parse_args()
 
