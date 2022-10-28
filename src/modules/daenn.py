@@ -603,11 +603,11 @@ def main():
 
     logging.info("=== Shape of dataset before splitting ===")
     for i, j in enumerate(dataset_arr):
-        logging.info(f">>> {i+1}. Dataset: {j.shape}")
+        logging.info(f"{i+1}. Dataset: {j.shape}")
 
     # Split dataset
     if not split:
-        logging.error("Error: Supports only spitting. Please set split to true.")
+        logging.error("Supports only spitting. Please set split to true.")
         sys.exit(1)
     train_arr, test_arr = [], []
     for i, j in enumerate(dataset_arr):
@@ -617,15 +617,16 @@ def main():
 
     logging.info("=== Shape of dataset after splitting ===")
     for i, j in enumerate(train_arr):
-        logging.info(f">>> {i+1}. Train: {j.shape} & Test: {test_arr[i].shape}")
+        logging.info(f"{i+1}. Train: {j.shape} & Test: {test_arr[i].shape}")
 
     # Normalization
     if float(max_scale) == 0.0:
         try:
             max_scale_train = [i.max() for i in train_arr]
             max_scale_test = [i.max() for i in test_arr]
+            logging.warning(f"As max_scale is set to {max_scale}, use maximum value in a dataset for scaling")
         except:
-            logging.error("Error: Cannot determine maximum scale")
+            logging.error("Cannot determine maximum scale")
             sys.exit(1)
     else:
         max_scale_train = [max_scale for i in train_arr]
@@ -636,7 +637,7 @@ def main():
         train_arr = [(j -  normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)]
         test_arr = [(j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)]
     except:
-        logging.error("Error: Normalization failed. Please check scaling parameters")
+        logging.error("Normalization failed. Please check scaling parameters")
         sys.exit(1)
 
     # Train on GPU?
@@ -733,7 +734,7 @@ def main():
         model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
     elif gpus > 1:
         try:
-            logging.warning(">>> Training on multi-GPU on a single machine")
+            logging.warning("Training on multi-GPU on a single machine")
             # Use all available GPUs
             strategy = tf.distribute.MirroredStrategy(devices=None)
             with strategy.scope():
@@ -741,7 +742,7 @@ def main():
                 model.build_autoencoder()
                 model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
         except:
-            logging.warning(">>> Cannot enable multi-GPUs support for Keras")
+            logging.warning("Cannot enable multi-GPUs support for Keras")
             model.build_network(units=units, act_funcs=user_act_func)
             model.build_autoencoder()
             model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)

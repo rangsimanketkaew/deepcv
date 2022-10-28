@@ -17,6 +17,10 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 import argparse
+import logging
+
+logging = logging.getLogger("DeepCV")
+
 import time
 import numpy as np
 import tensorflow as tf
@@ -244,7 +248,7 @@ class GAN_Model(object):
 
         self.epochs = epochs
         if str(batch_size) == "sqrt":
-            print("Use a common heuristic for batch size: the square root of the size of the dataset")
+            logging.info("Use a common heuristic for batch size: the square root of the size of the dataset")
             self.batch_size = int(np.sqrt(self.train_set.shape[0]))
         else:
             self.batch_size = int(batch_size)
@@ -252,10 +256,11 @@ class GAN_Model(object):
 
         self.batch_per_epoch = int(self.train_set.shape[0] / self.batch_size)
         if self.batch_per_epoch == 0:
-            exit(
+            logging.error(
                 f"Error: Batch per epoch is 0. Batch size ({self.batch_size}) should be smaller than "
                 f"input size ({self.train_set.shape[0]}). Try decreasing batch size!"
             )
+            sys.exit(1)
         half_batch = int(self.batch_size / 2)
         self.history = {"d_loss": [], "g_loss": []}
 
@@ -313,7 +318,7 @@ class GAN_Model(object):
         #     save_format="h5",
         #     signatures=None,
         # )
-        print(f">>> Model has been saved to {path}")
+        logging.info(f"Model has been saved to {path}")
 
     @staticmethod
     def save_graph(model, name):
@@ -373,7 +378,8 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isfile(args.input):
-        exit('Error: No such file "' + str(args.input) + '"')
+        logging.error('Error: No such file "' + str(args.input) + '"')
+        sys.exit(1)
 
     # Load data from JSON input file
     json = util.load_json(args.input)
@@ -426,11 +432,12 @@ def main():
 
     # ========================================
 
-    print("=" * 30 + " Program started " + "=" * 30)
-    print(f"Project: {project}")
+    logging.info("=" * 30 + " Program started " + "=" * 30)
+    logging.info(f"Project: {project}")
 
     if neural_network.lower() != "gan":
-        exit(f"Error: This is a GAN trainer, not {neural_network}.")
+        logging.error(f"This is a GAN trainer, not {neural_network}.")
+        sys.exit(1)
 
     ############################
     # Check and prepare datasets
@@ -441,25 +448,27 @@ def main():
     dataset_arr = [i.astype(np.float32) for i in dataset_arr]
     input_shape = (dataset_arr[0].shape[1],)
 
-    print("=== Shape of dataset before merging ===")
+    logging.info("=== Shape of dataset before merging ===")
     for i, j in enumerate(dataset_arr):
-        print(f">>> {i+1}. Dataset: {j.shape}")
+        logging.info(f"{i+1}. Dataset: {j.shape}")
 
     train_set = np.vstack(dataset_arr)
 
-    print("=== Shape of dataset after merging ===")
-    print(f">>> Train: {train_set.shape}")
+    logging.info("=== Shape of dataset after merging ===")
+    logging.info(f"Train: {train_set.shape}")
 
     # Normalize training set
     if float(max_scale) == 0.0:
         try:
             max_scale = np.max(train_set)
         except:
-            exit("Error: Cannot determine maximum scale")
+            logging.error("Cannot determine maximum scale")
+            sys.exit(1)
     try:
         train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
     except:
-        exit("Error: Normalization failed. Please check scaling parameters")
+        logging.error("Normalization failed. Please check scaling parameters")
+        sys.exit(1)
 
     # Train on GPU?
     if not enable_gpu:
@@ -470,7 +479,7 @@ def main():
     #####################
     if not regularizer["name"]:
         regularizer = None
-        print("Warning: Regularizer is not used")
+        logging.warning("Regularizer is not used")
     elif regularizer["name"].lower() == "l2":
         regularizer = l1(float(regularizer["factor"]))
     elif regularizer["name"].lower() == "l2":
@@ -478,9 +487,10 @@ def main():
     elif regularizer["name"].lower() == "l1_l2":
         regularizer = l1_l2(float(regularizer["factor_1"]), float(regularizer["factor_2"]))
     else:
-        exit(
-            "Error: Check your regularizer and factor. Set parameter to None if you do not want to apply regularizer."
+        logging.error(
+            "Check your regularizer and factor. Set parameter to None if you do not want to apply regularizer."
         )
+        sys.exit(1)
 
     #############################
     # Prepare batch normalization
@@ -498,7 +508,8 @@ def main():
             learning_rate=optimizer["learning_rate"], beta_1=optimizer["beta_1"], beta_2=optimizer["beta_2"]
         )
     else:
-        exit("Error: Optimizer you specified is not available")
+        logging.error("Optimizer you specified is not available")
+        sys.exit(1)
 
     ######################################
     # Initiate model and load training set
@@ -563,22 +574,22 @@ def main():
 
     # show and save model info
     if show_summary:
-        print("=== Generator (G) ===")
+        logging.info("=== Generator (G) ===")
         model.G.summary()
         path = out_parent + "/" + "G_model_summary.txt"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             with redirect_stdout(f):
                 model.G.summary()
-        print("=== Discriminator (D) ===")
+        logging.info("=== Discriminator (D) ===")
         model.D.summary()
         path = out_parent + "/" + "D_model_summary.txt"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             with redirect_stdout(f):
                 model.D.summary()
-        print("=== GAN (combined G and D) ===")
+        logging.info("=== GAN (combined G and D) ===")
         gan.summary()
         path = out_parent + "/" + "GAN_model_summary.txt"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             with redirect_stdout(f):
                 gan.summary()
 
@@ -590,8 +601,8 @@ def main():
         generator, discriminator, gan, epochs=num_epoch, batch_size=batch_size, save_interval=save_interval
     )
     end_time = time.time()
-    print(">>> Congrats! Training model is completed.")
-    print(f">>> Elapsed time:  {end_time - start_time:.3f} second")
+    logging.info("Congrats! Training model is completed.")
+    logging.info(f"Elapsed time:  {end_time - start_time:.3f} second")
 
     ########################
     # Save model and outputs
@@ -627,10 +638,10 @@ def main():
         plt.legend(loc="upper left")
         save_path = out_parent + "/" + loss_plot
         plt.savefig(save_path)
-        print(f">>> Loss history plot has been saved to {save_path}")
+        logging.info(f"Loss history plot has been saved to {save_path}")
         # plt.show()
 
-    print("=" * 30 + " DONE " + "=" * 30)
+    logging.info("=" * 30 + " DONE " + "=" * 30)
 
 
 if __name__ == "__main__":
