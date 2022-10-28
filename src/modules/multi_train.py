@@ -51,8 +51,16 @@ class MultiInputNN:
         self.traj_fitted = trajectory.fitting(self.traj, self.ref_mol)
 
         # Extract labels
+        # +++ Caveat! hard code for extracting each label set!
+        # +++ Need to make it more flexible when N label sets are requested by the user!
         self.num_label = len(labels)
-        self.label = np.load(labels[0])
+        _npz = np.load(labels[0])
+        self.label_1 = _npz[_npz.files[0]]
+        _npz = np.load(labels[1])
+        self.label_2 = _npz[_npz.files[0]]
+
+        # Merge label sets
+        self.label = np.concatenate((self.label_1, self.label_2), axis=1)
 
         # Shuffle frames
         self.indices = np.arange(self.traj_fitted.shape[0])
