@@ -22,6 +22,7 @@ logging = logging.getLogger("DeepCV")
 
 import numpy as np
 
+from utils import util  # needs to be loaded before calling TF
 from tools import trajectory
 
 from tensorflow.keras.layers import Input, Dense
@@ -53,7 +54,8 @@ class SingleInputNN(Model):
 
         # Extract labels
         self.num_label = len(labels)
-        self.label = np.loadtxt(labels[0], dtype=np.float32, skiprows=1)
+        # self.label = np.loadtxt(labels, dtype=np.float32, skiprows=1)
+        self.label = np.load(labels)['dist']
 
         # Shuffle frames
         self.indices = np.arange(self.traj_fitted.shape[0])
@@ -114,11 +116,11 @@ class SingleInputNN(Model):
 
         # define input layer
         inp_shape = np.prod((self.traj_size[1], self.traj_size[2]))
-        self.input = Input(shape=(inp_shape,), name="input_layer_1")
+        self._input = Input(shape=(inp_shape,), name="input_layer_1")
 
         # define hidden layers
         self.hidden_1 = Dense(units_1, activation=func_1, use_bias=True)
-        self.hidden_1 = self.hidden_1(self.input)
+        self.hidden_1 = self.hidden_1(self._input)
         self.hidden_2 = Dense(units_2, activation=func_2, use_bias=True)
         self.hidden_2 = self.hidden_2(self.hidden_1)
         self.hidden_3 = Dense(units_3, activation=func_3, use_bias=True)
@@ -127,12 +129,12 @@ class SingleInputNN(Model):
         # define output layer
         self.output_hidden_1 = Dense(2, activation="sigmoid", use_bias=True)
         self.output_hidden_1 = self.output_hidden_1(self.hidden_3)
-        self.output = Dense(1, activation="linear", use_bias=True)
-        self.output = self.output(self.output_hidden_1)
+        self._output = Dense(1, activation="linear", use_bias=True)
+        self._output = self._output(self.output_hidden_1)
 
     def build_model(self):
         """Build model"""
-        self.nn_model = Model(inputs=self.input, outputs=self.output, name="nn_model")
+        self.nn_model = Model(inputs=self._input, outputs=self._output, name="nn_model")
 
     def compile_model(self):
         """Compile model"""
@@ -245,8 +247,8 @@ def main():
     neural_network = json["project"]["neural_network"]
     # ---------
     dataset = json["input"]["dataset"]
-    labelset = json["input"]["labelset"]
     ref_mol = json["input"]["ref_mol"]
+    labelset = json["input"]["labelset"]
     # ---------
     out_model = json["output"]["out_model"]
     model_img = json["output"]["model_img"]
@@ -297,9 +299,9 @@ def main():
         logging.error("Supports only 3 hidden layers")
         sys.exit(1)
 
-    ################################
-    # Build, compile and train model
-    ################################
+    ##################################
+    # Build, compile and train a model
+    ##################################
     model = SingleInputNN()
     model.preprocess(dataset, ref_mol, split_ratio, labelset)
     model.build_network(
