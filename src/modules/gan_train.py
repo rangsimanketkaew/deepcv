@@ -302,6 +302,21 @@ class GAN_Model(object):
                 print(f"[D loss: {d_loss[0]:.8f}, acc.: {d_loss[1] * 100:.2f}] : [G loss: {g_loss:.8f}]")
 
     @staticmethod
+    def save_summary(model, save_dir):
+        """Save summary of a model
+
+        Args:
+            model (Class): Model to save
+            save_dir (str): Output directory
+        """
+        model.summary()
+        # save summary to a text file
+        path = save_dir + "/" + "model_summary.txt"
+        with open(path, "w") as f:
+            with redirect_stdout(f):
+                model.summary()
+
+    @staticmethod
     def save_model(model, name):
         """Save model as h5 file
 
@@ -568,30 +583,21 @@ def main():
     ################################
     out_parent = os.path.abspath(out_dir)
     Path(out_parent).mkdir(parents=True, exist_ok=True)
-    Path(out_parent + "/" + out_dir_G).mkdir(parents=True, exist_ok=True)
-    Path(out_parent + "/" + out_dir_D).mkdir(parents=True, exist_ok=True)
-    Path(out_parent + "/" + out_dir_GAN).mkdir(parents=True, exist_ok=True)
+    out_dir_G = out_parent + "/" + out_dir_G
+    Path(out_dir_G).mkdir(parents=True, exist_ok=True)
+    out_dir_D = out_parent + "/" + out_dir_D
+    Path(out_dir_D).mkdir(parents=True, exist_ok=True)
+    out_dir_GAN = out_parent + "/" + out_dir_GAN
+    Path(out_dir_GAN).mkdir(parents=True, exist_ok=True)
 
     # show and save model info
     if show_summary:
         logging.info("=== Generator (G) ===")
-        model.G.summary()
-        path = out_parent + "/" + "G_model_summary.txt"
-        with open(path, "w") as f:
-            with redirect_stdout(f):
-                model.G.summary()
+        model.save_summary(model.G, out_dir_G)
         logging.info("=== Discriminator (D) ===")
-        model.D.summary()
-        path = out_parent + "/" + "D_model_summary.txt"
-        with open(path, "w") as f:
-            with redirect_stdout(f):
-                model.D.summary()
+        model.save_summary(model.D, out_dir_D)
         logging.info("=== GAN (combined G and D) ===")
-        gan.summary()
-        path = out_parent + "/" + "GAN_model_summary.txt"
-        with open(path, "w") as f:
-            with redirect_stdout(f):
-                gan.summary()
+        model.save_summary(gan, out_dir_GAN)
 
     ####################
     # Start training GAN
@@ -608,9 +614,9 @@ def main():
     # Save model and outputs
     ########################
     if save_model:
-        model.save_model(model.G, out_parent + "/" + out_dir_G)
-        model.save_model(model.D, out_parent + "/" + out_dir_D)
-        model.save_model(gan, out_parent + "/" + out_dir_GAN)
+        model.save_model(model.G, out_dir_G)
+        model.save_model(model.D, out_dir_D)
+        model.save_model(gan, out_dir_GAN)
 
     if save_graph:
         model.save_graph(generator, name=f"{out_parent}/{generator.name}")
