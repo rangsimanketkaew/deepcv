@@ -169,15 +169,24 @@ class Autoencoder(Model):
         # ]
 
     def build_encoder(self, name="encoder"):
-        """Build encoder model.
+        """Build encoder model. An encoder is a neural network (it can be any type of network, e.g., FC, CNN,
+        RNN, etc) that takes the input, and output a feature map/vector/tensor. These feature vector hold the
+        information, the features, that represents the input.
 
         Args:
             name (str, optional): Name of model. Defaults to "encoder".
         """
-        self.encoder = Model(inputs=self.list_inp, outputs=self.latent, name=name)
+        # There are two ways to create an encoder with different input branchs.
+        #  1) Use a list of sepatate input layers
+        # self.encoder = Model(inputs=self.list_inp, outputs=self.latent, name=name)
+        #  2) Use already-merged input so that the encoder can be later imported by TF graph loader
+        #     and it will take only one dataset which combines already input size already
+        self.encoder = Model(inputs=[self.primary_inp] + self.secondary_inp, outputs=self.latent, name=name)
 
     def build_decoder(self, model_name="decoder", output_name="decoder_output"):
-        """Build decoder model.
+        """Build decoder model. The decoder is a network (usually the same network structure as encoder but in
+        opposite orientation) that takes the feature vector from the encoder, and gives the best closest match
+        to the actual input or intended output.
 
         Args:
             model_name (str, optional): Name of model. Defaults to "decoder".
@@ -197,7 +206,7 @@ class Autoencoder(Model):
         )
 
     def build_autoencoder(self, model_name="daenn"):
-        """Build autoencoder model.
+        """Build autoencoder model. Combine encoder and decoder together so that they are trained together.
 
         Args:
             model_name (str, optional): Name of model. Defaults to "daenn".
@@ -634,7 +643,7 @@ def main():
 
     try:
         # train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
-        train_arr = [(j -  normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)]
+        train_arr = [(j - normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)]
         test_arr = [(j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)]
     except:
         logging.error("Normalization failed. Please check scaling parameters")
