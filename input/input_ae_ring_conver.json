@@ -14,7 +14,7 @@
       "stacked_50arr_xsprint.npz"
     ],
     "secondary": [
-      "stacked_50arr_dist.npz"
+      "stacked_50arr_torsion.npz"
     ],
     "split": true,
     "split_ratio": 0.8,
