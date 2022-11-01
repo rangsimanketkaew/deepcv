@@ -211,9 +211,14 @@ class Autoencoder(Model):
         Args:
             model_name (str, optional): Name of model. Defaults to "daenn".
         """
+        # Method 1
         # self.autoencoder = Model(inputs=self.inputs, outputs=self.outputs, name=model_name)
+
+        # Method 2
         self.autoencoder = Model(
-            inputs=[self.primary_inp] + self.secondary_inp, outputs=[self.primary_out, self.secondary_out]
+            inputs=[self.primary_inp] + self.secondary_inp,
+            outputs=[self.primary_out, self.secondary_out],
+            name=model_name,
         )
 
         # It seems that using multiple separate inputs and outputs for a model is wrong
@@ -236,17 +241,19 @@ class Autoencoder(Model):
         Args:
             main_loss (func): Main loss
             penalty_loss (func): Loss-like penalty function
-            gamma (_type_): Weight for scaling down the impact of a loss function. Defaults to 0.8.
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
 
         Returns:
-            tensor: Return values from the closure function
+            _loss (tensor): Return values from the closure function
         """
+        # For backward compatable
         # tf.compat.v1.enable_eager_execution()
 
         def _loss(y_true, y_pred):
             split_index = functools.reduce(lambda x, y: x + y, self.size_inp[: self.num_primary])
-            y_true_penalty = y_true[split_index:]
-            y_pred_penalty = y_pred[split_index:]
+            # Debug
+            # y_true_penalty = y_true[split_index:]
+            # y_pred_penalty = y_pred[split_index:]
 
             return (gamma * main_loss(y_true, y_pred)) - ((1 - gamma) * penalty_loss(y_true, y_pred))
 
@@ -259,9 +266,11 @@ class Autoencoder(Model):
         which can take other variables as argument.
 
         Args:
+            y_true (array): Array of reference values (targets)
+            y_pred (array): Array of prediction values
             main_loss (func): Main loss
             penalty_loss (func): Loss-like penalty function
-            gamma (_type_): Special weight. Defaults to 0.8.
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
 
         Returns:
             tensor: Return values from the closure function
@@ -277,8 +286,11 @@ class Autoencoder(Model):
 
         Define a class of loss and call it
 
+        Args:
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
+
         Returns:
-            class: custom loss object
+            loss.CustomLoss (class): custom loss object
         """
         return loss.CustomLoss(self.main_loss, self.penalty_loss, self.latent, gamma)
 
@@ -289,7 +301,7 @@ class Autoencoder(Model):
             main_loss (func): Main loss
 
         Returns:
-            tensor: Return values from the closure function
+            _loss_1 (func): Return values from the closure function
         """
 
         def _loss_1(y_true, y_pred):
@@ -306,7 +318,7 @@ class Autoencoder(Model):
             penalty_loss (func): Loss-like penalty function
 
         Returns:
-            tensor: Return values from the closure function
+            _loss_2 (func): Return values from the closure function
         """
 
         def _loss_2(y_true, y_pred):

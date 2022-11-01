@@ -30,6 +30,15 @@ class CustomLoss(tf.keras.losses.Loss):
     """
 
     def __init__(self, main_loss, penalty_loss, layer, alpha, name="custom_loss"):
+        """Initialize a custom loss function class 
+
+        Args:
+            main_loss (func): Primary loss function, L, in the paper
+            penalty_loss (func): Secondary loss function, L', in the paper
+            layer (class): TensorFlow's Keras (Dense) layer
+            alpha (float): Weight
+            name (str, optional): Name of the class. Defaults to "custom_loss".
+        """
         super().__init__(name=name)
         self.main_loss = main_loss
         self.penalty_loss = penalty_loss
