@@ -21,6 +21,7 @@ nav:
     - Overview: installation/overview.md
     - Environment setup: installation/env-setup.md
     - Installing: installation/install.md
+    - Compiling: installation/compile.md
   - Usage:
     - Overview: usage/overview.md
     - Datasets: usage/prepare-dataset.md
