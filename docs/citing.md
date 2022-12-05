@@ -8,7 +8,7 @@ If you use DeepCV or find it useful for your research, please cite the following
 
 ??? note "Bibtex"
     ```bibtex
-    @article{Ketkaew2022,
+    @article{Ketkaew2022_daenn,
     doi = {10.1021/acs.jpclett.1c04004},
     url = {https://doi.org/10.1021/acs.jpclett.1c04004},
     year = {2022},
@@ -26,3 +26,17 @@ If you use DeepCV or find it useful for your research, please cite the following
 > Rangsiman Ketkaew and Sandra Luber <br/>
 > J. Chem. Inf. Model. 2022 <br/>
 > https://doi.org/10.1021/acs.jcim.2c00883
+
+??? note "Bibtex"
+    ```bibtex
+    @article{Ketkaew2022_deepcv,
+    doi = {10.1021/acs.jcim.2c00883},
+    url = {https://doi.org/10.1021/acs.jcim.2c00883},
+    year = {2022},
+    month = nov,
+    publisher = {American Chemical Society ({ACS})},
+    author = {Rangsiman Ketkaew and Sandra Luber},
+    title = {{DeepCV}: A Deep Learning Framework for Blind Search of Collective Variables in Expanded Configurational Space},
+    journal = {Journal of Chemical Information and Modeling}
+    }
+    ```
