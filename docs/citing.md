@@ -3,7 +3,7 @@
 If you use DeepCV or find it useful for your research, please cite the following papers:
 
 > Rangsiman Ketkaew, Fabrizio Creazzo, and Sandra Luber <br/>
-> J. Phys. Chem. Lett. 2022, 13, 7, 1797–1805 <br/>
+> J. Phys. Chem. Lett. 2022, 13, 7, 1797-1805 <br/>
 > https://doi.org/10.1021/acs.jpclett.1c04004
 
 ??? note "Bibtex"
@@ -24,7 +24,7 @@ If you use DeepCV or find it useful for your research, please cite the following
     ```
     
 > Rangsiman Ketkaew and Sandra Luber <br/>
-> J. Chem. Inf. Model. 2022 <br/>
+> J. Chem. Inf. Model. 2022, 62, 24, 6352-6364 <br/>
 > https://doi.org/10.1021/acs.jcim.2c00883
 
 ??? note "Bibtex"
@@ -35,6 +35,9 @@ If you use DeepCV or find it useful for your research, please cite the following
     year = {2022},
     month = nov,
     publisher = {American Chemical Society ({ACS})},
+    volume = {62},
+    number = {24},
+    pages = {6352--6364},
     author = {Rangsiman Ketkaew and Sandra Luber},
     title = {{DeepCV}: A Deep Learning Framework for Blind Search of Collective Variables in Expanded Configurational Space},
     journal = {Journal of Chemical Information and Modeling}
