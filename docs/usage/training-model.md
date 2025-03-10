@@ -6,7 +6,7 @@ Train a model with DeepCV is very easy. All parameters needed to train a model a
 
 ## Call DeepCV's module
 
-All DeepCV's modules can be called via `main.py` API script (Do not forget to activate to the environment where you installed dependencies packages for DeepCV).
+All DeepCV's modules can be called via `main.py` API script (Don't forget to activate to the environment, where you installed dependencies packages for DeepCV).
 
 ```sh
 $ cd deepcv/src/
@@ -38,8 +38,9 @@ For more detail, please review 'README' in the repository.
 
 ## Train model
 
-Execute the `main.py` with argument `daenn`, like below. Then it will start to train the model.
-The training time depends on the size of the dataset and networks, the number of epochs, etc.
+Execute the `main.py` script with argument `daenn` and followed by `-i` flag with the path to input file 
+(e.g. [input_ae_DA.json](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/input/input_ae_DA.json)). 
+The training time depends on the size of the dataset, the complexity of a neural net, the number of epochs, etc.
 
 ```sh
 $ python main.py daenn -i input/input_ae_DA.json
@@ -70,14 +71,15 @@ DeepCV:INFO >>> Metric accuracy history plot has been saved to /home/rketka/gith
 ============================== DONE ==============================
 ```
 
-Once you see the line `=== DONE===` it means that the training is completed.
-You can then use the output saved in the folder you specified in the input file for further works, i.e., generating CVs.
+Once you see the line `=== DONE===`, the training is successfully completed.
+You can then use the files saved in the output folder you specified in the input file for further post-training works, 
+e.g., use the trained model to generate CVs.
 
 ## Outputs
 
 DeepCV save autoencoder, encoder, and decoder models separately in output directory.
 
-Example of a list of output generated and saved by DeepCV (sorted by name).
+Example of a list of outputs generated and saved by DeepCV (sorted by name).
 
 ```sh
 assets
