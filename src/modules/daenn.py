@@ -417,7 +417,7 @@ class Autoencoder(Model):
             # save latent space
             ev = ae_visual.encode_fig(
                 (i + 1) * self.num_epoch,
-                self.autoencoder.get_layer("concatenate_1").input,
+                self.autoencoder.get_layer("concatenate").input,
                 self.autoencoder.get_layer("dense_2").output,
                 self.train_set,
                 self.train_set,
