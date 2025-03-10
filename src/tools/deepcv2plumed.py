@@ -428,23 +428,23 @@ def main():
     if not os.path.isfile(args.input):
         exit(f'Error: No such file "{args.input}"')
     json = util.load_json(args.input)
-    func_1 = json["network"]["func_1"]
-    func_2 = json["network"]["func_2"]
-    func_3 = json["network"]["func_3"]
+    func_1 = json["network"]["act_funcs"][0]
+    func_2 = json["network"]["act_funcs"][1]
+    func_3 = json["network"]["act_funcs"][2]
     folder = json["output"]["out_dir"]
     weight = json["output"]["out_weights_npz"]
     bias = json["output"]["out_biases_npz"]
 
     # ------- Check weight file -------#
     print(f">>> Checking weight output file: {weight}")
-    weight = folder + "/" + weight
+    weight = folder + "/" + "autoencoder" + "/" + weight
     if not os.path.isfile(weight):
         exit(f'Error: No such file "{weight}"')
     weight = np.load(weight)
 
     # ------- Check bias file -------#
     print(f">>> Checking bias output file  : {bias}")
-    bias = folder + "/" + bias
+    bias = folder + "/" + "autoencoder" + "/" + bias
     if not os.path.isfile(bias):
         exit(f'Error: No such file "{bias}"')
     bias = np.load(bias)
