@@ -1,4 +1,4 @@
-# Prepare input file for Diels-Alder reaction
+# Understanding DeepCV Input File
 
 DeepCV's input file must be in a JSON file format (dictionary-like).
 An example of DAENN input in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 

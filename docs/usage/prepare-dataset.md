@@ -1,4 +1,4 @@
-# Preparing data set
+# Data Set Preparation
 
 First step prior to calculation of representation is to generate a trajectory of reactant conformers. 
 This can be done by using (unbiased) molecular dynamics (MD) simulation to generate a trajectory of the system of interest.

@@ -1,6 +1,10 @@
-# Training a DAENN model
+# DAENN Model Training
 
-Train a model with DeepCV is very easy. All parameters needed to train a model are defined in one input file, that is all you need.
+Training a DAENN-based collective variable (CV) model with DeepCV is very easy. 
+All parameters needed for model training are defined in one input file, that is all you need.
+On this page, you will learn how to use the `daenn` code script to train a CV of the Diels-Alder reaction of 
+ethene and 1,3-butadiene. The reference paper is 
+[https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c04004](https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c04004).
 
 > Note that the current version of DeepCV accepts only datasets that are in NumPy's compressed file formats (.npz).
 

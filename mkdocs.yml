@@ -24,12 +24,12 @@ nav:
     - Compiling: installation/compile.md
   - Usage:
     - Overview: usage/overview.md
-    - Datasets: usage/prepare-dataset.md
-    - Input file: usage/input-file.md
-    - Models: usage/training-model.md
+    - Dataset preparation: usage/prepare-dataset.md
+    - Understanding input file: usage/input-file.md
+    - Model training: usage/training-model.md
     - Enhanced sampling:
       - Metadynamics: usage/metad-sim.md
-    - Analysis:
+    - Post-analysis:
       - Free energy surface: usage/fes-analysis.md
       - Metastable states: usage/states-analysis.md
   - Citing: citing.md
