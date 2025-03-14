@@ -55,11 +55,13 @@ Project: Demo
 >>> 1. Train: (79200, 15) & Test: (19800, 15)
 >>> 2. Train: (79200, 14) & Test: (19800, 14)
 >>> 3. Train: (79200, 13) & Test: (19800, 13)
+Model: "daenn"
 ...
 ...
 ...
 1/1 [==============================] - ETA: 0s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 61/1█ ETA: 00:00s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 0.0004 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_ou1/1 [==============================] - 0s 21ms/step - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_out_1_loss: 0.1160 - val_out_2_loss: 0.0156 - val_out_1_mse: 0.0013 - val_out_2_mse: 66.8437
-Training: 100%|█████████████████████████████████████████████████████████████████████████████████████████ 1000/1000 ETA: 00:00s,  42.66epochs/sDeepCV:INFO >>> Congrats! Training model is completed.
+Training: 100%|█████████████████████████████████████████████████████████████ 1000/1000 ETA: 00:00s,  42.66epochs/s
+DeepCV:INFO >>> Congrats! Training model is completed.
 DeepCV:INFO >>> Congrats! Training model is completed.
 DeepCV:INFO >>> Model has been saved to /home/rketka/github/deepcv/output/model.h5
 DeepCV:INFO >>> Weights of model have been saved to /home/rketka/github/deepcv/output/model_weights.h5
@@ -77,7 +79,7 @@ e.g., use the trained model to generate CVs.
 
 ## Outputs
 
-DeepCV save autoencoder, encoder, and decoder models separately in output directory.
+DeepCV save autoencoder, encoder, and decoder models separately in the respective output directory.
 
 Example of a list of outputs generated and saved by DeepCV (sorted by name).
 
