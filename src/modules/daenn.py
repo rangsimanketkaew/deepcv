@@ -398,7 +398,9 @@ class Autoencoder(Model):
         tqdm_callback = tfa.callbacks.TQDMProgressBar()
 
         # train N times
-        for i in range(10):
+        N = 10
+        for i in range(N):
+            print(f">>>>>>>>>>>>>>>> Training {i+1}/{N} <<<<<<<<<<<<<<<")
             self.history = self.autoencoder.fit(
                 x=self.train_set,  # input
                 y=self.train_set,  # target
