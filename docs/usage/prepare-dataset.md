@@ -29,6 +29,9 @@ traj-partial-100.xyz
 
 ### 1. Z-matrix (internal coordinate)
 
+The script `calc_rep.py` will calculate Z-matrix coordinates of each trajectory file and save the data as .npz 
+separately for bond distance, bond angle, and dihedral angle (torsion).
+
 ```sh
 $ deepcv/src/tools/calc_rep.py --input traj-partial-001.xyz --rep zmat --save
 Converting text data to NumPy array...
@@ -41,10 +44,19 @@ Check files
 
 ```sh
 $ ls *zmat*
-traj-partial-001_zmat_strc_1.npz
-traj-partial-001_zmat_strc_2.npz
-traj-partial-001_zmat_strc_3.npz
+traj-partial-001_zmat_dist_strc_1.npz
+traj-partial-001_zmat_dist_strc_2.npz
+traj-partial-001_zmat_dist_strc_3.npz
 ...
+...
+traj-partial-002_zmat_dist_strc_1.npz
+traj-partial-002_zmat_dist_strc_2.npz
+traj-partial-002_zmat_dist_strc_3.npz
+...
+...
+traj-partial-003_zmat_dist_strc_1.npz
+traj-partial-003_zmat_dist_strc_2.npz
+traj-partial-003_zmat_dist_strc_3.npz
 ```
 
 ### 2. SPRINT and xSPRINT
@@ -57,7 +69,7 @@ Calculate xSPRINT coordinates and sorted atom index
 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:03<00:00, 14.00it/s]
 ```
 
-And you can loop over all files, e.g.,
+You can also loop over all files, e.g.,
 
 ```sh
 $ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --input $i --rep zmat --save ; done
@@ -68,8 +80,14 @@ $ for i in traj-partial-*.xyz ; do echo $i ; deepcv/src/tools/calc_rep.py --inpu
 In this step, we will merge all individual npz files for the same kind of distance, angle, and torsion (separately).
 
 ```sh
-$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_strc_* -k dist
+$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_dist_strc_* -k dist
 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 49/49 [00:00<00:00, 376.17it/s]Shape of output NumPy array (after stacking): (50, 100)
+
+$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_angle_strc_* -k angle
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 49/49 [00:00<00:00, 285.08it/s]Shape of output NumPy array (after stacking): (50, 99)
+
+$ deepcv/src/helpers/stack_array.py -i traj-partial-*_zmat_torsion_strc_* -k torsion
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 49/49 [00:00<00:00, 394.47it/s]Shape of output NumPy array (after stacking): (50, 98)
 ```
 
 ---
