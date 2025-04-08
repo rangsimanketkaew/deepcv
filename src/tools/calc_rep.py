@@ -408,9 +408,9 @@ def main():
     # find atomic symbols for adj matrix descriptors
     if args.rep in ["adjmat", "sprint", "xsprint"]:
         symbols = [chemical_symbols[x] for x in numbers]
-
-    if index:
-        symbols = [symbols[i] for i in index]
+        # filter the symbols
+        if index:
+            symbols = [symbols[i] for i in index]
 
     # Internal coordinates
     if args.rep == "zmat":
