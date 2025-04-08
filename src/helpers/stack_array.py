@@ -18,7 +18,7 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 
-if __name__ == "__main__":
+def main():
     info = "Merge multiple NumPy's array compressed file (npz) of internal coordinates (z-matrix) into one npz file."
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
@@ -84,3 +84,7 @@ if __name__ == "__main__":
     else:
         out = f"stacked_{len(npz)}arr_{args.key_npz}.npz"
     np.savez_compressed(f"{out}", arr=dat)
+   
+
+if __name__ == "__main__":
+    main()
