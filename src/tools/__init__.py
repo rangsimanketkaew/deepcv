@@ -12,7 +12,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-# Bring all modules to the same level as main.py
+# Bring all modules to the same level as tools
 from . import gen_input
 from . import adjmat_param
 from . import calc_rep
