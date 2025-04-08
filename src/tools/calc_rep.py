@@ -422,6 +422,9 @@ def main():
     if args.rep in ["adjmat", "sprint", "xsprint"]:
         symbols = [chemical_symbols[x] for x in numbers]
 
+    if index:
+        symbols = [symbols[i] for i in index]
+
     # Internal coordinates
     if args.rep == "zmat":
         print("Calculate internal coordinates of all structures")
