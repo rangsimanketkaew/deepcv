@@ -17,16 +17,9 @@ import sys
 import argparse
 
 
-def main():
-    """Welcome message and program description"""
-    print("\n------------------------------------------------")
-    print("DeepCV : Deep Learning for Collective Variables")
-    print("-------------------------------------------------")
-    print(f"version {__version__} : {__date__}")
-    print("University of Zurich, Switzerland")
-    print("https://gitlab.uzh.ch/lubergroup/deepcv\n")
-
-    list_of_functions = [
+list_of_functions = [
+        ["xyz2arr", "Convert xyz to NumPy array"],
+        ["stack_array", "Combine arrays of the same dimension"],
         ["calc_rep", "Calculate molecular representations"],
         ["gen_input", "Neural network input generator"],
         ["single_train", "Single-data fully-connected neural network"],
@@ -39,6 +32,15 @@ def main():
         ["analyze_model", "DAENN model analysis and parameters extraction"],
         ["explore_abi", "Calculate exploration ability"],
     ]
+
+def main():
+    """Welcome message and program description"""
+    print("\n------------------------------------------------")
+    print("DeepCV : Deep Learning for Collective Variables")
+    print("-------------------------------------------------")
+    print(f"version {__version__} : {__date__}")
+    print("University of Zurich, Switzerland")
+    print("https://gitlab.uzh.ch/lubergroup/deepcv\n")
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)
     print("\nFor more detail, please review 'README' in the repository.\n")
@@ -56,27 +58,20 @@ if __name__ == "__main__":
         main()
         exit()
 
+    modules_list = [i[0] for i in list_of_functions]
+
     calling = sys.argv[0]
-    modules_list = [
-        "calc_rep",
-        "gen_input",
-        "single_train",
-        "multi_train",
-        "daenn",
-        "gan_train",
-        "gan_predict",
-        "deepcv2plumed",
-        "analyze_FES",
-        "analyze_model",
-        "explore_abi",
-    ]
     if not calling in modules_list:
         print(f"'{calling}' is not DeepCV's module. Available modules are: {modules_list}")
         exit()
 
-    import modules, tools
+    import modules, tools, helpers
 
-    if calling == "calc_rep":
+    if calling == "xyz2arr":
+        helpers.xyz2arr.main()
+    elif calling == "stack_array":
+        helpers.stack_array.main()
+    elif calling == "calc_rep":
         tools.calc_rep.main()
     elif calling == "gen_input":
         tools.gen_input.main()
