@@ -8,7 +8,7 @@ Once the training is complete, you can use `deecv2plumed` script to generate the
 It will automatically extract the weight and bias from the model and print out the file.
 
 ```sh
-$ python main.py deepcv2plumed -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
+$ python deepcv/src/main.py deepcv2plumed -i input/input_ae_DA.json -n 16 -o plumed-NN.dat
 
 >>> Plumed data have been written successfully to 'plumed-NN.dat'
 >>> In order to run metadynamics using CP2K & PLUMED, specify the following input deck in CP2K input:

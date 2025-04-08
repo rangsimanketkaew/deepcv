@@ -47,7 +47,7 @@ Execute the `main.py` script with argument `daenn` and followed by `-i` flag wit
 The training time depends on the size of the dataset, the complexity of a neural net, the number of epochs, etc.
 
 ```sh
-$ python main.py daenn -i input/input_ae_DA.json
+$ python deepcv/src/main.py daenn -i input/input_ae_DA.json
 
 ============================== Program started ==============================
 Project: Demo
