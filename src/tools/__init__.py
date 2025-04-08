@@ -14,6 +14,7 @@ sys.path.append(parentdir)
 
 # Bring all modules to the same level as main.py
 from . import gen_input
+from . import adjmat_param
 from . import calc_rep
 from . import deepcv2plumed
 from . import analyze_FES

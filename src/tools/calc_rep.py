@@ -17,24 +17,7 @@ from scipy import spatial
 import ase.io
 from ase.data import chemical_symbols
 from tqdm import tqdm
-
-# ++++++++++++++++++++++++++++++++++++++++++
-# Default parameters for adjacency matrix
-r_0 = {
-    "CoCo": 2.22,
-    "CC": 2.65,
-    "OO": 2.22,
-    "HH": 1.50,
-    "CoO": 2.22,
-    "CoH": 2.22,
-    "OH": 2.00,
-    "CH": 2.20,
-    "CO": 2.20,
-}
-n = 6
-m = 12
-M = 1
-# ++++++++++++++++++++++++++++++++++++++++++
+from tools import adjmat_param as param
 
 
 def _distance(p1, p2):
@@ -222,10 +205,14 @@ def calc_adjmat(symbols, xyz, r_0, n, m):
     Returns:
         array: Adjacency matrix
     """
-    tmp = [
-        [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
-        for first in symbols
-    ]
+    try:
+        tmp = [
+            [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
+            for first in symbols
+        ]
+    except KeyError as err:
+        exit(f"Error: Chemical symbol pair {err} is not defined in \"adjmat_param.py\". Please check!")
+
     r_0 = np.asarray(tmp)
     r_ij = spatial.distance.cdist(xyz, xyz)
     frac = np.divide(r_ij, r_0)  # r_ij / r_0
@@ -438,14 +425,14 @@ def main():
     elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
         for i in tqdm(range(no_struc)):
-            a_ij = calc_adjmat(symbols, xyz[i], r_0, n, m)
+            a_ij = calc_adjmat(symbols, xyz[i], param.r_0, param.n, param.m)
             if args.save:
                 np.savez_compressed(f"{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij)
     # SPRINT coordinates
     elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
         for i in tqdm(range(no_struc)):
-            sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], r_0, n, m, M)
+            sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], param.r_0, param.n, param.m, param.M)
             if args.save:
                 np.savez_compressed(
                     f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_SPRINT
@@ -454,7 +441,7 @@ def main():
     elif args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
         for i in tqdm(range(no_struc)):
-            sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], r_0, n, m, M)
+            sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], param.r_0, param.n, param.m, param.M)
             if args.save:
                 np.savez_compressed(
                     f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, xsprint=sorted_xSPRINT
