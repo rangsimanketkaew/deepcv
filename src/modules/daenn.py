@@ -148,7 +148,10 @@ class Autoencoder(Model):
         # Output: Out --> O1 + O2 + ...
         # ---------
         # size of primary layer [ : a]
-        size_p = self.primary_inp.shape.as_list()[1]
+        if type(self.primary_inp.shape) == tuple:
+            size_p = list(self.primary_inp.shape)[1]
+        else:
+            size_p = self.primary_inp.shape.as_list()[1]
         # size of secondary layer [a : ]
         size_s = functools.reduce(lambda x, y: x + y, self.size_inp[self.num_primary :])
 
