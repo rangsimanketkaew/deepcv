@@ -84,8 +84,9 @@ class WritePlumed:
         self.arg_input = (
             [f"d{j+1}" for j in range(len(index) - 1)]
             + [f"a{j+1}" for j in range(len(index) - 2)]
-            # + [f"t{j+1}" for j in range(len(index) - 3)]
         )
+        if torsion:
+            self.arg_input += [f"t{j+1}" for j in range(len(index) - 3)]
         arg = ",".join(self.arg_input)
         f.write(f"\nPRINT FILE=input_Zmat.log STRIDE={stride} ARG={arg}\n")
         f.close()
