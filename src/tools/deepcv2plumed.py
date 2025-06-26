@@ -47,45 +47,7 @@ class WritePlumed:
         f.write("UNITS LENGTH=A TIME=fs\n\n")
         f.close()
 
-    def write_zmat(self, num_atoms: int, stride=10):
-        """Write internal coordinate (Z-matrix) based on the successive indexes i.e. 1, 2, 3, ..., N.
-
-        Args:
-            num_atoms (int): Number of atoms in the simulation system
-            stride (int): Frequencies of the quantity to be printed. Defaults to 10.
-        """
-        f = open(self.output_plumed, "a")
-        f.write(f"# Total atoms = {num_atoms}\n")
-        # f.write(f"WHOLEMOLECULES ENTITY0=1-{num_atoms}\n\n")
-        f.write("# Distance\n")
-        f.write("d1: DISTANCE ATOMS=2,1\n")
-        f.write("d2: DISTANCE ATOMS=3,1\n")
-        num_inp = 2
-        for i in range(num_atoms - 3):
-            f.write(f"d{i+3}: DISTANCE ATOMS={i+4},{i+1}\n")
-            num_inp += 1
-        f.write("# Angle (radian)\n")
-        f.write("a1: ANGLE ATOMS=3,1,2\n")
-        num_inp += 1
-        for i in range(num_atoms - 3):
-            f.write(f"a{i+2}: ANGLE ATOMS={i+4},{i+1},{i+2}\n")
-            num_inp += 1
-        f.write("# Torsional angle (radian)\n")
-        for i in range(num_atoms - 3):
-            f.write(f"t{i+1}: TORSION ATOMS={i+4},{i+1},{i+2},{i+3}\n")
-            num_inp += 1
-        print(f">>>   |- Number of Z-matrix inputs: {num_inp}")
-        self.num_feat += num_inp
-        self.arg_input = (
-            [f"d{j+1}" for j in range(num_atoms - 1)]
-            + [f"a{j+1}" for j in range(num_atoms - 2)]
-            + [f"t{j+1}" for j in range(num_atoms - 3)]
-        )
-        arg = ",".join(self.arg_input)
-        f.write(f"\nPRINT FILE=input_Zmat.log STRIDE={stride} ARG={arg}\n")
-        f.close()
-
-    def write_zmat_by_index(self, index: list, stride=10):
+    def write_zmat(self, index: list, torsion=True, stride=10):
         """Write internal coordinate (Z-matrix) based on user-defined atom index.
 
         Args:
@@ -105,23 +67,24 @@ class WritePlumed:
             f.write(f"d{i+3}: DISTANCE ATOMS={index[i+3]},{index[i]}\n")
             num_inp += 1
         f.write("# Angle (radian)\n")
-        f.write("a1: ANGLE ATOMS=3,1,2\n")
+        f.write(f"a1: ANGLE ATOMS={index[2]},{index[0]},{index[1]}\n")
         num_inp += 1
         for i in range(len(index) - 3):
             f.write(f"a{i+2}: ANGLE ATOMS={index[i+3]},{index[i]},{index[i+1]}\n")
             num_inp += 1
-        f.write("# Torsional angle (radian)\n")
-        for i in range(len(index) - 3):
-            f.write(
-                f"t{i+1}: TORSION ATOMS={index[i+3]},{index[i]},{index[i+1]},{index[i+2]}\n"
-            )
-            num_inp += 1
+        if torsion:
+            f.write("# Torsional angle (radian)\n")
+            for i in range(len(index) - 3):
+                f.write(
+                    f"t{i+1}: TORSION ATOMS={index[i+3]},{index[i]},{index[i+1]},{index[i+2]}\n"
+                )
+                num_inp += 1
         print(f">>>   |- Number of Z-matrix inputs: {num_inp}")
         self.num_feat += num_inp
         self.arg_input = (
             [f"d{j+1}" for j in range(len(index) - 1)]
             + [f"a{j+1}" for j in range(len(index) - 2)]
-            + [f"t{j+1}" for j in range(len(index) - 3)]
+            # + [f"t{j+1}" for j in range(len(index) - 3)]
         )
         arg = ",".join(self.arg_input)
         f.write(f"\nPRINT FILE=input_Zmat.log STRIDE={stride} ARG={arg}\n")
@@ -428,26 +391,16 @@ def main():
         The input file must contain either absolute or relative path of the directory \
         in which the weight and bias NumPy's compresses file format (.npz) stored.",
     )
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--num-atoms",
-        "-n",
-        metavar="N",
-        type=int,
-        default=None,
-        help="The number of atoms in the simulation system that is used to train the model. \
-        Cannot be used with -a option.",
-    )
-    group.add_argument(
+    parser.add_argument(
         "--atom-index",
         "-a",
         metavar="INDEX",
         type=int,
         nargs="+",
         default=None,
+        required=True,
         help="List of atomic index (1-based array index) that will be used. \
-        If the specified index is 0-based index, please use '--increment-index' to change from 0-based to 1-based index. \
-        Cannot be used with -n option.",
+        For example, '{1..4}' or '1 {2..4} {7..10}'.",
     )
     parser.add_argument(
         "--sprint-index",
@@ -460,12 +413,10 @@ def main():
         For example, '--sprint-index O=3,5,7,9:H=2,4,6,8,10'.",
     )
     parser.add_argument(
-        "--increment-index",
-        "-ii",
-        action="store_true",
-        help="If this argument is set, the index will be changed from 0-based to 1-based index. \
-        This means that the index will be incremented by 1. For example, [3, 4, 5, 6] will become [4, 5, 6, 7]. \
-        This option is useful when the atomic index is 0-based.",
+        "--no-torsion",
+        default=True,
+        action="store_false",
+        help="If this argument is requested, no torsion used, no writing torsion angles.",
     )
     parser.add_argument(
         "--output",
@@ -508,26 +459,12 @@ def main():
 
     # ------- Start writing -------#
     p = WritePlumed(output_plumed=args.output)
-    if not args.num_atoms and not args.atom_index:
-        parser.error("either --num-atoms (-n) or --atom-index (-a) must be specified.")
-    elif args.num_atoms and args.atom_index:
-        parser.error(
-            "--num-atoms (-n) or --atom-index (-a) cannot be specified at the same time."
-        )
 
     # -------- Write input for primary neural network (first loss) --------#
     f = open(p.output_plumed, "a")
     f.write("# ---- Primary neural net ----\n\n")
     f.close()
-    if args.num_atoms:
-        p.write_zmat(args.num_atoms)
-    elif args.atom_index:
-        if args.increment_index:
-            print(">>> Increment all atomic index by 1")
-            args.atom_index = [i + 1 for i in args.atom_index]
-        else:
-            print(">>> Atomic index incrementation is turned off")
-        p.write_zmat_by_index(args.atom_index)
+    p.write_zmat(args.atom_index, torsion=args.no_torsion)
     if args.sprint_index:
         p.write_sprint(args.sprint_index.split(":"))
 
