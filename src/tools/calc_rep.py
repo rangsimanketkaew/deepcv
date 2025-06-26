@@ -336,7 +336,7 @@ def main():
         type=int,
         nargs="+",
         default=None,
-        help="List of atomic index that will be taken. (0-based array index)",
+        help="List of atomic index that will be taken. (1-based array index)",
     )
     parser.add_argument(
         "--rep",
@@ -394,6 +394,11 @@ def main():
     print(f"Shape of NumPy array: {xyz.shape}")
 
     index = args.index_list
+    # Check index
+    if min(index) <= 0:
+        exit(f"Error: there is at least one index in {index} that is equal or less than 0.")
+    # Change index of atoms from 1-based to 0-based
+    index = [i - 1 for i in index]
     if index:
         xyz = xyz[:, index]
         print(f"List of atom index: {index}")
