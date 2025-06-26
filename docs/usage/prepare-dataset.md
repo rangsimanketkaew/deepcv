@@ -63,8 +63,20 @@ traj-partial-003_zmat_dist_strc_3.npz
 
 ### 2. SPRINT and xSPRINT
 
+- SPRINT coordinates
+
 ```sh
 $ deepcv/src/main.py calc_rep --input traj-partial-001.xyz --rep sprint --save
+Converting text data to NumPy array...
+Shape of NumPy array: (50, 100, 3)
+Calculate SPRINT coordinates and sorted atom index
+100%|█████████████████████████████████████████████████████████████| 50/50 [00:03<00:00, 14.00it/s]
+```
+
+- xSPRINT coordinates
+
+```sh
+$ deepcv/src/main.py calc_rep --input traj-partial-001.xyz --rep xsprint --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 100, 3)
 Calculate xSPRINT coordinates and sorted atom index
