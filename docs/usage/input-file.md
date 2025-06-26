@@ -1,12 +1,13 @@
 # Understanding DeepCV Input File
 
 DeepCV's input file must be in a JSON file format (dictionary-like).
-An example of DAENN input in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
-shows the configuration for training a model using DAENN with five hidden layers.
+Examples of DAENN input in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
+show the configuration for training a model using DAENN with five hidden layers (fixed architecture).
 The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
-The rest layers are two decoded layers for reconstruction.
-On the other hand, the size of two hidden layers that are opposite of each other,
-e.g., input and output layers (the 1st and 5th hidden layers) must be the same.
+The last two layers are two decoded layers for reconstruction.
+
+The size of two hidden layers that are opposite of each other, e.g., input and output layers 
+(the 1st and 5th hidden layers) must be the same.
 
 ## Keys
 

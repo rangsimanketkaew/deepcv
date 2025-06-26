@@ -11,8 +11,7 @@
       "DA_dist.npz",
       "DA_angle.npz",
       "DA_torsion.npz",
-      "DA_sprint.npz",
-      "DA_xsprint.npz"
+      "DA_sprint.npz"
     ],
     "secondary": [
       "DA_dist_6carbons.npz"
