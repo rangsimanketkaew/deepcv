@@ -149,6 +149,29 @@ class WritePlumed:
         self.arg_input += arg
         f.close()
 
+    def write_dist_second_loss(self, index: list, stride=10):
+        """Write distances for secondary loss function based on user-defined atom index.
+
+        Args:
+            index (list): List of atom index
+            stride (int): Frequencies of the quantity to be printed. Defaults to 10.
+        """
+        f = open(self.output_plumed, "a")
+        f.write(f"# Total atoms = {len(index)}\n")
+        index_ = ",".join(map(str, index))
+        f.write(f"# Index: {index_}\n")
+        # Define input (features)
+        f.write("# Distance\n")
+        f.write(f"l2_d1: DISTANCE ATOMS={index[1]},{index[0]}\n")
+        f.write(f"l2_d2: DISTANCE ATOMS={index[2]},{index[0]}\n")
+        self.num_feat += 2
+        for i in range(len(index) - 3):
+            f.write(f"l2_d{i+3}: DISTANCE ATOMS={index[i+3]},{index[i]}\n")
+            self.num_feat += 1
+        arg = [f"l2_d{j+1}" for j in range(len(index) - 1)]
+        self.arg_input += arg
+        f.close()
+
     def write_NeuralNetwork(
         self,
         weight,
@@ -179,7 +202,7 @@ class WritePlumed:
         Args:
             weight (array): Trained neural network model.
             bias (array): Name of PLUMED input file.
-            ke (list): List of keywords of array in weight and bias arrays.
+            kw (list): List of keywords of array in weight and bias arrays.
             func_1 (str): Activation function of hidden layer 1.
             func_2 (str): Activation function of hidden layer 2.
             func_3 (str): Activation function of hidden layer 3 (encoded layer).
@@ -215,11 +238,11 @@ class WritePlumed:
         print(f">>>   |- Size of layers: {size_layer1}, {size_layer2}, {size_layer3}")
 
         f = open(self.output_plumed, "a")
-        f.write("\n" + "-" * 60 + "\n")
+        f.write("\n" + "#" + "-" * 60 + "\n")
         f.write(f"\n# Total number of inputs = {self.num_feat}\n")
         f.write("\n# Neural network\n")
         self.arg_input = ",".join(self.arg_input)
-        # ----------- LAYER 1 -----------#
+        #----------- LAYER 1 -----------#
         f.write("#===== Hidden layer 1 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer1):
@@ -246,7 +269,7 @@ class WritePlumed:
         arg = ",".join([f"hl1_n{i+1}_out" for i in range(size_layer1)])
         f.write(f"\nPRINT FILE=layer1.log STRIDE={stride} ARG={arg}\n")
 
-        # ----------- LAYER 2 -----------#
+        #----------- LAYER 2 -----------#
         f.write("\n#===== Hidden layer 2 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer2):
@@ -274,7 +297,7 @@ class WritePlumed:
         arg = ",".join([f"hl2_n{i+1}_out" for i in range(size_layer2)])
         f.write(f"\nPRINT FILE=layer2.log STRIDE={stride} ARG={arg}\n")
 
-        # ----------- LAYER 3 -----------#
+        #----------- LAYER 3 -----------#
         f.write("\n#===== Hidden layer 3 =====#\n")
         # Loop over nodes (neurons) in the present hidden layer
         for i in range(size_layer3):
@@ -302,11 +325,11 @@ class WritePlumed:
         arg = ",".join([f"hl3_n{i+1}_out" for i in range(size_layer3)])
         f.write(f"\nPRINT FILE=layer3.log STRIDE={stride} ARG={arg}\n")
 
-        # Update PLUMED output files
+        #----------- Update PLUMED output files -----------#
         f.write(f"\n# Update all files every {stride_flush} steps\n")
         f.write(f"FLUSH STRIDE={stride_flush}\n")
 
-        # Save/Print CVs
+        #----------- Save/Print CVs -----------#
         self.colvar = [f"hl3_n{j+1}_out" for j in range(size_layer3)]
         colvar = ",".join(self.colvar)
         f.write(f"\nPRINT ARG={colvar} STRIDE=1 FILE={self.colvar_file}\n")
@@ -423,7 +446,7 @@ def main():
 
     args = parser.parse_args()
 
-    # ------- Read input -------#
+    #------- Read input -------#
     print(">>> Reading DeepCV input file ...")
     if not os.path.isfile(args.input):
         exit(f'Error: No such file "{args.input}"')
@@ -435,14 +458,14 @@ def main():
     weight = json["output"]["out_weights_npz"]
     bias = json["output"]["out_biases_npz"]
 
-    # ------- Check weight file -------#
+    #------- Check weight file -------#
     print(f">>> Checking weight output file: {weight}")
     weight = folder + "/" + "autoencoder" + "/" + weight
     if not os.path.isfile(weight):
         exit(f'Error: No such file "{weight}"')
     weight = np.load(weight)
 
-    # ------- Check bias file -------#
+    #------- Check bias file -------#
     print(f">>> Checking bias output file  : {bias}")
     bias = folder + "/" + "autoencoder" + "/" + bias
     if not os.path.isfile(bias):
@@ -451,12 +474,17 @@ def main():
 
     kw = weight.files[:3]  # get keywords of first three layers
 
-    # ------- Start writing -------#
+    #------- Start writing -------#
     p = WritePlumed(output_plumed=args.output)
     if not args.num_atoms and not args.atom_index:
         parser.error("either --num-atoms (-n) or --atom-index (-a) must be specified.")
     elif args.num_atoms and args.atom_index:
         parser.error("--num-atoms (-n) or --atom-index (-a) cannot be specified at the same time.")
+
+    #-------- Write input for primary neural network (first loss) --------#
+    f = open(p.output_plumed, "a")
+    f.write("# ---- Primary neural net ----\n\n")
+    f.close()
     if args.num_atoms:
         p.write_Zmat(args.num_atoms)
     elif args.atom_index:
@@ -468,6 +496,14 @@ def main():
         p.write_Zmat_by_index(args.atom_index)
     if args.sprint_index:
         p.write_SPRINT(args.sprint_index.split(":"))
+
+    #-------- Write input for secondary neural network (second loss) --------#
+    f = open(p.output_plumed, "a")
+    f.write("\n# ---- Secondary neural net ----\n\n")
+    f.close()
+    p.write_dist_second_loss(args.atom_index)
+
+    #-------- Write neural network functions (DAENN CV)--------#
     p.write_NeuralNetwork(weight, bias, kw, func_1, func_2, func_3)
     p.write_MetaD()
     print(f">>> Plumed data have been written successfully to '{os.path.abspath(args.output)}'.")
