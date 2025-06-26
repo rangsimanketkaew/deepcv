@@ -21,6 +21,8 @@ sys.path.append(parentdir)
 import argparse
 import numpy as np
 from utils import util
+from tools import adjmat_param as param
+from itertools import combinations_with_replacement
 from datetime import datetime
 
 
@@ -130,15 +132,43 @@ class WritePlumed:
         f = open(self.output_plumed, "a")
         f.write("\n# SPRINT coordinate\n")
         self.num_sprint = 0
+        symbols = []
         for i in sprint_index:
             self.num_sprint += len(i.split("=")[1].split(","))
             f.write(f"DENSITY LABEL={i.split('=')[0]} SPECIES={i.split('=')[1]}\n")
+            symbols.append(i.split('=')[0])
+        print(symbols)
         print(f">>>   |- Number of SPRINT inputs: {self.num_sprint}")
         self.num_feat += self.num_sprint
         f.write("\nCONTACT_MATRIX ...\n")
-        f.write("# !!!---------------------------------------------------!!!\n")
-        f.write("# !!! You have to define adjacency matrix (a_<ij>) here !!!\n")
-        f.write("# !!!---------------------------------------------------!!!\n")
+        f.write(f"  ATOMS={','.join(symbols)}\n")
+        for i, j in enumerate(symbols):
+            print(i, j)
+
+        # Determine all possible pairs of elements for contact matrix
+        symbols_pairs = list(combinations_with_replacement(symbols, 2))
+        index_pairs = list(combinations_with_replacement(range(len(symbols)), 2))
+        # print(symbols_pairs)
+        # print(index_pairs)
+        # Shift to 1-based
+        index_pairs = [(i + 1, j + 1) for i, j in index_pairs]
+        # print(index_pairs)
+        a = 2.5
+        for i in range(len(index_pairs)):
+            switch = "".join(map(str,index_pairs[i]))
+            try:
+                str_pair = "".join(map(str,symbols_pairs[i]))
+                r_0 = param.r_0[str(str_pair)]
+            except:
+                try:
+                    swapped_pair = (symbols_pairs[i][1], symbols_pairs[i][0])
+                    print(swapped_pair)
+                    str_pair = "".join(map(str,swapped_pair))
+                    r_0 = param.r_0[str(str_pair)]
+                except:
+                    exit("Error: Pair of elements now found in adjmat_param")
+            f.write(f"  SWITCH{switch}={{RATIONAL R_0={r_0} NN={param.n} MM={param.m}}}\n")
+        f.write(f"  LABEL=mat\n")
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
