@@ -20,6 +20,14 @@ from tqdm import tqdm
 from tools import adjmat_param as param
 
 
+def find_atomic_symbol(numbers, index):
+    # find atomic symbols for adj matrix descriptors
+    symbols = [chemical_symbols[x] for x in numbers]
+    # filter the symbols
+    if index:
+        symbols = [symbols[i] for i in index]
+
+
 def _distance(p1, p2):
     """Calculate bond length between atoms
 
@@ -336,6 +344,7 @@ def main():
         type=int,
         nargs="+",
         default=None,
+        required=True,
         help="List of atomic index that will be taken. (1-based array index)",
     )
     parser.add_argument(
@@ -409,13 +418,8 @@ def main():
     ############################
 
     no_struc, _, _ = xyz.shape
-
-    # find atomic symbols for adj matrix descriptors
     if args.rep in ["adjmat", "sprint", "xsprint"]:
-        symbols = [chemical_symbols[x] for x in numbers]
-        # filter the symbols
-        if index:
-            symbols = [symbols[i] for i in index]
+        symbols = find_atomic_symbol(numbers, index)
 
     # Internal coordinates
     if args.rep == "zmat":
