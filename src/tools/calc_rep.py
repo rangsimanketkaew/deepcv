@@ -240,7 +240,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
 
     Returns:
         a_i (array): Sorted index of atoms
-        s (array): Sorted SPRINT coordinate
+        s (array): Sorted SPRINT coordinates
     """
     a_ij = calc_adjmat(symbols, xyz, r_0, n, m)
     # Calculate eigenvalue and eigenvector
@@ -294,7 +294,7 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
 
     Returns:
         a_i (array): Sorted index of atoms
-        s_x (array): Sorted SPRINT coordinate
+        s_x (array): Sorted xSPRINT coordinates
     """
     # Calculate normal SPRINT
     a_i, s = calc_sprint(symbols, xyz, r_0, n, m, M)
