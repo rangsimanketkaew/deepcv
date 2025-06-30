@@ -27,6 +27,8 @@ def find_atomic_symbol(numbers, index):
     if index:
         symbols = [symbols[i] for i in index]
 
+    return symbols
+
 
 def _distance(p1, p2):
     """Calculate bond length between atoms
