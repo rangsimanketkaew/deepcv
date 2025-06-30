@@ -1,0 +1,128 @@
+# Metadynamics simulation of Diels-Alder reaction in water 
+# using xTB and D3 correction
+# PLUMED is used as external plugin for metadynamics
+
+@SET RESTART 0
+@SET PROJECT_NAME DA_MetaD_DeepCV_xTB
+@SET COORD_FILE reactant_DA_water.xyz
+
+@SET MULT 1
+@SET MOL_CHARGE 0
+
+&GLOBAL
+  PROJECT ${PROJECT_NAME}
+  RUN_TYPE MD
+  PRINT_LEVEL MEDIUM
+  WALLTIME 84000
+  PREFERRED_FFT_LIBRARY FFTW3
+&END GLOBAL
+
+&FORCE_EVAL
+  METHOD  QS
+  &DFT
+    UKS  F
+    MULTIPLICITY ${MULT}
+    CHARGE ${MOL_CHARGE}
+    &PRINT
+      &MULLIKEN
+        &EACH
+          MD 10
+        &END EACH
+      &END MULLIKEN
+    &END PRINT
+    &SCF
+      MAX_SCF    15
+      EPS_SCF    1E-06
+      SCF_GUESS  RESTART
+      &OT  T
+        MINIMIZER DIIS
+        PRECONDITIONER FULL_ALL
+        ALGORITHM IRAC
+        ORTHO_IRAC CHOL
+        EPS_IRAC_SWITCH 0.0
+        LINESEARCH 3PNT
+      &END OT       
+      &OUTER_SCF
+        MAX_SCF 25
+        EPS_SCF 1E-06
+      &END OUTER_SCF
+    &END SCF
+    &QS
+      METHOD xTB
+      &xTB
+        DO_EWALD T
+        &PARAMETER
+           PARAM_FILE_NAME xTB_parameters
+           DISPERSION_PARAMETER_FILE dftd3.dat
+        &END PARAMETER
+      &END xtB
+    &END QS
+    &MGRID
+      NGRIDS     5
+      CUTOFF     400
+      REL_CUTOFF 60
+    &END MGRID
+  &END DFT
+  &SUBSYS
+    &CELL
+        ABC 8.964321 8.964321 8.964321
+    &END CELL
+    &TOPOLOGY
+      CONN_FILE_FORMAT GENERATE
+      &CENTER_COORDINATES T
+      &END CENTER_COORDINATES
+      COORD_FILE_FORMAT XYZ
+      COORD_FILE_NAME ${COORD_FILE}
+    &END TOPOLOGY
+  &END SUBSYS
+&END FORCE_EVAL
+&MOTION
+  &MD
+    ENSEMBLE NVT
+    STEPS  200000
+    TIMESTEP 0.5
+    TEMPERATURE 300
+    &THERMOSTAT
+      TYPE NOSE
+      &NOSE
+        TIMECON 100
+      &END NOSE
+    &END THERMOSTAT
+    &PRINT
+      &ENERGY
+        &EACH
+          MD 1
+        &END EACH
+      &END ENERGY
+    &END PRINT
+  &END MD
+  &FREE_ENERGY
+      &METADYN
+          USE_PLUMED .TRUE.
+          PLUMED_INPUT_FILE plumed-NN.dat
+      &END METADYN
+  &END FREE_ENERGY
+  &PRINT
+    &TRAJECTORY
+      FORMAT XMOL
+      &EACH
+        MD 1
+      &END EACH
+    &END TRAJECTORY
+    &RESTART
+      &EACH
+        MD 50
+      &END EACH
+      ADD_LAST NUMERIC
+    &END RESTART
+  &END PRINT
+&END MOTION
+
+@if ${RESTART} == 1
+&EXT_RESTART
+  RESTART_FILE_NAME ${PROJECT_NAME}-1.restart
+  RESTART_DEFAULT T
+  RESTART_RTP F
+&END EXT_RESTART
+@endif
+
