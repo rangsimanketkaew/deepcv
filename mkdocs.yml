@@ -31,6 +31,8 @@ nav:
     - 4. Training DAENN model with DeepCV: usage/training-model.md
     - 5. Enhanced sampling:
       - Metadynamics using PLUMED: usage/metad-sim.md
+      - CP2K with PLUMED: usage/cp2k-with-plumed.md
+      - Run CP2K on SLURM cluster: slurm-cp2k.md
     - 6. Post-analysis:
       - Free energy surface: usage/fes-analysis.md
       - Metastable states: usage/states-analysis.md
