@@ -1,64 +1,39 @@
-# DAENN Model Training
+# Training DAENN model with DeepCV
 
-Training a DAENN-based collective variable (CV) model with DeepCV is very easy. 
-All parameters needed for model training are defined in one input file, that is all you need.
+Training a DAENN CVs model with DeepCV is very easy. 
+All parameters needed for model training are defined in one input file that you just setup in the previous step.
 On this page, you will learn how to use the `daenn` code script to train a CV of the Diels-Alder reaction of 
 ethene and 1,3-butadiene. The reference paper is 
 [https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c04004](https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c04004).
 
 > Note that the current version of DeepCV accepts only datasets that are in NumPy's compressed file formats (.npz).
 
-## Call DeepCV's module
-
-All DeepCV's modules can be called via `main.py` API script (Don't forget to activate to the environment, where you installed dependencies packages for DeepCV).
-
-```sh
-$ cd deepcv/src/
-$ python main.py
-
-------------------------------------------------
-DeepCV : Deep Learning for Collective Variables
--------------------------------------------------
-version 1.0 : February 2022
-University of Zurich, Switzerland
-https://gitlab.uzh.ch/lubergroup/deepcv
-
-Module         Description
--------------  ----------------------------------------------
-calc_rep       Calculate molecular representation
-gen_input      Neural network input generator
-single_train   Single-data fully-connected neural network
-multi_train    Multi-data fully-connected neural network
-daenn          Deep autoencoder neural network
-gan_train      Training generative adversarial network (GAN)
-gan_predict    Generating samples using trained GAN
-deepcv2plumed  Create PLUMED input file
-analyze_FES    FES validation
-analyze_model  DAENN model analysis and parameters extraction
-explor_abi     Calculate exploration ability
-
-For more detail, please review 'README' in the repository.
-```
-
 ## Train model
 
-Execute the `main.py` script with argument `daenn` and followed by `-i` flag with the path to input file 
+Execute the `main.py` script with argument `daenn` and followed by `--input` or `-i` flag with the path to input file 
 (e.g. [input_ae_DA.json](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/input/input_ae_DA.json)). 
 The training time depends on the size of the dataset, the complexity of a neural net, the number of epochs, etc.
+The following example is the training on dataset of 99,000 configurations of ethene and 1,3-butadiene.
 
 ```sh
-$ python deepcv/src/main.py daenn -i input/input_ae_DA.json
+$ python deepcv/src/main.py daenn --input input/input_ae_DA.json
 
-============================== Program started ==============================
-Project: Demo
-=== Shape of dataset before splitting ===
->>> 1. Dataset: (99000, 15)
->>> 2. Dataset: (99000, 14)
->>> 3. Dataset: (99000, 13)
-=== Shape of dataset after splitting ===
->>> 1. Train: (79200, 15) & Test: (19800, 15)
->>> 2. Train: (79200, 14) & Test: (19800, 14)
->>> 3. Train: (79200, 13) & Test: (19800, 13)
+DeepCV:INFO >>> ============================== Program started ==============================
+DeepCV:INFO >>> Project: Demo
+DeepCV:INFO >>> Date 30/06/2025 at 11:38:36
+DeepCV:WARNING >>> No npz keys specified, the first key found in array.files is automatically used.
+DeepCV:INFO >>> === Shape of dataset before splitting ===
+DeepCV:INFO >>> 1. Dataset: (99000, 5)
+DeepCV:INFO >>> 2. Dataset: (99000, 4)
+DeepCV:INFO >>> 3. Dataset: (99000, 3)
+DeepCV:INFO >>> 4. Dataset: (99000, 6)
+DeepCV:INFO >>> 5. Dataset: (99000, 5)
+DeepCV:INFO >>> === Shape of dataset after splitting ===
+DeepCV:INFO >>> 1. Train: (79200, 5) & Test: (19800, 5)
+DeepCV:INFO >>> 2. Train: (79200, 4) & Test: (19800, 4)
+DeepCV:INFO >>> 3. Train: (79200, 3) & Test: (19800, 3)
+DeepCV:INFO >>> 4. Train: (79200, 6) & Test: (19800, 6)
+DeepCV:INFO >>> 5. Train: (79200, 5) & Test: (19800, 5)
 Model: "daenn"
 ...
 ...
@@ -83,7 +58,7 @@ e.g., use the trained model to generate CVs.
 
 ## Outputs
 
-DeepCV save autoencoder, encoder, and decoder models separately in the respective output directory.
+DeepCV saves autoencoder, encoder, and decoder models separately in the respective output directory.
 
 Example of a list of outputs generated and saved by DeepCV (sorted by name).
 

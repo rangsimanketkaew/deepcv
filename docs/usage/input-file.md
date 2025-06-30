@@ -1,4 +1,4 @@
-# Understanding DeepCV Input File
+# Preparing DeepCV Input File
 
 DeepCV's input file must be in a JSON file format (dictionary-like).
 Examples of DAENN input in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
@@ -8,6 +8,8 @@ The last two layers are two decoded layers for reconstruction.
 
 The size of two hidden layers that are opposite of each other, e.g., input and output layers 
 (the 1st and 5th hidden layers) must be the same.
+
+Here is the example input file for training DAENN CV of Diels-Alder reaction: [input_ae_DA.json](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/input/input_ae_DA.json)
 
 ## Keys
 

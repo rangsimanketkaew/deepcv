@@ -1,4 +1,4 @@
-# Free Energy Surface Analysis
+# Analyzing free energy surface
 
 ## Convergence of FES
 

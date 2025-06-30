@@ -1,4 +1,4 @@
-# Metastable States Sampling Analysis
+# Analyzing netastable states
 
 ## Visualizing the latent space
 

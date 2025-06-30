@@ -23,13 +23,13 @@ nav:
     - Installing: installation/install.md
     - Compiling: installation/compile.md
   - Usage:
-    - Overview: usage/overview.md
-    - Dataset preparation: usage/prepare-dataset.md
-    - Understanding input file: usage/input-file.md
-    - Model training: usage/training-model.md
-    - Enhanced sampling:
-      - Metadynamics: usage/metad-sim.md
-    - Post-analysis:
+    - 1. Overview: usage/overview.md
+    - 2. Preparing dataset: usage/prepare-dataset.md
+    - 3. Preparing DeepCV input file: usage/input-file.md
+    - 4. Training DAENN model with DeepCV: usage/training-model.md
+    - 5. Enhanced sampling:
+      - Metadynamics using PLUMED: usage/metad-sim.md
+    - 6. Post-analysis:
       - Free energy surface: usage/fes-analysis.md
       - Metastable states: usage/states-analysis.md
   - Citing: citing.md
