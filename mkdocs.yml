@@ -23,7 +23,9 @@ nav:
     - Installing: installation/install.md
     - Compiling: installation/compile.md
   - Usage:
-    - 1. Overview: usage/overview.md
+    - 1. Overview: 
+      - Understanding DeepCV: usage/overview.md
+      - DeepCV modules: usage/modules.md
     - 2. Preparing dataset: usage/prepare-dataset.md
     - 3. Preparing DeepCV input file: usage/input-file.md
     - 4. Training DAENN model with DeepCV: usage/training-model.md
