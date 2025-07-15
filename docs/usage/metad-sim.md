@@ -10,7 +10,7 @@ Basically, it will read and extract the neural network outputs (the optimized we
 in PLUMED format using `MATHEVAL` or `CUSTOM` function ([see details here](https://www.plumed.org/doc-v2.10/user-doc/html/_m_a_t_h_e_v_a_l.html)).
 
 ```sh
-$ python deepcv/src/main.py deepcv2plumed --input input/input_ae_DA.json --atom-index {1..6} --sprint--index C=1,2,3,4,5,6 
+$ python deepcv/src/main.py deepcv2plumed --input input_ae_DA.json --atom-index {1..6} --sprint-index C=1,2,3,4,5,6 
 
 >>> Reading DeepCV input file ...
 >>> Checking weight output file: model_weights.npz

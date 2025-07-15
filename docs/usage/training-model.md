@@ -16,7 +16,7 @@ The training time depends on the size of the dataset, the complexity of a neural
 The following example is the training on dataset of 99,000 configurations of ethene and 1,3-butadiene.
 
 ```sh
-$ python deepcv/src/main.py daenn --input input/input_ae_DA.json
+$ python deepcv/src/main.py daenn --input input_ae_DA.json
 
 DeepCV:INFO >>> ============================== Program started ==============================
 DeepCV:INFO >>> Project: Demo
