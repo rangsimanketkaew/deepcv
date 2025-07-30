@@ -99,7 +99,7 @@
   &FREE_ENERGY
       &METADYN
           USE_PLUMED .TRUE.
-          PLUMED_INPUT_FILE plumed-NN.dat
+          PLUMED_INPUT_FILE plumed_deepcv.dat
       &END METADYN
   &END FREE_ENERGY
   &PRINT

@@ -27,11 +27,11 @@ from datetime import datetime
 
 
 class WritePlumed:
-    def __init__(self, output_plumed="plumed-NN.dat", colvar_file="COLVAR.log"):
+    def __init__(self, output_plumed="plumed_deepcv.dat", colvar_file="COLVAR.log"):
         """Start writing PLUMED input file (.dat)
 
         Args:
-            output_plumed (str): Plumed file name. Defaults to "plumed-NN.dat".
+            output_plumed (str): Plumed file name. Defaults to "plumed_deepcv.dat".
             colvar_file (str): Name of collective variable file. Defaults to "COLVAR.log".
         """
         self.output_plumed = output_plumed
@@ -81,10 +81,9 @@ class WritePlumed:
                 num_inp += 1
         print(f">>>   |- Number of Z-matrix inputs: {num_inp}")
         self.num_feat += num_inp
-        self.arg_input = (
-            [f"d{j+1}" for j in range(len(index) - 1)]
-            + [f"a{j+1}" for j in range(len(index) - 2)]
-        )
+        self.arg_input = [f"d{j+1}" for j in range(len(index) - 1)] + [
+            f"a{j+1}" for j in range(len(index) - 2)
+        ]
         if torsion:
             self.arg_input += [f"t{j+1}" for j in range(len(index) - 3)]
         arg = ",".join(self.arg_input)
@@ -424,8 +423,8 @@ def main():
         "-o",
         metavar="FILENAME.dat",
         type=str,
-        default="plumed_NN.dat",
-        help="Name of a PLUMED input file (.dat). Default to 'plumed_NN.dat'",
+        default="plumed_deepcv.dat",
+        help="Name of a PLUMED input file (.dat). Default to 'plumed_deepcv.dat'",
     )
 
     args = parser.parse_args()

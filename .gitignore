@@ -20,7 +20,7 @@ log/*
 logs/*
 examples/
 *.png
-!output/plumed_NN.dat
+!output/plumed_deepcv.dat
 
 # mkdocs
 !docs/img/*.png
