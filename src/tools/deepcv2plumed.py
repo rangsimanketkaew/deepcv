@@ -112,22 +112,33 @@ class WritePlumed:
         index_pairs = list(combinations_with_replacement(range(len(symbols)), 2))
         # Shift to 1-based
         index_pairs = [(i + 1, j + 1) for i, j in index_pairs]
-        a = 2.5
+        # ---------------
+        # Determine r_0 of each pair for switching function
+        r_0 = []
         for i in range(len(index_pairs)):
-            switch = "".join(map(str, index_pairs[i]))
             try:
                 str_pair = "".join(map(str, symbols_pairs[i]))
-                r_0 = param.r_0[str(str_pair)]
+                r_0_ = param.r_0[str(str_pair)]
             except:
                 try:
                     swapped_pair = (symbols_pairs[i][1], symbols_pairs[i][0])
                     str_pair = "".join(map(str, swapped_pair))
-                    r_0 = param.r_0[str(str_pair)]
+                    r_0_ = param.r_0[str(str_pair)]
                 except:
                     exit("Error: Pair of elements now found in adjmat_param")
+            r_0.append(r_0_)
+        # ---------------
+        # Write the swiching function
+        if len(index_pairs) == 1:
             f.write(
-                f"  SWITCH{switch}={{RATIONAL R_0={r_0} NN={param.n} MM={param.m}}}\n"
+                f"  SWITCH={{RATIONAL R_0={r_0[0]} NN={param.n} MM={param.m}}}\n"
             )
+        elif len(index_pairs) > 1:
+            for i in range(len(index_pairs)):
+                switch = "".join(map(str, index_pairs[i]))
+                f.write(
+                    f"  SWITCH{switch}={{RATIONAL R_0={r_0} NN={param.n} MM={param.m}}}\n"
+                )
         f.write(f"  LABEL=mat\n")
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
