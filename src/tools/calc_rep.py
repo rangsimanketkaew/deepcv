@@ -11,7 +11,7 @@ Info:
 
 import os
 import argparse
-import math
+import multiprocessing as mp
 import numpy as np
 from scipy import spatial
 import ase.io
@@ -40,7 +40,9 @@ def _distance(p1, p2):
     Returns:
         float: Bond length
     """
-    return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2))
+    return np.sqrt(
+        ((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2) + ((p1[2] - p2[2]) ** 2)
+    )
 
 
 def _angle(a, b, c):
@@ -124,22 +126,9 @@ def _torsion(p0, p1, p2, p3, degree=False):
         return np.arctan2(y, x)
 
 
-def calc_zmat(xyz, filename="structures"):
-    """Compute Z-matrix (internal) coordinates of a given molecule
+def calc_dist(xyz):
+    """Compute distances between atoms A and B of a given molecule
 
-    Args:
-        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
-        filename (str, optional): Output filename. Defaults to "structures".
-
-    Returns:
-        dist (array): (dims M-1) Distances for M atoms
-        angle (array): (dims M-2) Bond angles for each M structure
-        torsion (array): (dims M-3) Torsion angles for each M structure
-    """
-    no_atoms, _ = xyz.shape
-
-    # ---------------------------------------------
-    """Calculate distance between atom A and B.
     1
     2 - 1       bond 1
     3 - 1       bond 2
@@ -150,7 +139,14 @@ def calc_zmat(xyz, filename="structures"):
     8 - 5
     ...
     N - (N-3)   bond N-1
+
+    Args:
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+
+    Returns:
+        dist (array): (dims M-1) Distances for M atoms
     """
+    no_atoms, _ = xyz.shape
     dist = np.zeros(no_atoms - 1)
     # for i in range(no_strct):
     alldist = spatial.distance.cdist(xyz, xyz)
@@ -159,8 +155,12 @@ def calc_zmat(xyz, filename="structures"):
     for i in range(no_atoms - 3):
         dist[i + 2] = alldist[i][i + 3]
 
-    # ---------------------------------------------
-    """Calculate angle between atom A, B and C.
+    return dist
+
+
+def calc_angle(xyz):
+    """Compute angles between atoms A, B and C of a given molecule
+
     1
     2 - 1
     3 - 1 - 2       angle 1
@@ -171,14 +171,25 @@ def calc_zmat(xyz, filename="structures"):
     8 - 5 - 6
     ...
     N - (N-3) - (N-2)   bond N-2
+
+    Args:
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+
+    Returns:
+        angle (array): (dims M-2) Bond angles for each M structure
     """
+    no_atoms, _ = xyz.shape
     angle = np.zeros(no_atoms - 2)
     angle[0] = _angle_sign(xyz[2], xyz[0], xyz[1])
     for i in range(no_atoms - 3):
         angle[i + 1] = _angle_sign(xyz[i + 3], xyz[i], xyz[i + 2])
 
-    # ---------------------------------------------
-    """Calculate torsion (dihedral) angle between atom A, B, C and D.
+    return angle
+
+
+def calc_torsion(xyz):
+    """Compute torsion (dihedral) angles between atoms A, B, C and D of a given molecule
+
     1
     2 - 1
     3 - 1 - 2
@@ -189,12 +200,19 @@ def calc_zmat(xyz, filename="structures"):
     8 - 5 - 6 - 7       dih 5
     ...
     N - (N-3) - (N-2) - (N-1)      dih N-3
+
+    Args:
+        xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+
+    Returns:
+        torsion (array): (dims M-3) Torsion angles for each M structure
     """
+    no_atoms, _ = xyz.shape
     torsion = np.zeros(no_atoms - 3)
     for i in range(no_atoms - 4):
         torsion[i] = _torsion(xyz[i + 3], xyz[i], xyz[i + 1], xyz[i + 2])
 
-    return dist, angle, torsion
+    return torsion
 
 
 def calc_adjmat(symbols, xyz, r_0, n, m):
@@ -217,11 +235,16 @@ def calc_adjmat(symbols, xyz, r_0, n, m):
     """
     try:
         tmp = [
-            [r_0[first + second] if first + second in r_0 else r_0[second + first] for second in symbols]
+            [
+                r_0[first + second] if first + second in r_0 else r_0[second + first]
+                for second in symbols
+            ]
             for first in symbols
         ]
     except KeyError as err:
-        exit(f"Error: Chemical symbol pair {err} is not defined in \"src/tools/adjmat_param.py\". Please check!")
+        exit(
+            f'Error: Chemical symbol pair {err} is not defined in "src/tools/adjmat_param.py". Please check!'
+        )
 
     r_0 = np.asarray(tmp)
     r_ij = spatial.distance.cdist(xyz, xyz)
@@ -407,7 +430,9 @@ def main():
     index = args.index_list
     # Check index
     if min(index) <= 0:
-        exit(f"Error: there is at least one index in {index} that is equal or less than 0.")
+        exit(
+            f"Error: there is at least one index in {index} that is equal or less than 0."
+        )
     # Change index of atoms from 1-based to 0-based
     index = [i - 1 for i in index]
     if index:
@@ -423,39 +448,66 @@ def main():
     if args.rep in ["adjmat", "sprint", "xsprint"]:
         symbols = find_atomic_symbol(numbers, index)
 
+    # Setting up multiprocessing
+    num_workers = int(0.8 * os.cpu_count())
+    chunksize = max(1, int(no_struc / num_workers))
+
     # Internal coordinates
     if args.rep == "zmat":
-        print("Calculate internal coordinates of all structures")
-        for i in tqdm(range(no_struc)):
-            dist, angle, torsion = calc_zmat(xyz[i], filename)
-            if args.save:
-                np.savez_compressed(f"{filename}_{args.rep}_dist_strc_{i+1}.npz", dist=dist)
-                np.savez_compressed(f"{filename}_{args.rep}_angle_strc_{i+1}.npz", angle=angle)
-                np.savez_compressed(f"{filename}_{args.rep}_torsion_strc_{i+1}.npz", torsion=torsion)
+        print("Calculate distance coordinates of all structures")
+        with mp.Pool(num_workers) as p:
+            matrix = np.array(p.map(calc_dist, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_dist_strc.npz", dist=matrix)
+
+        print("Calculate bond angle coordinates of all structures")
+        with mp.Pool(num_workers) as p:
+            matrix = np.array(p.map(calc_angle, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_angle_strc.npz", angle=matrix)
+
+        print("Calculate torsion angle coordinates of all structures")
+        with mp.Pool(num_workers) as p:
+            matrix = np.array(p.map(calc_angle, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_torsion_strc.npz", torsion=matrix)
+
     # Adjacency matrix
     elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
         for i in tqdm(range(no_struc)):
             a_ij = calc_adjmat(symbols, xyz[i], param.r_0, param.n, param.m)
             if args.save:
-                np.savez_compressed(f"{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij)
+                np.savez_compressed(
+                    f"{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij
+                )
+
     # SPRINT coordinates
     elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
         for i in tqdm(range(no_struc)):
-            sorted_index, sorted_SPRINT = calc_sprint(symbols, xyz[i], param.r_0, param.n, param.m, param.M)
+            sorted_index, sorted_SPRINT = calc_sprint(
+                symbols, xyz[i], param.r_0, param.n, param.m, param.M
+            )
             if args.save:
                 np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, sprint=sorted_SPRINT
+                    f"{filename}_{args.rep}_strc_{i+1}.npz",
+                    index=sorted_index,
+                    sprint=sorted_SPRINT,
                 )
+
     # xSPRINT coordinates
     elif args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
         for i in tqdm(range(no_struc)):
-            sorted_index, sorted_xSPRINT = calc_xsprint(symbols, xyz[i], param.r_0, param.n, param.m, param.M)
+            sorted_index, sorted_xSPRINT = calc_xsprint(
+                symbols, xyz[i], param.r_0, param.n, param.m, param.M
+            )
             if args.save:
                 np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz", index=sorted_index, xsprint=sorted_xSPRINT
+                    f"{filename}_{args.rep}_strc_{i+1}.npz",
+                    index=sorted_index,
+                    xsprint=sorted_xSPRINT,
                 )
 
 
