@@ -14,7 +14,6 @@ Exploration ability of the state on configurational space
 
 import argparse
 import numpy as np
-import sympy as sp
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D

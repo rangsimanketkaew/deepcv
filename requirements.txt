@@ -2,7 +2,6 @@ tensorflow-gpu==2.10.0
 numpy
 scikit-learn
 scipy
-sympy
 matplotlib
 ase
 imageio

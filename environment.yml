@@ -9,7 +9,6 @@ dependencies:
 - numpy=1.23.1
 - scipy=1.9.1
 - scikit-learn=1.1.2
-- sympy=1.11.1
 - matplotlib=3.6.1
 - bayesian-optimization=1.2.0
 - imageio=2.22.0
