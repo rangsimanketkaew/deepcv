@@ -19,5 +19,4 @@ dependencies:
 - pydot=1.4.2
 - pip
 - pip:
-  - tensorflow-addons==0.18.0
   - ase==3.22.1

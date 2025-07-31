@@ -30,7 +30,6 @@ from contextlib import redirect_stdout
 import functools
 import numpy as np
 import tensorflow as tf
-import tensorflow_addons as tfa
 
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
 from tensorflow.keras.models import Model
@@ -397,9 +396,6 @@ class Autoencoder(Model):
         # e.g. 'tensorflow --logdir ./log'
         tbCallBack = TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True)
 
-        # TQDM progress bar
-        tqdm_callback = tfa.callbacks.TQDMProgressBar()
-
         # train N times
         N = 10
         for i in range(N):
@@ -415,7 +411,6 @@ class Autoencoder(Model):
                 verbose=verbose,
                 use_multiprocessing=True,
                 callbacks=[
-                    tqdm_callback,
                     # tbCallBack
                 ],
             )

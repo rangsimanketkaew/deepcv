@@ -6,7 +6,6 @@ DeepCV requires the following libraries (the supported version for each library 
 
 ```
 tensorflow-gpu==2.10.0
-tensorflow-addons
 numpy
 scikit-learn
 scipy
