@@ -13,7 +13,6 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 # Bring all modules to the same level as tools
-from . import gen_input
 from . import adjmat_param
 from . import calc_rep
 from . import deepcv2plumed
