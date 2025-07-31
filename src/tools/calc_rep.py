@@ -17,7 +17,6 @@ import numpy as np
 from scipy import spatial
 import ase.io
 from ase.data import chemical_symbols
-from tqdm import tqdm
 from tools import adjmat_param as param
 
 
@@ -256,7 +255,7 @@ def calc_adjmat(xyz, symbols, r_0, n, m):
     return a_ij
 
 
-def calc_sprint(symbols, xyz, r_0, n, m, M=1):
+def calc_sprint(xyz, symbols, r_0, n, m, M=1):
     """Compute SPRINT coordinates
 
     s^x_i = \sqrt{n} \lambda v_i
@@ -308,7 +307,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
     return a_i, s
 
 
-def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
+def calc_xsprint(xyz, symbols, r_0, n, m, M=1, r_0x=1.5, sh=1):
     """Calculate eXtended SPRINT (xSPRINT) coordinates
 
          /-> s_i                       ; r_ij < r_0
@@ -318,8 +317,8 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
     where w is (\sum r_n)**2.
 
     Args:
-        symbols (list, array): Atomic symbol
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+        symbols (list, array): Atomic symbol
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
@@ -332,7 +331,7 @@ def calc_xsprint(symbols, xyz, r_0, n, m, M=1, r_0x=1.5, sh=1):
         s_x (array): Sorted xSPRINT coordinates
     """
     # Calculate normal SPRINT
-    a_i, s = calc_sprint(symbols, xyz, r_0, n, m, M)
+    a_i, s = calc_sprint(xyz, symbols, r_0, n, m, M)
 
     # calculate w
     _w = 0
@@ -486,30 +485,20 @@ def main():
     # SPRINT coordinates
     elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
-        for i in tqdm(range(no_struc)):
-            sorted_index, sorted_SPRINT = calc_sprint(
-                symbols, xyz[i], param.r_0, param.n, param.m, param.M
-            )
-            if args.save:
-                np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz",
-                    index=sorted_index,
-                    sprint=sorted_SPRINT,
-                )
+        with mp.Pool(num_workers) as p:
+            worker = partial(calc_sprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            sorted_index, sorted_SPRINT = zip(*p.map(worker, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", index=sorted_index, sprint=sorted_SPRINT)
 
     # xSPRINT coordinates
     elif args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
-        for i in tqdm(range(no_struc)):
-            sorted_index, sorted_xSPRINT = calc_xsprint(
-                symbols, xyz[i], param.r_0, param.n, param.m, param.M
-            )
-            if args.save:
-                np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz",
-                    index=sorted_index,
-                    xsprint=sorted_xSPRINT,
-                )
+        with mp.Pool(num_workers) as p:
+            worker = partial(calc_xsprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            sorted_index, sorted_xSPRINT = zip(*p.map(worker, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", index=sorted_index, sprint=sorted_xSPRINT)
 
 
 if __name__ == "__main__":
