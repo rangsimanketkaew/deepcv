@@ -1,4 +1,4 @@
-# Citing DeepCV
+# Cite DeepCV
 
 If you use DeepCV or find it useful for your research, please cite the following papers:
 

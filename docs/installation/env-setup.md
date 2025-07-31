@@ -9,7 +9,7 @@ git clone git@gitlab.uzh.ch:lubergroup/deepcv.git
 
 You can also use command `git checkout` to switch between `master` and `dev` branches.
 
-## Environment setup & install dependencies
+## Setup environment & install dependencies
 
 ```sh
 cd deepcv/

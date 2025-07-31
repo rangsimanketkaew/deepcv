@@ -1,13 +1,10 @@
 # Preparing DeepCV Input File
 
-DeepCV's input file must be in a JSON file format (dictionary-like).
-Examples of DAENN input in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
-show the configuration for training a model using DAENN with five hidden layers (fixed architecture).
-The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer).
-The last two layers are two decoded layers for reconstruction.
-
-The size of two hidden layers that are opposite of each other, e.g., input and output layers 
-(the 1st and 5th hidden layers) must be the same.
+DeepCV's input file is written in a JSON file format (dictionary-like).
+Input examples in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
+show the configurations for training a DAENN model with five hidden layers (fixed symmetric architecture):
+- The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer)
+- The last two layers are two decoded layers for reconstruction
 
 Here is the example input file for training DAENN CV of Diels-Alder reaction: [input_ae_DA.json](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/input/input_ae_DA.json)
 
@@ -37,7 +34,8 @@ Here is the example input file for training DAENN CV of Diels-Alder reaction: [i
 | `main_loss`        | Primary loss function          | `MSE`, `MAE`                                                               |
 | `penalty_loss`     | Secondary loss function        | `MSE`, `MAE`                                                               |
 | `loss_weights`     | A list of weight for each loss | `[1, 0.1]`                                                                 |
-| `num_epoch`        | Number of training epoch       | Integer: `1000`                                                            |
+| `num_train`        | Number of training rounds      | Integer: `10`                                                              |
+| `num_epoch`        | Number of training epochs      | Integer: `1000`                                                            |
 | `batch_size`       | Batch size                     | Integer: `55`                                                              |
 
 #### Neural network

@@ -1,6 +1,6 @@
-# Installing DeepCV
+# Install DeepCV
 
-## Installing dependencies
+## Install dependencies
 
 DeepCV requires the following libraries (the supported version for each library is as of the current version of DeepCV):
 
@@ -9,13 +9,11 @@ tensorflow-gpu==2.10.0
 numpy
 scikit-learn
 scipy
-sympy
 matplotlib
 ase
 imageio
 natsort
 tabulate
-bayesian-optimization
 tqdm
 pydot
 ```
@@ -28,7 +26,7 @@ pip install -r requirements.txt # or conda install --file requirements.txt
 Note that installing tensorflow may be sometimes tricky, depending on system environment. 
 Please consult its official website in case you have errors.
 
-## Installing DeepCV (Python)
+## Install DeepCV (Python)
 
 ```sh
 cd deepcv/

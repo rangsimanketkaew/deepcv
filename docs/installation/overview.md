@@ -1,4 +1,4 @@
-# Overview of Installing DeepCV
+# Overview of DeepCV Installation
 
 The source code of DeepCV is available free of charge for academic purposes on our [GitLab](https://gitlab.uzh.ch/lubergroup/deepcv).
 

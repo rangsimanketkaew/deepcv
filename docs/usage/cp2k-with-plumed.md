@@ -1,4 +1,4 @@
-# Using CP2K with PLUMED for metadynamics simulation
+# Use CP2K with PLUMED for Metadynamics Simulation
 
 ## Prepare all necessary files
 

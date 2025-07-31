@@ -1,6 +1,6 @@
-# Compiling DeepCV (C++)
+# Compile DeepCV (C++)
 
-## Compilation of TensorFlow C++ API
+## Compile TensorFlow C++ API
 
 TensorFlow C++ API used in this work was built from the source. One can follow step-by-step instructions to build the TensorFlow libraries using GCC 9.3.1 for C++ 14:
 
@@ -36,7 +36,7 @@ TensorFlow C++ API used in this work was built from the source. One can follow s
     ```
 More details on package dependencies installation and compilation of TensorFlow C++ API are available at https://github.com/rangsimanketkaew/tensorflow_cpp_api.
 
-## Compilation of PLUMED with DeepCV and TensorFlow
+## Compile PLUMED with DeepCV and TensorFlow
 
 DeepCV is implemented in PLUMED as a standalone module `deepcv`. The source code of a modified version of PLUMED is available at https://gitlab.uzh.ch/lubergroup/plumed2-deepcv. The following is instruction for compiling PLUMED with TensorFlow and DeepCV:
 
@@ -68,7 +68,7 @@ export LD_LIBRARY_PATH="${LIB_TF}/lib/":"$PREFIX/lib/":$LD_LIBRARY_PATH
 
 Note that the above procedure will compile PLUMED with MPI. Use `--disable-mpi` instead if you prefer serial compilation to parallel compilation.
 
-## Compilation of DeepCV C++ module
+## Compile DeepCV C++ module
 
 1. Go to DeepCV directory:
     ```sh

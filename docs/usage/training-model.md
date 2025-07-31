@@ -1,4 +1,4 @@
-# Training DAENN model with DeepCV
+# Train DAENN model with DeepCV
 
 Training a DAENN CVs model with DeepCV is very easy. 
 All parameters needed for model training are defined in one input file that you just setup in the previous step.

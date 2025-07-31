@@ -1,4 +1,4 @@
-# Call DeepCV's module
+# Call DeepCV's Module
 
 All modules can be called via `main.py` API script. Please make sure to activate to the (conda) environment, where you installed dependencies packages for DeepCV, before calling DeepCV.
 

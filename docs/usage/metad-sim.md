@@ -1,6 +1,6 @@
-# Running metadynamics simulation
+# Run Metadynamics Simulation
 
-## Converting DAENN/DeepCV model output to PLUMED input file
+## Convert DAENN/DeepCV model output to PLUMED input file
 
 Now we are ready to convert DAENN CV from DeepCV output to PLUMED file format. PLUMED is a plugin for enhanced sampling simulations
 which supports several standard molecular simulation packages, e.g., CP2K, LAMMPS, and GROMACS.
@@ -27,7 +27,7 @@ $ python deepcv/src/main.py deepcv2plumed --input input_ae_DA.json --atom-index 
 
 The example of a generated `plumed_deepcv.dat` for the Diels-Alder reaction is [plumed_deepcv.dat](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/output/plumed_deepcv.dat).
 
-## Test plumed input file
+## Test PLUMED input file
 
 This step is to check if a generated PLUMED input file works or not.
 You can use PLUMED driver to run a trial test on a 1-frame simple Diels-Alder trajectory.
