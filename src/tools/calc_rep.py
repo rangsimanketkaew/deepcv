@@ -221,7 +221,7 @@ def calc_adjmat(symbols, xyz, r_0, n, m):
             for first in symbols
         ]
     except KeyError as err:
-        exit(f"Error: Chemical symbol pair {err} is not defined in \"adjmat_param.py\". Please check!")
+        exit(f"Error: Chemical symbol pair {err} is not defined in \"src/tools/adjmat_param.py\". Please check!")
 
     r_0 = np.asarray(tmp)
     r_ij = spatial.distance.cdist(xyz, xyz)

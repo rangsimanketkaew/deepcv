@@ -7,7 +7,7 @@ Info:
 """
 
 """
-Deep autoencoder neural net (DAENN) for learning collective variables from molecular representations
+Deep Autoencoder Neural Network (DAENN) for learning collective variables from molecular representations
 """
 
 import os, sys
@@ -364,10 +364,10 @@ class Autoencoder(Model):
         )
 
     def train_model(self, num_train, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
-        """Train model for [num_train x num_epoch] (epochs)
+        """Train model. The actual number of training steps = num_train x num_epoch (epochs)
 
         Args:
-            num_train (int): Number of trainings
+            num_train (int): Number of trainings (Defaults to 10 if not defined by the user)
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
             verbose (int): Level of prining information. Defaults to 1.
@@ -415,7 +415,7 @@ class Autoencoder(Model):
                     # tbCallBack
                 ],
             )
-            # save latent space
+            # save latent space as a figure for each training
             ev = ae_visual.encode_fig(
                 (i + 1) * self.num_epoch,
                 self.autoencoder.get_layer("concatenate_1").input,
@@ -804,7 +804,7 @@ def main():
 
     ########################
     # Save model and outputs
-    ########################\
+    ########################
     if save_model:
         model.save_model(model.autoencoder, out_autoencoder, out_model, "Autoencoder")
         model.save_model(model.encoder, out_encoder, out_model, "Encoder")

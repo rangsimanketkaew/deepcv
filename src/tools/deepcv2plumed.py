@@ -125,7 +125,7 @@ class WritePlumed:
                     str_pair = "".join(map(str, swapped_pair))
                     r_0_ = param.r_0[str(str_pair)]
                 except:
-                    exit("Error: Pair of elements now found in adjmat_param")
+                    exit(f"Error: Chemical symbol pair {str_pair} is not defined in \"src/tools/adjmat_param.py\". Please check!")
             r_0.append(r_0_)
         # ---------------
         # Write the swiching function

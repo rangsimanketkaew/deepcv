@@ -1,5 +1,6 @@
 # ++++++++++++++++++++++++++++++++++++++++++
 # Default parameters for adjacency matrix
+# Here you can add new parameters in r_0 dictionary
 r_0 = {
     "CoCo": 2.22,
     "CC": 2.65,
