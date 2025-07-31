@@ -7,6 +7,5 @@ ase
 imageio
 natsort
 tabulate
-bayesian-optimization
 tqdm
 pydot
