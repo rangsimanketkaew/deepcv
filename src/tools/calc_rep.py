@@ -381,6 +381,16 @@ def main():
         help="Representation (descriptor) to calculate",
     )
     parser.add_argument(
+        "--num-procs",
+        "-np",
+        dest="num_procs",
+        metavar="NUM_PROCS",
+        type=int,
+        default=0,
+        required=False,
+        help="Number of processors for parallel calculation",
+    )
+    parser.add_argument(
         "--save",
         "-s",
         dest="save",
@@ -450,7 +460,15 @@ def main():
         symbols = find_atomic_symbol(numbers, index)
 
     # Setting up multiprocessing
-    num_workers = int(0.8 * os.cpu_count())
+    if args.num_procs == 0:
+        num_workers = 1
+    elif args.num_procs > 0:
+        num_workers = int(args.num_procs)
+
+    if num_workers > os.cpu_count():
+        print(
+            "Requested number of processors is greater than the number of physical processors !!"
+        )
     chunksize = max(1, int(no_struc / num_workers))
 
     # Internal coordinates
@@ -477,7 +495,9 @@ def main():
     elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
         with mp.Pool(num_workers) as p:
-            worker = partial(calc_adjmat, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            worker = partial(
+                calc_adjmat, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m
+            )
             matrix = np.array(p.map(worker, xyz, chunksize))
         if args.save:
             np.savez_compressed(f"{filename}_{args.rep}.npz", adjmat=matrix)
@@ -486,19 +506,27 @@ def main():
     elif args.rep == "sprint":
         print("Calculate SPRINT coordinates and sorted atom index")
         with mp.Pool(num_workers) as p:
-            worker = partial(calc_sprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            worker = partial(
+                calc_sprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m
+            )
             sorted_index, sorted_SPRINT = zip(*p.map(worker, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_SPRINT)
+            np.savez_compressed(
+                f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_SPRINT
+            )
 
     # xSPRINT coordinates
     elif args.rep == "xsprint":
         print("Calculate xSPRINT coordinates and sorted atom index")
         with mp.Pool(num_workers) as p:
-            worker = partial(calc_xsprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            worker = partial(
+                calc_xsprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m
+            )
             sorted_index, sorted_xSPRINT = zip(*p.map(worker, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_xSPRINT)
+            np.savez_compressed(
+                f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_xSPRINT
+            )
 
 
 if __name__ == "__main__":
