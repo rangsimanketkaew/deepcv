@@ -19,7 +19,6 @@ tabulate
 bayesian-optimization
 tqdm
 pydot
-graphviz
 ```
 
 One can use this command to install all of them
