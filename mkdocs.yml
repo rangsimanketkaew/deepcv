@@ -20,15 +20,15 @@ nav:
   - Installation:
     - Overview: installation/overview.md
     - Environment setup: installation/env-setup.md
-    - Installing: installation/install.md
-    - Compiling: installation/compile.md
+    - Install: installation/install.md
+    - Compile: installation/compile.md
   - Usage:
     - 1. Overview: 
-      - Understanding DeepCV: usage/overview.md
+      - Understand DeepCV: usage/overview.md
       - DeepCV modules: usage/modules.md
-    - 2. Preparing dataset: usage/prepare-dataset.md
-    - 3. Preparing DeepCV input file: usage/input-file.md
-    - 4. Training DAENN model with DeepCV: usage/training-model.md
+    - 2. Prepare dataset: usage/prepare-dataset.md
+    - 3. Prepare DeepCV input file: usage/input-file.md
+    - 4. Train DAENN model with DeepCV: usage/training-model.md
     - 5. Enhanced sampling:
       - Metadynamics using PLUMED: usage/metad-sim.md
       - CP2K with PLUMED: usage/cp2k-with-plumed.md
@@ -36,7 +36,7 @@ nav:
     - 6. Post-analysis:
       - Free energy surface: usage/fes-analysis.md
       - Metastable states: usage/states-analysis.md
-  - Citing: citing.md
+  - Cite DeepCV: citing.md
 
 plugins:
   - search

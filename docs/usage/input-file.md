@@ -1,4 +1,4 @@
-# Preparing DeepCV Input File
+# Prepare DeepCV Input File
 
 DeepCV's input file is written in a JSON file format (dictionary-like).
 Input examples in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
