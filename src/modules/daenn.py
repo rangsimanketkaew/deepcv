@@ -363,10 +363,11 @@ class Autoencoder(Model):
             # run_eagerly=True,
         )
 
-    def train_model(self, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
-        """Train model
+    def train_model(self, num_train, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
+        """Train model for [num_train x num_epoch] (epochs)
 
         Args:
+            num_train (int): Number of trainings
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
             verbose (int): Level of prining information. Defaults to 1.
@@ -386,6 +387,7 @@ class Autoencoder(Model):
             tf.concat(self.test_set[self.num_primary :], axis=1),
         ]
 
+        self.num_train = num_train
         self.num_epoch = num_epoch
         self.batch_size = batch_size
         if self.batch_size == 0:
@@ -396,10 +398,9 @@ class Autoencoder(Model):
         # e.g. 'tensorflow --logdir ./log'
         tbCallBack = TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True)
 
-        # train N times
-        N = 10
-        for i in range(N):
-            print(f">>>>>>>>>>>>>>>> Training {i+1}/{N} <<<<<<<<<<<<<<<")
+        # train num_train times
+        for i in range(self.num_train):
+            print(f">>>>>>>>>>>>>>>> Training {i+1}/{self.num_train} <<<<<<<<<<<<<<<")
             self.history = self.autoencoder.fit(
                 x=self.train_set,  # input
                 y=self.train_set,  # target
@@ -549,6 +550,10 @@ def main():
     main_loss = json["model"]["main_loss"]
     penalty_loss = json["model"]["penalty_loss"]
     loss_weights = json["model"]["loss_weights"]
+    try:
+        num_train = json["model"]["num_train"]
+    except KeyError:
+        num_train = 10
     num_epoch = json["model"]["num_epoch"]
     batch_size = json["model"]["batch_size"]
     # ---------
@@ -788,7 +793,7 @@ def main():
     # decoded_test = model.decoder_predict(encoded_test)
 
     # Train model
-    model.train_model(num_epoch, batch_size, verbosity, save_tb, out_autoencoder)
+    model.train_model(num_train, num_epoch, batch_size, verbosity, save_tb, out_autoencoder)
     logging.info("Congrats! Training model is completed.")
 
     # Test prediction
