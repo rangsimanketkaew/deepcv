@@ -12,6 +12,7 @@ Info:
 import os
 import argparse
 import multiprocessing as mp
+from functools import partial
 import numpy as np
 from scipy import spatial
 import ase.io
@@ -215,7 +216,7 @@ def calc_torsion(xyz):
     return torsion
 
 
-def calc_adjmat(symbols, xyz, r_0, n, m):
+def calc_adjmat(xyz, symbols, r_0, n, m):
     """Compute adjacency matrix
 
     a_ij = (1 - frac^n) / (1 - frac^m)
@@ -226,6 +227,7 @@ def calc_adjmat(symbols, xyz, r_0, n, m):
 
     Args:
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+        symbols (list, array): Atomic symbol
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
@@ -264,8 +266,8 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
     2. https://pubs.acs.org/doi/10.1021/acs.jctc.7b01289
 
     Args:
-        symbols (list, array): Atomic symbol
         xyz (array): (dims M x 3) Cartesian coordinates of M atoms in a molecule.
+        symbols (list, array): Atomic symbol
         r_0 (float): cutoff in Angstroms
         n (int): Switching function parameter
         m (int): Switching function parameter
@@ -275,7 +277,7 @@ def calc_sprint(symbols, xyz, r_0, n, m, M=1):
         a_i (array): Sorted index of atoms
         s (array): Sorted SPRINT coordinates
     """
-    a_ij = calc_adjmat(symbols, xyz, r_0, n, m)
+    a_ij = calc_adjmat(xyz, symbols, r_0, n, m)
     # Calculate eigenvalue and eigenvector
     w, v = np.linalg.eig(a_ij)
 
@@ -475,12 +477,11 @@ def main():
     # Adjacency matrix
     elif args.rep == "adjmat":
         print("Calculate adjacency matrix")
-        for i in tqdm(range(no_struc)):
-            a_ij = calc_adjmat(symbols, xyz[i], param.r_0, param.n, param.m)
-            if args.save:
-                np.savez_compressed(
-                    f"{filename}_{args.rep}_strc_{i+1}.npz", adjmat=a_ij
-                )
+        with mp.Pool(num_workers) as p:
+            worker = partial(calc_adjmat, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
+            matrix = np.array(p.map(worker, xyz, chunksize))
+        if args.save:
+            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", adjmat=matrix)
 
     # SPRINT coordinates
     elif args.rep == "sprint":
