@@ -459,19 +459,19 @@ def main():
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_dist, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_dist_strc.npz", dist=matrix)
+            np.savez_compressed(f"{filename}_dist.npz", dist=matrix)
 
         print("Calculate bond angle coordinates of all structures")
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_angle, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_angle_strc.npz", angle=matrix)
+            np.savez_compressed(f"{filename}_angle.npz", angle=matrix)
 
         print("Calculate torsion angle coordinates of all structures")
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_angle, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_torsion_strc.npz", torsion=matrix)
+            np.savez_compressed(f"{filename}_torsion.npz", torsion=matrix)
 
     # Adjacency matrix
     elif args.rep == "adjmat":
@@ -480,7 +480,7 @@ def main():
             worker = partial(calc_adjmat, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
             matrix = np.array(p.map(worker, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", adjmat=matrix)
+            np.savez_compressed(f"{filename}_{args.rep}.npz", adjmat=matrix)
 
     # SPRINT coordinates
     elif args.rep == "sprint":
@@ -489,7 +489,7 @@ def main():
             worker = partial(calc_sprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
             sorted_index, sorted_SPRINT = zip(*p.map(worker, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", index=sorted_index, sprint=sorted_SPRINT)
+            np.savez_compressed(f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_SPRINT)
 
     # xSPRINT coordinates
     elif args.rep == "xsprint":
@@ -498,7 +498,7 @@ def main():
             worker = partial(calc_xsprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m)
             sorted_index, sorted_xSPRINT = zip(*p.map(worker, xyz, chunksize))
         if args.save:
-            np.savez_compressed(f"{filename}_{args.rep}_strc.npz", index=sorted_index, sprint=sorted_xSPRINT)
+            np.savez_compressed(f"{filename}_{args.rep}.npz", index=sorted_index, sprint=sorted_xSPRINT)
 
 
 if __name__ == "__main__":
