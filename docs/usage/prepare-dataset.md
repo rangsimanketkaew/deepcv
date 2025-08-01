@@ -56,7 +56,7 @@ The following example calculates the features using only all carbon atoms (index
 $ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep zmat --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
-List of atom index: [0, 1, 2, 3, 4, 5]
+List of atom indices: [1, 2, 3, 4, 5, 6]
 Shape of NumPy array with only specified atom index: (50, 6, 3)
 Calculate distance coordinates of all structures
 Calculate bond angle coordinates of all structures
@@ -71,7 +71,7 @@ Calculate torsion angle coordinates of all structures
 $ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep sprint --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
-List of atom index: [0, 1, 2, 3, 4, 5]
+List of atom indices: [1, 2, 3, 4, 5, 6]
 Shape of NumPy array with only specified atom index: (50, 6, 3)
 Calculate SPRINT coordinates and sorted atom index
 ```
@@ -82,7 +82,7 @@ Calculate SPRINT coordinates and sorted atom index
 $ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep xsprint --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
-List of atom index: [0, 1, 2, 3, 4, 5]
+List of atom indices: [1, 2, 3, 4, 5, 6]
 Shape of NumPy array with only specified atom index: (50, 6, 3)
 Calculate xSPRINT coordinates and sorted atom index
 ```

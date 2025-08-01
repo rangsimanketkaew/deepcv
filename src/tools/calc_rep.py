@@ -444,12 +444,13 @@ def main():
         exit(
             f"Error: there is at least one index in {index} that is equal or less than 0."
         )
+
+    print(f"List of atom indices: {index}")
+
     # Change index of atoms from 1-based to 0-based
     index = [i - 1 for i in index]
-    if index:
-        xyz = xyz[:, index]
-        print(f"List of atom index: {index}")
-        print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
+    xyz = xyz[:, index]
+    print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
 
     ############################
     # Calculate representation #
@@ -487,7 +488,7 @@ def main():
 
         print("Calculate torsion angle coordinates of all structures")
         with mp.Pool(num_workers) as p:
-            matrix = np.array(p.map(calc_angle, xyz, chunksize))
+            matrix = np.array(p.map(calc_torsion, xyz, chunksize))
         if args.save:
             np.savez_compressed(f"{filename}_torsion.npz", torsion=matrix)
 
