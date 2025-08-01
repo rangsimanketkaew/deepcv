@@ -29,6 +29,7 @@ from contextlib import redirect_stdout
 
 import functools
 import numpy as np
+
 import tensorflow as tf
 
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
@@ -38,7 +39,8 @@ from tensorflow.keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
-from modules import layer, loss
+from utils import util
+from modules import loss
 from tools import ae_visual
 
 
@@ -751,6 +753,7 @@ def main():
     ##############################################################
     # Build, compile and train encoder & decoder models separately
     ##############################################################
+    util.tf_logging(3, 3)  # warning level
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
     # Check if multi-GPU parallelization is possible

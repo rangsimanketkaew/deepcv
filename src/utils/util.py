@@ -43,10 +43,8 @@ def tf_logging(log=2, vlog=2):
         # It seems that this works only for Linux
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = f"{log}"
         # os.system(f"export TF_CPP_MIN_LOG_LEVEL={log}")
-        print(f"Set TensorFlow Log info to level {log}")
         os.environ["TF_CPP_MIN_VLOG_LEVEL"] = f"{vlog}"
         # os.system(f"export TF_CPP_MIN_VLOG_LEVEL={vlog}")
-        print(f"Set TensorFlow VLog info to level {vlog}")
     else:
         print("Error: TF logging support only level: 0, 1, 2, 3")
 

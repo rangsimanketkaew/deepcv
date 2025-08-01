@@ -17,10 +17,6 @@ import logging
 # printing logging messages to stdout file still does not work!
 logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
 
-from utils import util
-
-util.tf_logging(3, 3)  # warning level
-
 import tensorflow as tf
 
 try:
