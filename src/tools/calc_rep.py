@@ -467,7 +467,7 @@ def main():
 
     if num_workers > os.cpu_count():
         print(
-            "Requested number of processors is greater than the number of physical processors !!"
+            f"Requested number of processors ({num_workers}) is greater than the number of physical processors ({os.cpu_count()})!!"
         )
     chunksize = max(1, int(no_struc / num_workers))
 

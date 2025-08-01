@@ -402,7 +402,7 @@ class Autoencoder(Model):
 
         # train num_train times
         for i in range(self.num_train):
-            print(f">>>>>>>>>>>>>>>> Training {i+1}/{self.num_train} <<<<<<<<<<<<<<<")
+            logging.info(f"Training {i+1}/{self.num_train}")
             self.history = self.autoencoder.fit(
                 x=self.train_set,  # input
                 y=self.train_set,  # target
