@@ -39,7 +39,6 @@ Model: "daenn"
 ...
 ...
 1/1 [==============================] - ETA: 0s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 61/1█ ETA: 00:00s - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 0.0004 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_ou1/1 [==============================] - 0s 21ms/step - loss: 0.1283 - out_1_loss: 0.1268 - out_2_loss: 0.0154 - out_1_mse: 4.0202e-04 - out_2_mse: 67.5435 - val_loss: 0.1176 - val_out_1_loss: 0.1160 - val_out_2_loss: 0.0156 - val_out_1_mse: 0.0013 - val_out_2_mse: 66.8437
-Training: 100%|█████████████████████████████████████████████████████████████ 1000/1000 ETA: 00:00s,  42.66epochs/s
 DeepCV:INFO >>> Congrats! Training model is completed.
 DeepCV:INFO >>> Congrats! Training model is completed.
 DeepCV:INFO >>> Model has been saved to /home/rketka/github/deepcv/output/model.h5

@@ -28,15 +28,15 @@ Here is the example input file for training DAENN CV of Diels-Alder reaction: [i
 | `max_scale`       | Maximum scaling value                               | Integer: `1`             |
 
 #### Model
-| Key                | Definition                     | Value                                                                      |
-|--------------------|--------------------------------|----------------------------------------------------------------------------|
-| `optimizer`        | Optimizer                      | `Adadelta`, `Adagrad`, `Adam`, `Adamax`, `Ftrl`, `Nadam`, `RMSprop`, `SGD` |
-| `main_loss`        | Primary loss function          | `MSE`, `MAE`                                                               |
-| `penalty_loss`     | Secondary loss function        | `MSE`, `MAE`                                                               |
-| `loss_weights`     | A list of weight for each loss | `[1, 0.1]`                                                                 |
-| `num_train`        | Number of training rounds      | Integer: `10`                                                              |
-| `num_epoch`        | Number of training epochs      | Integer: `1000`                                                            |
-| `batch_size`       | Batch size                     | Integer: `55`                                                              |
+| Key                  | Definition                     | Value                                                                      |
+|----------------------|--------------------------------|----------------------------------------------------------------------------|
+| `optimizer`          | Optimizer                      | `Adadelta`, `Adagrad`, `Adam`, `Adamax`, `Ftrl`, `Nadam`, `RMSprop`, `SGD` |
+| `main_loss`          | Primary loss function          | `MSE`, `MAE`                                                               |
+| `penalty_loss`       | Secondary loss function        | `MSE`, `MAE`                                                               |
+| `loss_weights`       | A list of weight for each loss | `[1, 0.1]`                                                                 |
+| `num_epoch`          | Number of training epochs      | Integer: `1000`                                                            |
+| `batch_size`         | Batch size                     | Integer: `55`                                                              |
+| `save_every_n_epoch` | Save model every N-th epoch    | Integer: `10`                                                              |
 
 #### Neural network
 | Key         | Definition                                          | Value                     |
@@ -55,7 +55,6 @@ Here is the example input file for training DAENN CV of Diels-Alder reaction: [i
 |--------------------|----------------------------|--------------------------|
 | `verbosity`        | Level of output printing   | Integer: `1`             |
 | `show_summary`     | Show DAENN summary         | Logical: `true`, `false` |
-| `save_tb`          | Save TensorBoard file      | Logical: `true`, `false` |
 | `save_model`       | Save trained model         | Logical: `true`, `false` |
 | `save_weights`     | Save weights               | Logical: `true`, `false` |
 | `save_weights_npz` | Save weights in npz format | Logical: `true`, `false` |
@@ -70,6 +69,7 @@ Here is the example input file for training DAENN CV of Diels-Alder reaction: [i
 | Key               | Definition                           | Value  |
 |-------------------|--------------------------------------|--------|
 | `out_dir`         | Path for output directory            | String |
+| `out_tb`          | Name of output TensorBoard           | String |
 | `out_model`       | Name of output model                 | String |
 | `out_weights`     | Name of output weights               | String |
 | `out_weights_npz` | Name of output weights in npz format | String |

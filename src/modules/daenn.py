@@ -32,10 +32,10 @@ import numpy as np
 
 import tensorflow as tf
 
-from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU
+from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU, Lambda
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
-from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import Callback, TensorBoard
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
@@ -99,14 +99,21 @@ class Autoencoder(Model):
             units (list): Number of neurons for each hidden layer
             act_funcs (list): Activation function for each hidden layer
         """
-        self.units_1, self.units_2, self.units_3, self.units_4, self.units_5 = layer_params["units"]
-        self.func_1, self.func_2, self.func_3, self.func_4, self.func_5 = layer_params["act_funcs"]
+        self.units_1, self.units_2, self.units_3, self.units_4, self.units_5 = (
+            layer_params["units"]
+        )
+        self.func_1, self.func_2, self.func_3, self.func_4, self.func_5 = layer_params[
+            "act_funcs"
+        ]
 
         # ---------
         # Create initial placeholder layer for each input dataset
         # ---------
         self.size_inp = [i.shape[1] for i in self.train_set]
-        self.list_inp = [self.generate_input(self.size_inp[i], i + 1) for i in range(len(self.size_inp))]
+        self.list_inp = [
+            self.generate_input(self.size_inp[i], i + 1)
+            for i in range(len(self.size_inp))
+        ]
 
         # ---------
         # Apply custom layer
@@ -122,7 +129,9 @@ class Autoencoder(Model):
             self.primary_inp = self.list_inp[0]
         # otherwise merge them (only primary layers)
         else:
-            self.primary_inp = Concatenate(axis=-1)(self.list_inp[: self.num_primary])  # Merge branches
+            self.primary_inp = Concatenate(axis=-1)(
+                self.list_inp[: self.num_primary]
+            )  # Merge branches
 
         # merge again with the rest of placeholder layer (secondary dataset(s))
         self.secondary_inp = self.list_inp[self.num_primary :]
@@ -132,17 +141,29 @@ class Autoencoder(Model):
         # Encoder: Inp --> H1 --> H2 --> H3
         # latent = feature representation
         # ---------
-        self.encoded1 = Dense(self.units_1, activation=self.func_1, use_bias=True)(self.inputs)
-        self.encoded2 = Dense(self.units_2, activation=self.func_2, use_bias=True)(self.encoded1)
-        self.latent = Dense(self.units_3, activation=self.func_3, use_bias=True)(self.encoded2)
+        self.encoded1 = Dense(self.units_1, activation=self.func_1, use_bias=True)(
+            self.inputs
+        )
+        self.encoded2 = Dense(self.units_2, activation=self.func_2, use_bias=True)(
+            self.encoded1
+        )
+        self.latent = Dense(self.units_3, activation=self.func_3, use_bias=True)(
+            self.encoded2
+        )
 
         # ---------
         # Decoder: H3 --> H4 --> H5 --> Out
         # output = reconstruction
         # ---------
-        self.decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(self.latent)
-        self.decoded2 = Dense(self.units_5, activation=self.func_5, use_bias=True)(self.decoded1)
-        self.outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(self.decoded2)
+        self.decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(
+            self.latent
+        )
+        self.decoded2 = Dense(self.units_5, activation=self.func_5, use_bias=True)(
+            self.decoded1
+        )
+        self.outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(
+            self.decoded2
+        )
 
         # ---------
         # split output into sub-tensors
@@ -156,14 +177,23 @@ class Autoencoder(Model):
         # size of secondary layer [a : ]
         size_s = functools.reduce(lambda x, y: x + y, self.size_inp[self.num_primary :])
 
-        self.list_out = tf.split(
-            self.outputs,
-            [size_p, size_s],
-            axis=1,
-            name=output_name,
+        split_layer = Lambda(
+            lambda x: tf.split(x, [size_p, size_s], axis=1), name=output_name
         )
-        self.primary_out = Dense(size_p, activation=None, name="out_1")(self.list_out[0])
-        self.secondary_out = Dense(size_s, activation=None, name="out_2")(self.list_out[0])
+        self.list_out = split_layer(self.outputs)
+
+        # self.list_out = tf.split(
+        #     self.outputs,
+        #     [size_p, size_s],
+        #     axis=1,
+        #     name=output_name,
+        # )
+        self.primary_out = Dense(size_p, activation=None, name="out_1")(
+            self.list_out[0]
+        )
+        self.secondary_out = Dense(size_s, activation=None, name="out_2")(
+            self.list_out[0]
+        )
 
         # manually create a placeholder for each small output layer
         # but it does not seem to work
@@ -185,7 +215,11 @@ class Autoencoder(Model):
         # self.encoder = Model(inputs=self.list_inp, outputs=self.latent, name=name)
         #  2) Use already-merged input so that the encoder can be later imported by TF graph loader
         #     and it will take only one dataset which combines already input size already
-        self.encoder = Model(inputs=[self.primary_inp] + self.secondary_inp, outputs=self.latent, name=name)
+        self.encoder = Model(
+            inputs=[self.primary_inp] + self.secondary_inp,
+            outputs=self.latent,
+            name=name,
+        )
 
     def build_decoder(self, model_name="decoder", output_name="decoder_output"):
         """Build decoder model. The decoder is a network (usually the same network structure as encoder but in
@@ -200,12 +234,21 @@ class Autoencoder(Model):
         # the input of Model class accepts only Input layer. We therefore need to re-construct
         # the decoder based on the second half of Autoencoder.
         decoder_input = Input(shape=(self.latent.shape[1],), name="decoder_input")
-        decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(decoder_input)
+        decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(
+            decoder_input
+        )
         decoded2 = Dense(self.units_5, activation=self.func_5, use_bias=True)(decoded1)
-        outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(decoded2)  # reconstruct input
+        outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(
+            decoded2
+        )  # reconstruct input
+
+        split_layer = Lambda(
+            lambda x: tf.split(x, self.size_inp, axis=1, name=output_name)
+        )
+        output_split = split_layer(outputs)
         self.decoder = Model(
             inputs=decoder_input,
-            outputs=[tf.split(outputs, self.size_inp, axis=1, name=output_name)],
+            outputs=[output_split],
             name=model_name,
         )
 
@@ -254,12 +297,16 @@ class Autoencoder(Model):
         # tf.compat.v1.enable_eager_execution()
 
         def _loss(y_true, y_pred):
-            split_index = functools.reduce(lambda x, y: x + y, self.size_inp[: self.num_primary])
+            split_index = functools.reduce(
+                lambda x, y: x + y, self.size_inp[: self.num_primary]
+            )
             # Debug
             # y_true_penalty = y_true[split_index:]
             # y_pred_penalty = y_pred[split_index:]
 
-            return (gamma * main_loss(y_true, y_pred)) - ((1 - gamma) * penalty_loss(y_true, y_pred))
+            return (gamma * main_loss(y_true, y_pred)) - (
+                (1 - gamma) * penalty_loss(y_true, y_pred)
+            )
 
         return _loss
 
@@ -361,17 +408,25 @@ class Autoencoder(Model):
             # loss=None, # method 2
             # loss=self.custom_loss_3(alpha=0.8), # method 3
             loss_weights=self.loss_weights,
-            metrics=["mse"],
+            metrics=["mse", "mse"],
             # run_eagerly=True,
         )
 
-    def train_model(self, num_train, num_epoch, batch_size, verbose=1, log_dir="./logs/", out_dir="./"):
-        """Train model. The actual number of training steps = num_train x num_epoch (epochs)
+    def train_model(
+        self,
+        num_epoch,
+        batch_size,
+        save_every_n_epoch,
+        verbose=1,
+        log_dir="./logs/",
+        out_dir="./",
+    ):
+        """Train model. Save model (latent space) every N-th epoch defined by the user
 
         Args:
-            num_train (int): Number of trainings (Defaults to 10 if not defined by the user)
             num_epoch (int): Number of epochs
             batch_size (int): Batch size
+            save_every_n_epoch (int): Number of trainings (Defaults to 10 if not defined by the user)
             verbose (int): Level of prining information. Defaults to 1.
             log_dir (str): Directory to save model logs. Defaults to "./logs/".
             out_dir (str): Directory to save visualization outputs. Defaults to "./".
@@ -389,43 +444,59 @@ class Autoencoder(Model):
             tf.concat(self.test_set[self.num_primary :], axis=1),
         ]
 
-        self.num_train = num_train
         self.num_epoch = num_epoch
         self.batch_size = batch_size
+        self.save_every_n_epoch = save_every_n_epoch
         if self.batch_size == 0:
             self.batch_size = None
 
         # TF Board
         # You can use tensorboard to visualize TensorFlow runs and graphs.
         # e.g. 'tensorflow --logdir ./log'
-        tbCallBack = TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True)
+        tbCallBack = TensorBoard(
+            log_dir=log_dir, histogram_freq=0, write_graph=True, write_images=True
+        )
 
-        # train num_train times
-        for i in range(self.num_train):
-            logging.info(f"Training {i+1}/{self.num_train}")
-            self.history = self.autoencoder.fit(
-                x=self.train_set,  # input
-                y=self.train_set,  # target
-                shuffle=True,
-                # validation_split=0.20,
-                validation_data=(self.test_set, self.test_set),
-                epochs=self.num_epoch,
-                batch_size=self.batch_size,
-                verbose=verbose,
-                use_multiprocessing=True,
-                callbacks=[
-                    # tbCallBack
-                ],
+        # Save model during the training
+        class SaveLatentSpaceEveryNepoch(Callback):
+            """A callback to save latent space as a figure at every N epoch"""
+
+            def __init__(self, every_n_epoch, x_train, y_train, output_name):
+                self.every_n_epoch = every_n_epoch
+                self.x_train = x_train
+                self.y_train = y_train
+                self.output_name = output_name
+
+            def on_epoch_end(self, epoch, logs=None):
+                if (epoch % self.every_n_epoch) == 0:
+                    logging.info(f"Save model at epoch no. {epoch}")
+                    ev = ae_visual.encode_fig(
+                        epoch,
+                        self.model.get_layer("concatenate_1").input,
+                        self.model.get_layer("dense_2").output,
+                        self.x_train,
+                        self.y_train,
+                        folder=self.output_name,
+                    )
+
+        saveCallback = [
+            SaveLatentSpaceEveryNepoch(
+                self.save_every_n_epoch, self.train_set, self.train_set, out_dir
             )
-            # save latent space as a figure for each training
-            ev = ae_visual.encode_fig(
-                (i + 1) * self.num_epoch,
-                self.autoencoder.get_layer("concatenate_1").input,
-                self.autoencoder.get_layer("dense_2").output,
-                self.train_set,
-                self.train_set,
-                folder=out_dir,
-            )
+        ]
+
+        # Training begins here
+        self.history = self.autoencoder.fit(
+            x=self.train_set,  # input
+            y=self.train_set,  # target
+            shuffle=True,
+            # validation_split=0.20,
+            validation_data=(self.test_set, self.test_set),
+            epochs=self.num_epoch,
+            batch_size=self.batch_size,
+            verbose=verbose,
+            callbacks=[tbCallBack, saveCallback],
+        )
 
     def encoder_predict(self, input_sample):
         """Generate predictions using encoder
@@ -476,25 +547,15 @@ class Autoencoder(Model):
                 model.summary()
 
     @staticmethod
-    def save_model(model, save_dir, model_name, model_type):
+    def save_model(model, path_output):
         """Save model in SavedModel format (low-level) and in h5 format (Keras-supported)
 
         Args:
             model (Class): Model to save
-            save_dir (str): Output directory
-            model_name (str): Name of the model to save
-            model_type (str): Type of the model: Autoencoder, Encoder, or Decoder
+            path_output (str): Path of output to save
         """
-        tf.saved_model.save(model, save_dir)
-        path = save_dir + "/" + model_name
-        model.save(
-            path,
-            overwrite=True,
-            include_optimizer=True,
-            save_format="h5",
-            signatures=None,
-        )
-        logging.info(f"{model_type} model has been saved to {save_dir}")
+        model.save(path_output, overwrite=True, include_optimizer=True)
+        logging.info(f"Model {model_name} has been saved to {save_dir}")
 
     @staticmethod
     def save_graph(model, file_name="graph", save_dir=os.getcwd(), dpi=192):
@@ -552,12 +613,15 @@ def main():
     main_loss = json["model"]["main_loss"]
     penalty_loss = json["model"]["penalty_loss"]
     loss_weights = json["model"]["loss_weights"]
-    try:
-        num_train = json["model"]["num_train"]
-    except KeyError:
-        num_train = 10
     num_epoch = json["model"]["num_epoch"]
     batch_size = json["model"]["batch_size"]
+    try:
+        save_every_n_epoch = json["model"]["save_every_n_epoch"]
+        save_every_n_epoch = int(save_every_n_epoch)
+    except KeyError:
+        save_every_n_epoch = int(num_epoch / 10)
+        if save_every_n_epoch == 0:
+            save_every_n_epoch = 10
     # ---------
     units = json["network"]["units"]
     act_funcs = json["network"]["act_funcs"]
@@ -567,7 +631,6 @@ def main():
     # ---------
     verbosity = json["settings"]["verbosity"]
     show_summary = json["settings"]["show_summary"]
-    save_tb = json["settings"]["save_tb"]
     save_model = json["settings"]["save_model"]
     save_weights = json["settings"]["save_weights"]
     save_weights_npz = json["settings"]["save_weights_npz"]
@@ -579,6 +642,7 @@ def main():
     show_metrics = json["settings"]["show_metrics"]
     # ---------
     out_dir = json["output"]["out_dir"]
+    out_tb = json["output"]["out_tb"]
     out_model = json["output"]["out_model"]
     out_weights = json["output"]["out_weights"]
     out_weights_npz = json["output"]["out_weights_npz"]
@@ -592,7 +656,10 @@ def main():
 
     logging.info("=" * 30 + " Program started " + "=" * 30)
     logging.info(f"Project: {project}")
-    logging.info("Date {:%d/%m/%Y}".format(datetime.now()) + " at {:%H:%M:%S}".format(datetime.now()))
+    logging.info(
+        "Date {:%d/%m/%Y}".format(datetime.now())
+        + " at {:%H:%M:%S}".format(datetime.now())
+    )
 
     if neural_network.lower() != "daenn":
         logging.error(f"This is a DAENN trainer, not {neural_network}.")
@@ -617,7 +684,9 @@ def main():
 
     # Extract features (input)
     if no_keys:
-        logging.warning("No npz keys specified, the first key found in array.files is automatically used.")
+        logging.warning(
+            "No npz keys specified, the first key found in array.files is automatically used."
+        )
         dataset_arr_raw = [np.load(i) for i in all_dataset]
         dataset_arr = [i[i.files[0]] for i in dataset_arr_raw]
     else:
@@ -639,7 +708,9 @@ def main():
         sys.exit(1)
     train_arr, test_arr = [], []
     for i, j in enumerate(dataset_arr):
-        train, test = train_test_split(j, train_size=split_ratio, shuffle=shuffle, random_state=42)
+        train, test = train_test_split(
+            j, train_size=split_ratio, shuffle=shuffle, random_state=42
+        )
         train_arr.append(train)
         test_arr.append(test)
 
@@ -652,7 +723,9 @@ def main():
         try:
             max_scale_train = [i.max() for i in train_arr]
             max_scale_test = [i.max() for i in test_arr]
-            logging.warning(f"As max_scale is set to {max_scale}, use maximum value in a dataset for scaling")
+            logging.warning(
+                f"As max_scale is set to {max_scale}, use maximum value in a dataset for scaling"
+            )
         except:
             logging.error("Cannot determine maximum scale")
             sys.exit(1)
@@ -662,8 +735,12 @@ def main():
 
     try:
         # train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
-        train_arr = [(j - normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)]
-        test_arr = [(j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)]
+        train_arr = [
+            (j - normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)
+        ]
+        test_arr = [
+            (j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)
+        ]
     except:
         logging.error("Normalization failed. Please check scaling parameters")
         sys.exit(1)
@@ -796,7 +873,10 @@ def main():
     # decoded_test = model.decoder_predict(encoded_test)
 
     # Train model
-    model.train_model(num_train, num_epoch, batch_size, verbosity, save_tb, out_autoencoder)
+    out_tb = out_parent + "/" + out_tb
+    model.train_model(
+        num_epoch, batch_size, save_every_n_epoch, verbosity, out_tb, out_autoencoder
+    )
     logging.info("Congrats! Training model is completed.")
 
     # Test prediction
@@ -809,13 +889,13 @@ def main():
     # Save model and outputs
     ########################
     if save_model:
-        model.save_model(model.autoencoder, out_autoencoder, out_model, "Autoencoder")
-        model.save_model(model.encoder, out_encoder, out_model, "Encoder")
-        model.save_model(model.decoder, out_decoder, out_model, "Decoder")
+        model.save_model(model.autoencoder, out_autoencoder + "/" + out_model)
+        model.save_model(model.encoder, out_encoder + "/" + out_model)
+        model.save_model(model.decoder, out_decoder + "/" + out_model)
 
     if save_weights:
         path = out_autoencoder + "/" + out_weights
-        model.autoencoder.save_weights(path, overwrite=True, save_format="h5")
+        model.autoencoder.save_weights(path, overwrite=True)
         logging.info(f"Weights of model have been saved to {path}")
 
     if save_weights_npz:

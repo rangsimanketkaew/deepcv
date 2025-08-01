@@ -1,6 +1,6 @@
 # Deep Learning for Collective Variables (DeepCV)
 
-DeepCV is a computer code that implements our developed unsupervised machine learning called *deep autoencoder neural network* (DAENN) for learning low-dimensional collective variables (CVs) aka slow-mode reaction coordinates of a set of molecules for enhanced sampling.
+DeepCV is a tool to learn collective variables (CVs) of a chemical process for enhanced sampling simulation, using *deep autoencoder neural network* (DAENN) model.
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
@@ -9,7 +9,7 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
 1. Molecular features
    - Internal coordinates
    - SPRINT and eXtended SPRINT coordinates
-2. Dense autoencoder neural nets
+2. Autoencoder (non-iterative approach)
    - Single and multi-input simple and stacked autoencoder
    - Avoid saturation
    - GPU acceleration
@@ -20,7 +20,6 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
    - Self-directed expansion of configurational space
 4. Generative model for generating data
    - Generative adversarial networks (GANs)
-   - Variational autoencoder (future work)
 5. Can interface with PLUMED and CP2K
 6. Input file generator (GUI) for PLUMED and CP2K
 7. Analysis tools
@@ -58,7 +57,7 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
 The following is an example command for training model of CVs for Diels-Alder reaction using features extracted from reactant trajectory. You can call DeepCV's DAENN via either `main.py` API or `deepcv_daenn` command (register entrypoint).
 
 ```sh
-python main.py daenn -i input_ae_DA.json
+python deepcv/src/main.py daenn -i input_ae_DA.json
 ```
 
 or 
@@ -71,7 +70,8 @@ deepcv_daenn -i input_ae_DA.json
 
 ## Development
 
-- Python 3.6 or a newer version
+- Python 3.10 or a newer version
+- TensorFlow 2.16 and Keras 3 or newer version
 - Use git control: `git clone https://gitlab.uzh.ch/lubergroup/deepcv.git`
 - Please write function docstring and comment for difficult-to-understand code
 - Document modules and packages you are developing
@@ -80,34 +80,21 @@ deepcv_daenn -i input_ae_DA.json
 
 ## Packages requirements
 
-To install all dependencies packages of DeepCV, you can follow either following way:
+To install all dependencies packages of DeepCV, use `conda` or `pip`:
 
-1. All at once (for the users)
+  - `Conda` (recommended)
+    - `conda update --all -y`
+    - `conda install --file requirements.txt`
+  - `pip`
+    - `pip install --upgrade pip`
+    - `pip install -r requirements.txt`
 
-   - Using PIP
-     - `pip install --upgrade pip`
-     - `pip install -r requirements.txt`
-   - Using Conda (recommended)
-     - `conda update --all -y`
-     - `conda install --file requirements.txt`
+<details>
+<summary>Install packages separately (recommended for the developers)</summary>
 
-2. Install packages separately (recommended for the developers)
-
-   - NumPy >= 1.22.2
-     - E.g., `pip install --upgrade numpy==1.23.4`
-   - TensorFlow + Keras 2.10.0
-     - `pip install tensorflow` (CPU)
-     - `conda install tensorflow-gpu` (+ CUDA & cuDNN)
-   - NVIDIA GPU and CUDA 10.1 (for GPU enabled)
-     - https://developer.nvidia.com/cuda-toolkit-archive
-   - cuDNN v7.6.4 (September 27, 2019), for CUDA 10.1
-     - https://developer.nvidia.com/rdp/cudnn-archive
-   - pydot (for `keras.utils.vis_utils.plot_model`)
-     - `conda install pydot`
-   - other important packages are listed in [requirements.txt](./requirements.txt)
-
-3. DeepCV C++ makes use of JSON parser
-   - https://github.com/nlohmann/json
+  - All packages are listed in [requirements.txt](./requirements.txt)
+  - DeepCV C++ makes use of JSON parser: https://github.com/nlohmann/json
+</details>
 
 ## In Progress
 
