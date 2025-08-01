@@ -256,7 +256,7 @@ def calc_adjmat(xyz, symbols, r_0, n, m):
 
 
 def calc_sprint(xyz, symbols, r_0, n, m, M=1):
-    """Compute SPRINT coordinates
+    r"""Compute SPRINT coordinates
 
     s^x_i = \sqrt{n} \lambda v_i
 
@@ -308,7 +308,7 @@ def calc_sprint(xyz, symbols, r_0, n, m, M=1):
 
 
 def calc_xsprint(xyz, symbols, r_0, n, m, M=1, r_0x=1.5, sh=1):
-    """Calculate eXtended SPRINT (xSPRINT) coordinates
+    r"""Calculate eXtended SPRINT (xSPRINT) coordinates
 
          /-> s_i                       ; r_ij < r_0
     S^x_i

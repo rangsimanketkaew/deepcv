@@ -134,7 +134,7 @@ def MaxAPE(y_true, y_pred):
 
 @tf.function
 def RMSE(y_true, y_pred):
-    """Calculate root mean-squared error (RMSE)
+    r"""Calculate root mean-squared error (RMSE)
 
                 ----------------------------
                /  N                   2
@@ -159,7 +159,7 @@ def RMSE(y_true, y_pred):
 
 @tf.function
 def GMSE(y_true, y_pred):
-    """Calculate Geometric mean-squared error (GRMSE)
+    r"""Calculate Geometric mean-squared error (GRMSE)
 
                 ----------------------------
            N   /  N                   2
@@ -184,7 +184,7 @@ def GMSE(y_true, y_pred):
 
 @tf.function
 def GRMSE(y_true, y_pred):
-    """Calculate Geometric root mean-squared error (GRMSE)
+    r"""Calculate Geometric root mean-squared error (GRMSE)
 
                  ----------------------------
            2N   /  1   N                   2
