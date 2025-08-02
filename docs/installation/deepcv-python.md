@@ -6,16 +6,21 @@ It is recommended to use `pip` to install DeepCV
 
 ```sh
 pip install -r requirements.txt 
-python3 -m pip install .
-
-# Test calling the main API
-deepcv_calc_rep
-# or
-deepcv_daenn
+pip install .
 ```
 
-Note that installing `tensorflow` can sometimes be tricky, depending on system environment.
-Please check [Install TensorFlow 2](https://www.tensorflow.org/install) for more details.
+Test calling `deepcv` with
+
+```sh
+deepcv
+# or
+deepcv calc_rep
+# or 
+deepcv daenn
+```
+
+> Installing `tensorflow` can be tricky, depending on operating system and system environment.
+> Please check [Install TensorFlow 2](https://www.tensorflow.org/install) for more details.
 
 ## Install with conda
 

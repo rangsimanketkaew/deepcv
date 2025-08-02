@@ -2,7 +2,7 @@
 
 ## Compile TensorFlow C++ API
 
-You can follow the step-by-step instructions to build TensorFlow C++ API from source using GCC 9.3.1 for C++ 14:
+You can follow the step-by-step instruction to build TensorFlow C++ API from source using GCC 9.3.1 for C++ 14:
 
 1. Install Python 3.7 or a newer version and Bazel 3.7.2
     
@@ -37,7 +37,7 @@ You can follow the step-by-step instructions to build TensorFlow C++ API from so
     
 More details on package dependencies installation and compilation of TensorFlow C++ API are available at https://github.com/rangsimanketkaew/tensorflow_cpp_api.
 
-> The procedure above should also work with new version or Python and Bazel.
+> The procedure above should also work with a new version or Python and Bazel.
 
 ## Compile PLUMED with DeepCV and TensorFlow
 

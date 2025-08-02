@@ -25,7 +25,7 @@ Website: https://lubergroup.pages.uzh.ch/deepcv/
 
 - Install with `pip`:
   ```sh
-  cd deepcv/
+  cd deepcv
   pip install -r requirements.txt
   pip install .
   ```
@@ -47,16 +47,16 @@ Install dependencies (packages required by DeepCV) separately (recommended for t
 
 ## Usage
 
-You can call DeepCV's module via `main.py` API script, like this:
+You can call DeepCV's module via registered entry point `deepcv` followed by a module, e.g.:
+
+```sh
+deepcv daenn -i input_ae_DA.json
+```
+
+or by executing `main.py` API script:
 
 ```sh
 python deepcv/src/main.py daenn -i input_ae_DA.json
-```
-
-or via registered entry point, e.g., `deepcv_daenn` command:
-
-```sh
-deepcv_daenn -i input_ae_DA.json
 ```
 
 where `input_ae_DA.json` is [an input file of DAENN for Diels-Alder reaction](input/input_ae_DA.json).

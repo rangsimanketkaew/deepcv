@@ -8,13 +8,13 @@ The reference paper is [https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c0400
 
 ## Train model
 
-Execute the `main.py` script with argument `daenn`  or call `deepcv_daenn`, and followed by `--input` or `-i` flag with the path to the input file 
+Call `deepcv daenn` or execute the `main.py` script with argument `daenn`, and followed by `--input` or `-i` flag with the path to the input file 
 (e.g. [input_ae_DA.json](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/input/input_ae_DA.json)). 
 The training time depends on the size of the dataset, the complexity of a neural net, the number of epochs, etc.
 The following example is the training on dataset of 99,000 configurations of ethene and 1,3-butadiene.
 
 ```sh
-$ python deepcv/src/main.py daenn --input input_ae_DA.json
+$ deepcv daenn --input input_ae_DA.json
 
 DeepCV:INFO >>> ============================== Program started ==============================
 DeepCV:INFO >>> Project: Demo
@@ -96,3 +96,11 @@ Example of contents of output directory in a tree-like format generated and save
         ├── events.out.tfevents.1754132722.linux.local.57483.1.v2
         └── events.out.tfevents.1754133580.linux.local.58283.1.v2
 ```
+
+To visualize training log with TensorBoard, run this command
+
+```sh
+tensorboard --logdir output/tb
+```
+
+and open the local host URL, e.g. `http://localhost:6006/`, in your web browser.

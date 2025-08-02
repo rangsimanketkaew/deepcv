@@ -1,30 +1,34 @@
 # Call DeepCV's Module
 
-All modules can be called via `main.py` API script or via its entry point (i.e. `deepcv_daenn`). If you use conda, please ensure to activate to the environment, where you installed dependencies, before calling DeepCV.
+All modules can be called via registered `deepcv` command or `main.py` API script. 
+If you use conda, please ensure to activate to the environment, where you installed dependencies, before calling DeepCV.
 
 ```sh
-$ python deepcv/src/main.py
+$ deepcv
 
 ------------------------------------------------
 DeepCV : Deep Learning for Collective Variables
 -------------------------------------------------
 version 2.0 : August 2025
 University of Zurich, Switzerland
-https://gitlab.uzh.ch/lubergroup/deepcv
+Manual: https://lubergroup.pages.uzh.ch/deepcv
+Code: https://gitlab.uzh.ch/lubergroup/deepcv
 
 Module         Description
 -------------  ----------------------------------------------
-calc_rep       Calculate molecular representation
-gen_input      Neural network input generator
+calc_rep       Calculate molecular representations
+gen_input      Input generator
+daenn          Deep autoencoder neural network
+deepcv2plumed  Create PLUMED input file
 single_train   Single-data fully-connected neural network
 multi_train    Multi-data fully-connected neural network
-daenn          Deep autoencoder neural network
 gan_train      Training generative adversarial network (GAN)
 gan_predict    Generating samples using trained GAN
-deepcv2plumed  Create PLUMED input file
 analyze_FES    FES validation
 analyze_model  DAENN model analysis and parameters extraction
-explor_abi     Calculate exploration ability
+explore_abi    Calculate exploration ability
+stack_array    Combine arrays of the same dimension
+xyz2arr        Convert xyz to NumPy array
 
 For more detail, please review 'README' in the repository.
 ```

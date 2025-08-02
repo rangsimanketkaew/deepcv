@@ -52,7 +52,7 @@ Calculate bond distance, bond angle, and dihedral angle (torsion), and save .npz
 The following example calculates the features using only all carbon atoms (index 1, 2, 3, 4, 5, 6).
 
 ```sh
-$ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep zmat --save
+$ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep zmat --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
 List of atom indices: [1, 2, 3, 4, 5, 6]
@@ -67,7 +67,7 @@ Calculate torsion angle coordinates of all structures
 - SPRINT coordinates
 
 ```sh
-$ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep sprint --save
+$ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep sprint --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
 List of atom indices: [1, 2, 3, 4, 5, 6]
@@ -78,7 +78,7 @@ Calculate SPRINT coordinates and sorted atom index
 - xSPRINT coordinates
 
 ```sh
-$ deepcv/src/main.py calc_rep --input traj.xyz --atom-index {1..6} --rep xsprint --save
+$ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep xsprint --save
 Converting text data to NumPy array...
 Shape of NumPy array: (50, 16, 3)
 List of atom indices: [1, 2, 3, 4, 5, 6]
