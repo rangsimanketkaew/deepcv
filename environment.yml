@@ -1,20 +1,20 @@
-# run: conda env create --file environment.yml
+# create env: conda env create --file environment.yml
+# update env: conda env update --file environment --prune
 name: deepcv
 channels:
 - conda-forge
 - defaults
 dependencies:
-- python=3.10.6
-- tensorflow-gpu=2.10.0
-- numpy=1.23.1
-- scipy=1.9.1
-- scikit-learn=1.1.2
-- matplotlib=3.6.1
-- imageio=2.22.0
-- natsort=8.2.0
-- tabulate=0.9.0
-- tqdm=4.64.1
-- pydot=1.4.2
+- python=3.12
 - pip
-- pip:
-  - ase==3.22.1
+- tensorflow
+- numpy
+- scipy
+- scikit-learn
+- matplotlib
+- imageio
+- natsort
+- tabulate
+- tqdm
+- pydot
+- ase
