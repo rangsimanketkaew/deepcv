@@ -3,7 +3,8 @@ Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
-28/11/2020 : Rangsiman Ketkaew
+28/11/2020 : v1.0 [RK]
+02/08/2025 : v2.0 supports TensorFlow 2.16 and Keras 3 [RK]
 """
 
 """
@@ -18,12 +19,12 @@ sys.path.append(parentdir)
 
 import argparse
 import logging
+from utils import util  # needs to be loaded before calling TF
 
-logging = logging.getLogger("DeepCV")
+util.tf_logging(3, 3)  # warning level
 
 from datetime import datetime
 from inspect import getmembers, isfunction
-from utils import util  # needs to be loaded before calling TF
 from pathlib import Path
 from contextlib import redirect_stdout
 
@@ -31,7 +32,6 @@ import functools
 import numpy as np
 
 import tensorflow as tf
-
 from tensorflow.keras.layers import Input, Dense, Concatenate, LeakyReLU, Lambda
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
@@ -39,9 +39,10 @@ from tensorflow.keras.callbacks import Callback, TensorBoard
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
-from utils import util
 from modules import loss
 from tools import ae_visual
+
+logging = logging.getLogger("DeepCV")
 
 
 class Autoencoder(Model):
@@ -830,7 +831,6 @@ def main():
     ##############################################################
     # Build, compile and train encoder & decoder models separately
     ##############################################################
-    util.tf_logging(3, 3)  # warning level
     model = Autoencoder()
     model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
     # Check if multi-GPU parallelization is possible

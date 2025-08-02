@@ -1,4 +1,4 @@
-# Building a document website for DeepCV
+# Build a document website for DeepCV
 
 ### Install mkdocs
 

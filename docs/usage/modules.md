@@ -1,15 +1,14 @@
 # Call DeepCV's Module
 
-All modules can be called via `main.py` API script. Please make sure to activate to the (conda) environment, where you installed dependencies packages for DeepCV, before calling DeepCV.
+All modules can be called via `main.py` API script or via its entry point (i.e. `deepcv_daenn`). If you use conda, please ensure to activate to the environment, where you installed dependencies, before calling DeepCV.
 
 ```sh
-$ cd deepcv/src/
-$ python main.py
+$ python deepcv/src/main.py
 
 ------------------------------------------------
 DeepCV : Deep Learning for Collective Variables
 -------------------------------------------------
-version 1.0 : February 2022
+version 2.0 : August 2025
 University of Zurich, Switzerland
 https://gitlab.uzh.ch/lubergroup/deepcv
 

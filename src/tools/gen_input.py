@@ -14,7 +14,14 @@ Graphical user interface of the deep learning input generator
 
 import sys
 import json
-from PyQt5 import QtCore
+
+try:
+    from PyQt5 import QtCore
+except ImportError:
+    raise ImportError(
+        "DeepCV's gen_input requires PyQt5 package, which can be installed with `pip install pyqt5` or `conda install pyqt`"
+    )
+
 from PyQt5.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -53,14 +60,14 @@ class Window(QWidget):
         layout = QVBoxLayout()
         text = "Input generator of Deep Learning for Collective Variables (DeepCV)\n\
 Source code: https://gitlab.uzh.ch/lubergroup/deepcv\n\
-Version: Development version\n\n\
+Version: Stable version\n\n\
 Support:\n\
 - Multi-layer autoencoder\n\
 - Non-linear and linear activation functions\n\
 - Loss-like penalty functions\n\n\
 Author:\n\
-- Rangsiman Ketkaew\n\
-- Sandra Luber\n\n\
+- Rangsiman Ketkaew (rangsiman.ketkaew@chem.uzh.ch)\n\
+- Sandra Luber (sandra.luber@chem.uzh.ch)\n\n\
 Developed at Department of Chemistry, University of Zurich, Switzerland"
         label_author = QLabel(text)
         layout.addWidget(label_author)
@@ -263,14 +270,18 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
                 "loss_weights": [1, 0.1],
                 "num_epoch": int(self.epochs.text()),
                 "batch_size": int(self.batch_size.text()),
-                "train_separately": False,
+                "save_every_n_epoch": 10,
             },
             "network": {
                 "_comment": "Number of neurons and activation function for each hidden layer",
                 "hidden_layers": 5,
-                "units": [int(self.list_num_neuron[0].text()) for i in range(len(self.list_num_neuron))],
+                "units": [
+                    int(self.list_num_neuron[0].text())
+                    for i in range(len(self.list_num_neuron))
+                ],
                 "act_funcs": [
-                    str(self.combo_act_func_hidden.currentText()) for i in range(len(self.list_num_neuron))
+                    str(self.combo_act_func_hidden.currentText())
+                    for i in range(len(self.list_num_neuron))
                 ],
             },
             "performance": {
@@ -296,6 +307,7 @@ Developed at Department of Chemistry, University of Zurich, Switzerland"
             "output": {
                 "_comment": "Set name of output files",
                 "out_dir": "output",
+                "out_tb": "tb",
                 "out_model": "model.h5",
                 "out_weights": "model_weights.h5",
                 "out_weights_npz": "model_weights.npz",
@@ -325,7 +337,9 @@ def main():
     app = QApplication([])
     window = Window()
     window.show()
-    print("DAENN input generator. This module is part of DeepCV developed at University of Zurich.")
+    print(
+        "DAENN input generator. This module is part of DeepCV developed at University of Zurich, Switzerland."
+    )
     sys.exit(app.exec_())
 
 

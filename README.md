@@ -1,100 +1,75 @@
 # Deep Learning for Collective Variables (DeepCV)
 
-DeepCV is a tool to learn collective variables (CVs) of a chemical process for enhanced sampling simulation, using *deep autoencoder neural network* (DAENN) model.
+DeepCV is a tool to learn collective variables (CVs) of a chemical process for enhanced sampling simulation, using *deep autoencoder neural network* (DAENN) model (non-iterative approach).
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
 ## Main Features
 
-1. Molecular features
+1. Molecular descriptors
    - Internal coordinates
    - SPRINT and eXtended SPRINT coordinates
-2. Autoencoder (non-iterative approach)
-   - Single and multi-input simple and stacked autoencoder
-   - Avoid saturation
-   - GPU acceleration
-3. Learn CVs in expanded configurational space
-   - Customized loss functions with minimaxation technique
-     - Primary loss: main loss with regularization
-     - Secondary loss: Additional loss to be maximized to expand the CV space
-   - Self-directed expansion of configurational space
+2. Stacked autoencoder
+3. Loss customization with minimaxation technique to learn CVs in expanded configurational space
+   - Primary loss: main loss with regularization
+   - Secondary loss: Additional loss to be maximized to expand the CV space
 4. Generative model for generating data
    - Generative adversarial networks (GANs)
-5. Can interface with PLUMED and CP2K
-6. Input file generator (GUI) for PLUMED and CP2K
-7. Analysis tools
-   - Feature importance
+5. Can interface with [PLUMED](https://www.plumed.org/)
+6. Tools
+   - Input file generator (GUI) for PLUMED and CP2K
+   - Feature importance analysis
    - Sampling convergence assessment
 
 ## Quick installation
 
-- Python codes
+- Install with `pip`:
   ```sh
   cd deepcv/
   pip install -r requirements.txt
   pip install .
   ```
-- C++ codes
 
+- Install with `conda`:
   ```sh
-  cd deepcv/
-  export LIB_TF=/usr/local/tensorflow/
-
-  g++ -Wall -fPIC -o deepcv.o deepcv.cpp \
-      -O3 -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++14 -fPIC \
-      -I${LIB_TF}/include/ -L${LIB_TF}/lib \
-      -ltensorflow -ltensorflow_cc -ltensorflow_framework
-
-  g++ -shared -fPIC -o deepcv.so deepcv.o
+  conda env create --file environment.yml
+  conda activate deepcv
   ```
-  or you can use `make`
-  ```sh
-  make CXXFLAGS="-std=c++14 -fPIC"
-  ```
+
+<details>
+<summary>Dependencies</summary>
+
+Install dependencies (packages required by DeepCV) separately (recommended for the developers)
+
+  - All dependencies are listed in [requirements.txt](./requirements.txt)
+  - DeepCV C++ makes use of JSON parser: https://github.com/nlohmann/json
+</details>
 
 ## Usage
 
-The following is an example command for training model of CVs for Diels-Alder reaction using features extracted from reactant trajectory. You can call DeepCV's DAENN via either `main.py` API or `deepcv_daenn` command (register entrypoint).
+You can call DeepCV's module via `main.py` API script, like this:
 
 ```sh
 python deepcv/src/main.py daenn -i input_ae_DA.json
 ```
 
-or 
+or via registered entry point, e.g., `deepcv_daenn` command:
 
 ```sh
 deepcv_daenn -i input_ae_DA.json
 ```
 
----
+where `input_ae_DA.json` is [an input file of DAENN for Diels-Alder reaction](input/input_ae_DA.json).
 
 ## Development
 
-- Python 3.10 or a newer version
+- Python 3.9 - 3.12
 - TensorFlow 2.16 and Keras 3 or newer version
 - Use git control: `git clone https://gitlab.uzh.ch/lubergroup/deepcv.git`
 - Please write function docstring and comment for difficult-to-understand code
 - Document modules and packages you are developing
 - Format codes with [Black](https://github.com/psf/black)
 - Send pull-request to master with an explanation, for example, what you contribute, how it works, and usefulness
-
-## Packages requirements
-
-To install all dependencies packages of DeepCV, use `conda` or `pip`:
-
-  - `Conda` (recommended)
-    - `conda update --all -y`
-    - `conda install --file requirements.txt`
-  - `pip`
-    - `pip install --upgrade pip`
-    - `pip install -r requirements.txt`
-
-<details>
-<summary>Install packages separately (recommended for the developers)</summary>
-
-  - All packages are listed in [requirements.txt](./requirements.txt)
-  - DeepCV C++ makes use of JSON parser: https://github.com/nlohmann/json
-</details>
 
 ## In Progress
 

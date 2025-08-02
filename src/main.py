@@ -8,8 +8,8 @@ Info:
 23/02/2022 : Rangsiman Ketkaew
 """
 
-__version__ = "1.0"
-__date__ = "February 2022"
+__version__ = "2.0"
+__date__ = "August 2025"
 
 from tabulate import tabulate
 
@@ -18,20 +18,21 @@ import argparse
 
 
 list_of_functions = [
-        ["xyz2arr", "Convert xyz to NumPy array"],
-        ["stack_array", "Combine arrays of the same dimension"],
-        ["calc_rep", "Calculate molecular representations"],
-        ["gen_input", "Neural network input generator"],
-        ["single_train", "Single-data fully-connected neural network"],
-        ["multi_train", "Multi-data fully-connected neural network"],
-        ["daenn", "Deep autoencoder neural network"],
-        ["gan_train", "Training generative adversarial network (GAN)"],
-        ["gan_predict", "Generating samples using trained GAN"],
-        ["deepcv2plumed", "Create PLUMED input file"],
-        ["analyze_FES", "FES validation"],
-        ["analyze_model", "DAENN model analysis and parameters extraction"],
-        ["explore_abi", "Calculate exploration ability"],
-    ]
+    ["calc_rep", "Calculate molecular representations"],
+    ["gen_input", "Input generator"],
+    ["daenn", "Deep autoencoder neural network"],
+    ["deepcv2plumed", "Create PLUMED input file"],
+    ["single_train", "Single-data fully-connected neural network"],
+    ["multi_train", "Multi-data fully-connected neural network"],
+    ["gan_train", "Training generative adversarial network (GAN)"],
+    ["gan_predict", "Generating samples using trained GAN"],
+    ["analyze_FES", "FES validation"],
+    ["analyze_model", "DAENN model analysis and parameters extraction"],
+    ["explore_abi", "Calculate exploration ability"],
+    ["stack_array", "Combine arrays of the same dimension"],
+    ["xyz2arr", "Convert xyz to NumPy array"],
+]
+
 
 def main():
     """Welcome message and program description"""
@@ -40,7 +41,8 @@ def main():
     print("-------------------------------------------------")
     print(f"version {__version__} : {__date__}")
     print("University of Zurich, Switzerland")
-    print("https://gitlab.uzh.ch/lubergroup/deepcv\n")
+    print("Manual: https://lubergroup.pages.uzh.ch/deepcv")
+    print("Code: https://gitlab.uzh.ch/lubergroup/deepcv\n")
     t = tabulate(list_of_functions, headers=["Module", "Description"])
     print(t)
     print("\nFor more detail, please review 'README' in the repository.\n")
@@ -62,7 +64,9 @@ if __name__ == "__main__":
 
     calling = sys.argv[0]
     if not calling in modules_list:
-        print(f"'{calling}' is not DeepCV's module. Available modules are: {modules_list}")
+        print(
+            f"'{calling}' is not DeepCV's module. Available modules are: {modules_list}"
+        )
         exit()
 
     import modules, tools, helpers
@@ -74,7 +78,9 @@ if __name__ == "__main__":
     elif calling == "calc_rep":
         tools.calc_rep.main()
     elif calling == "gen_input":
-        tools.gen_input.main()
+        from tools import gen_input
+
+        gen_input.main()
     elif calling == "single_train":
         modules.single_train.main()
     elif calling == "multi_train":

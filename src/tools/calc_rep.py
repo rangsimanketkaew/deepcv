@@ -5,7 +5,8 @@ Deep Learning for Collective Variables (DeepCV)
 https://gitlab.uzh.ch/LuberGroup/deepcv
 
 Info:
-28/11/2020 : Rangsiman Ketkaew
+28/11/2020 : v1.0 [RK]
+02/08/2025 : v2.0 supports calculation in parallel [RK]
 """
 
 

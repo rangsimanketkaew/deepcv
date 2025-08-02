@@ -1,8 +1,8 @@
-# Compile DeepCV (C++)
+# Install DeepCV C++
 
 ## Compile TensorFlow C++ API
 
-TensorFlow C++ API used in this work was built from the source. One can follow step-by-step instructions to build the TensorFlow libraries using GCC 9.3.1 for C++ 14:
+You can follow the step-by-step instructions to build TensorFlow C++ API from source using GCC 9.3.1 for C++ 14:
 
 1. Install Python 3.7 or a newer version and Bazel 3.7.2
     
@@ -34,7 +34,10 @@ TensorFlow C++ API used in this work was built from the source. One can follow s
     sudo cp -r bazel-bin/tensorflow/*.so* $LIB_TF/lib/
     sudo cp -r /home/rangsiman/protobuf-3.9.2/lib/*.so* $LIB_TF/lib/
     ```
+    
 More details on package dependencies installation and compilation of TensorFlow C++ API are available at https://github.com/rangsimanketkaew/tensorflow_cpp_api.
+
+> The procedure above should also work with new version or Python and Bazel.
 
 ## Compile PLUMED with DeepCV and TensorFlow
 

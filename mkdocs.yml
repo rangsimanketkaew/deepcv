@@ -15,20 +15,17 @@ theme:
 nav:
   - Introduction: 
     - DeepCV: index.md
-    - DAENN: introduction/daenn.md
-    - Descriptors: introduction/descriptors.md
+    - Workflow: introduction/workflow.md
+    - Model and Descriptors: introduction/model-descriptors.md
   - Installation:
     - Overview: installation/overview.md
-    - Environment setup: installation/env-setup.md
-    - Install: installation/install.md
-    - Compile: installation/compile.md
+    - DeepCV Python: installation/deepcv-python.md
+    - DeepCV C++: installation/deepcv-cpp.md
   - Usage:
-    - 1. Overview: 
-      - Understand DeepCV: usage/overview.md
-      - DeepCV modules: usage/modules.md
+    - 1. DeepCV modules: usage/modules.md
     - 2. Prepare dataset: usage/prepare-dataset.md
     - 3. Prepare DeepCV input file: usage/input-file.md
-    - 4. Train DAENN model with DeepCV: usage/training-model.md
+    - 4. Train a model: usage/train-model.md
     - 5. Enhanced sampling:
       - Metadynamics using PLUMED: usage/metad-sim.md
       - CP2K with PLUMED: usage/cp2k-with-plumed.md

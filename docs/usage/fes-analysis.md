@@ -1,18 +1,24 @@
-# Analyzing free energy surface
+# Analyzing Free Energy Surface
 
-## Convergence of FES
+## Committor analysis
 
-### Simple committor analysis
+### 1. Simple committor analysis
+
+A simple cammand to determine the start and final state of each conformer based on its CV value 
+for metadynamics simulation of *Reaction 3 (R3): Keto–Enol Tautomerism* reported in https://pubs.acs.org/doi/full/10.1021/acs.jpclett.1c04004.
 
 ```Python
 import numpy as np
-committor = np.where(dat[1] > 1.65, 1, (np.where(dat[1] < 1.45, -1, 0)))  # R3
+
+committor = np.where(dat[1] > 1.65, 1, (np.where(dat[1] < 1.45, -1, 0)))
+# dat is an array of CV values
 ```
 
-### Committor analysis with colormap
+### 2. Committor analysis with colormap
 
-A script to calculate the sum of six torsion angles of carbons in the cyclohexene ring. 
-Each sampling points is highlighted in different shade color, e.g., in this case, winter colormap.
+A script to calculate the sum of six torsion angles of carbons in the cyclohexene ring reported in 
+https://pubs.acs.org/doi/10.1021/acs.jcim.2c00883.
+Each sampling point is highlighted in different shade color, e.g., in this case, winter colormap.
 
 ```Python
 #!/usr/bin/env python3

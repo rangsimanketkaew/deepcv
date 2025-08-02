@@ -1,7 +1,7 @@
 # Prepare DeepCV Input File
 
 DeepCV's input file is written in a JSON file format (dictionary-like).
-Input examples in [inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
+Input examples provided in [deepcv/inputs/](https://gitlab.uzh.ch/lubergroup/deepcv/-/tree/master/input) folder 
 show the configurations for training a DAENN model with five hidden layers (fixed symmetric architecture):
 - The first three hidden layers contain two encoded layers and one latent encoded layer (middle layer)
 - The last two layers are two decoded layers for reconstruction

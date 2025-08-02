@@ -1,9 +1,8 @@
 # Prepare dataset
 
-First step prior to calculation of representation is to generate a trajectory of reactant conformers. 
-This can be done by using (unbiased) molecular dynamics (MD) simulation to generate a trajectory of the system of interest.
-To do so, we recommend general MD packages, e.g., CP2K or GROMACS, because they have an interface with
-PLUMED, which is a plugin for running metadynamics simulation.
+First step prior to calculation of representation is to generate a trajectory of reactant conformers; 
+this can be done using (unbiased) molecular dynamics (MD) simulation. 
+We recommend general MD packages, e.g., [CP2K](https://www.cp2k.org/), [GROMACS](https://www.gromacs.org/), [LAMMPS](https://www.lammps.org/), or any software that supports [PLUMED](https://www.plumed.org/), which is a plugin for running metadynamics simulation.
 
 <figure markdown>
   ![Image title](../img/da-reactant-in-water.png){ width="1200" }
@@ -43,8 +42,8 @@ $ less traj.xyz
 
 ## Calculate molecular representations and generate input files (dataset) for neural network
 
-The `calc_rep` module calculates all molecular representations (feature vectors) needed to trained 
-DAENN model, and save the data as .npz.
+`calc_rep` module calculates all molecular representations (feature vectors) needed to train DAENN model. 
+The dataset of each feature is saved in `.npz` file format.
 
 ### 1. Z-matrix (internal coordinate)
 
