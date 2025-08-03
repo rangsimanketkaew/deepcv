@@ -556,9 +556,14 @@ class Autoencoder(Model):
             path_output (str): Path of output to save
         """
         try:
-            tf.keras.models.save_model(model, path_output + ".keras", overwrite=True, include_optimizer=True)
+            tf.keras.models.save_model(
+                model, path_output + ".keras", overwrite=True, include_optimizer=True
+            )
         except:
-            model.export(path_output)
+            try:
+                model.export(path_output)
+            except:
+                pass
 
     @staticmethod
     def save_graph(model, file_name="graph", save_dir=os.getcwd(), dpi=192):
@@ -894,7 +899,7 @@ def main():
         model.save_model(model.autoencoder, out_autoencoder + "/" + out_model)
         model.save_model(model.encoder, out_encoder + "/" + out_model)
         model.save_model(model.decoder, out_decoder + "/" + out_model)
-        logging.info(f"Models has been saved to {out_parent}")
+        logging.info(f"Models have been saved to {out_parent}")
 
     if save_weights:
         path = out_autoencoder + "/" + out_weights
