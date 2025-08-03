@@ -8,6 +8,7 @@ Info:
 
 import json
 import os
+import tensorflow as tf
 
 
 def load_json(file):
@@ -53,7 +54,6 @@ def limit_gpu_growth():
     """Limiting GPU memory growth
     Solution is taken from https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
     """
-    import tensorflow as tf
 
     gpus = tf.config.list_physical_devices("GPU")
 
@@ -71,6 +71,5 @@ def limit_gpu_growth():
 
 def fix_autograph_warning():
     """Decorator to suppress autograph warning"""
-    import tensorflow as tf
 
     tf.autograph.experimental.do_not_convert

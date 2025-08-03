@@ -12,12 +12,8 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-import logging
-
-# printing logging messages to stdout file still does not work!
-logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
-
 import tensorflow as tf
+from utils import util
 
 try:
     assert tf.test.is_built_with_gpu_support()
@@ -26,6 +22,11 @@ except AssertionError:
     pass
 else:
     util.limit_gpu_growth()
+
+import logging
+
+# printing logging messages to stdout file still does not work!
+logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
 
 # Bring all modules to the same level as main.py
 from . import single_train
