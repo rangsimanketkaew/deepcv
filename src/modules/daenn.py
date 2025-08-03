@@ -549,14 +549,16 @@ class Autoencoder(Model):
 
     @staticmethod
     def save_model(model, path_output):
-        """Save model in SavedModel format (low-level) and in h5 format (Keras-supported)
+        """Save model either in keras format or in SavedModel format (low-level)
 
         Args:
             model (Class): Model to save
             path_output (str): Path of output to save
         """
-        model.save(path_output, overwrite=True, include_optimizer=True)
-        logging.info(f"Model {model_name} has been saved to {save_dir}")
+        try:
+            tf.keras.models.save_model(model, path_output + ".keras", overwrite=True, include_optimizer=True)
+        except:
+            model.export(path_output)
 
     @staticmethod
     def save_graph(model, file_name="graph", save_dir=os.getcwd(), dpi=192):
@@ -892,6 +894,7 @@ def main():
         model.save_model(model.autoencoder, out_autoencoder + "/" + out_model)
         model.save_model(model.encoder, out_encoder + "/" + out_model)
         model.save_model(model.decoder, out_decoder + "/" + out_model)
+        logging.info(f"Models has been saved to {out_parent}")
 
     if save_weights:
         path = out_autoencoder + "/" + out_weights
