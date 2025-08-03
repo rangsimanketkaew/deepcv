@@ -76,10 +76,10 @@
   },
   "output": {
     "_comment": "Set name of output files",
-    "out_dir": "output/",
-    "out_dir_G": "G_model/",
-    "out_dir_D": "D_model/",
-    "out_dir_GAN": "GAN_model/",
+    "out_dir": "output",
+    "out_dir_G": "G_model",
+    "out_dir_D": "D_model",
+    "out_dir_GAN": "GAN_model",
     "loss_plot": "loss.png"
   }
 }

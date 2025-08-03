@@ -58,10 +58,10 @@
   },
   "output": {
     "_comment": "Set name of output files",
-    "out_dir": "output/",
+    "out_dir": "output",
     "out_tb": "tb",
-    "out_model": "model.h5",
-    "out_weights": "model_weights.h5",
+    "out_model": "model",
+    "out_weights": "model.weights.h5",
     "out_weights_npz": "model_weights.npz",
     "out_biases_npz": "model_biases.npz",
     "loss_plot": "loss.png",
