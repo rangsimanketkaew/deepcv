@@ -37,12 +37,6 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "deepcv=src.main:main",
-            "deepcv_calc_rep=src.tools.calc_rep:main",
-            "deepcv_gen_input=src.tools.gen_input:main",
-            "deepcv_daenn=src.modules.daenn:main",
-            "deepcv_gan_train=src.modules.gan_train:main",
-            "deepcv_gan_predict=src.modules.gan_predict:main",
-            "deepcv_plumed=src.tools.deepcv2plumed:main",
         ]
     },
 )
