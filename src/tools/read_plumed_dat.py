@@ -8,29 +8,46 @@ Info:
 11/06/2021 : Rangsiman Ketkaew
 """
 
+"""
+Extract data from PLUMED dat files
+"""
+
 import argparse
 import os
 import numpy as np
 
-parser = argparse.ArgumentParser(
-    description="Read PLUMED data file (.dat, .log, .out, .txt) and save data as NumPy's compressed file (.npz)"
-)
-parser.add_argument("--input", "-i", metavar="DATA", type=str, required=True, help="PLUMED data file")
-parser.add_argument(
-    "--key",
-    "-k",
-    metavar="KEYWORD",
-    type=str,
-    default="dat",
-    help="Keyword name of the data array in .npz file",
-)
 
-args = parser.parse_args()
+def main():
+    parser = argparse.ArgumentParser(
+        description="Read PLUMED data file (.dat, .log, .out, .txt) and save data as NumPy's compressed file (.npz)"
+    )
+    parser.add_argument(
+        "--input",
+        "-i",
+        metavar="DATA",
+        type=str,
+        required=True,
+        help="PLUMED data file",
+    )
+    parser.add_argument(
+        "--key",
+        "-k",
+        metavar="KEYWORD",
+        type=str,
+        default="dat",
+        help="Keyword name of the data array in .npz file",
+    )
 
-# Read file and remove first column
-dat = np.loadtxt(args.input, skiprows=1)[:, 1:]
+    args = parser.parse_args()
 
-# save array as npz
-out = os.path.splitext(args.input)[0] + "_" + args.key + ".npz"
-d = {args.key: dat}
-np.savez_compressed(out, **d)
+    # Read file and remove first column
+    dat = np.loadtxt(args.input, skiprows=1)[:, 1:]
+
+    # save array as npz
+    out = os.path.splitext(args.input)[0] + "_" + args.key + ".npz"
+    d = {args.key: dat}
+    np.savez_compressed(out, **d)
+
+
+if __name__ == "__main__":
+    main()
