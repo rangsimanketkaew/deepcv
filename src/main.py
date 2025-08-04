@@ -18,6 +18,9 @@ import sys
 import argparse
 import logging
 
+logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
+# logging.disable(logging.WARNING)
+
 
 list_of_functions = [
     ["calc_rep", "Calculate molecular representations"],
@@ -97,9 +100,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s"
-    )
-    # logging.disable(logging.WARNING)
-
     main()
