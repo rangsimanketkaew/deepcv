@@ -12,9 +12,10 @@ dependencies:
 - scipy
 - scikit-learn
 - matplotlib
+- ase
 - imageio
 - natsort
 - tabulate
 - tqdm
 - pydot
-- ase
+- graphviz

@@ -9,3 +9,4 @@ natsort
 tabulate
 tqdm
 pydot
+graphviz
