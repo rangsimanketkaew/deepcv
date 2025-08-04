@@ -12,8 +12,20 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-import tensorflow as tf
+"""Set logging info before importing TensorFlow
+
+ Level | Level for Humans | Level Description
+-------|------------------|------------------------------------
+    0     | DEBUG            | [Default] Print all messages
+    1     | INFO             | Filter out INFO messages
+    2     | WARNING          | Filter out INFO & WARNING messages
+    3     | ERROR            | Filter out all messages
+"""
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_CPP_MIN_VLOG_LEVEL"] = "3"
+
 from utils import util
+import tensorflow as tf
 
 try:
     assert tf.test.is_built_with_gpu_support()
@@ -21,12 +33,7 @@ try:
 except AssertionError:
     pass
 else:
-    util.limit_gpu_growth()
-
-import logging
-
-# printing logging messages to stdout file still does not work!
-logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
+    util.limit_gpu_growth(tf)
 
 # Bring all modules to the same level as main.py
 from . import daenn

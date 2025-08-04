@@ -7,8 +7,6 @@ Info:
 """
 
 import json
-import os
-import tensorflow as tf
 
 
 def load_json(file):
@@ -26,50 +24,33 @@ def load_json(file):
     return json_data
 
 
-def tf_logging(log=2, vlog=2):
-    """TensorFlow logging info
-
-     Level | Level for Humans | Level Description
-    -------|------------------|------------------------------------
-     0     | DEBUG            | [Default] Print all messages
-     1     | INFO             | Filter out INFO messages
-     2     | WARNING          | Filter out INFO & WARNING messages
-     3     | ERROR            | Filter out all messages
-
-    Args:
-        level (str, optional): Level of tensorflow information. Defaults to "INFO".
-    """
-
-    if log and vlog in [0, 1, 2, 3]:
-        # It seems that this works only for Linux
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = f"{log}"
-        # os.system(f"export TF_CPP_MIN_LOG_LEVEL={log}")
-        os.environ["TF_CPP_MIN_VLOG_LEVEL"] = f"{vlog}"
-        # os.system(f"export TF_CPP_MIN_VLOG_LEVEL={vlog}")
-    else:
-        print("Error: TF logging support only level: 0, 1, 2, 3")
-
-
-def limit_gpu_growth():
+def limit_gpu_growth(tensorflow):
     """Limiting GPU memory growth
     Solution is taken from https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
+
+    Args:
+        tensorflow (module): TensorFlow module
     """
 
-    gpus = tf.config.list_physical_devices("GPU")
+    gpus = tensorflow.config.list_physical_devices("GPU")
 
     if gpus:
         try:
             # Currently, memory growth needs to be the same across GPUs
             for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.list_logical_devices("GPU")
+                tensorflow.config.experimental.set_memory_growth(gpu, True)
+            logical_gpus = tensorflow.config.list_logical_devices("GPU")
             print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
         except RuntimeError as e:
             # Memory growth must be set before GPUs have been initialized
             print(e)
 
 
-def fix_autograph_warning():
-    """Decorator to suppress autograph warning"""
+def fix_autograph_warning(tensorflow):
+    """Decorator to suppress autograph warning
 
-    tf.autograph.experimental.do_not_convert
+    Args:
+        tensorflow (module): TensorFlow module
+    """
+
+    tensorflow.autograph.experimental.do_not_convert

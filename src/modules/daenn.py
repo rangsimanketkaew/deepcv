@@ -19,10 +19,7 @@ sys.path.append(parentdir)
 
 import argparse
 import logging
-from utils import util  # needs to be loaded before calling TF
-
-util.tf_logging(3, 3)  # warning level
-
+from utils import util
 from datetime import datetime
 from inspect import getmembers, isfunction
 from pathlib import Path

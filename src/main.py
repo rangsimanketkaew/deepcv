@@ -16,6 +16,7 @@ from tabulate import tabulate
 
 import sys
 import argparse
+import logging
 
 
 list_of_functions = [
@@ -96,4 +97,9 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s"
+    )
+    # logging.disable(logging.WARNING)
+
     main()
