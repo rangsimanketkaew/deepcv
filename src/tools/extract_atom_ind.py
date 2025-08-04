@@ -13,7 +13,6 @@ Extract atomic index
 """
 
 import argparse
-from collections import Counter
 
 parser = argparse.ArgumentParser(description="Extract index of all atoms from .xyz file")
 parser.add_argument(

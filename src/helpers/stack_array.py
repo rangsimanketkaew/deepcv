@@ -12,7 +12,6 @@ Info:
 Stacking multiple arrays into single array
 """
 
-import os
 import glob
 import argparse
 import numpy as np

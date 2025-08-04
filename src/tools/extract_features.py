@@ -9,7 +9,6 @@ Info:
 """
 
 import os
-import math
 import numpy as np
 from calc_rep import _distance, _angle, _angle_sign, _torsion
 
