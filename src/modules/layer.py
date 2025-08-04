@@ -24,7 +24,6 @@ class LayerWithRMS(tf.keras.layers.Layer):
 
     def call(self, inputs):
         self.add_loss(tf.math.sqrt(tf.math.reduce_sum(tf.math.square(inputs)) / inputs.shape[1]))
-        print(inputs.numpy())
         return inputs
 
 

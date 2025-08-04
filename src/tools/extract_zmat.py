@@ -9,7 +9,9 @@ Info:
 """
 
 import os
+import sys
 import argparse
+import logging
 import ase.io
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -18,6 +20,8 @@ try:
     from .extract_features import _angle_sign, _torsion
 except ImportError:
     from extract_features import _angle_sign, _torsion
+
+logging = logging.getLogger("DeepCV")
 
 
 def distance(xyz):
@@ -116,7 +120,7 @@ if __name__ == "__main__":
     filename, filext = os.path.splitext(arg.input)
 
     if filext == ".xyz":
-        print("Converting text data to NumPy array...")
+        logging.info("Converting text data to NumPy array...")
         f = open(arg.input, "r")
         no_atoms = int(f.readline())
         f.close()
@@ -133,25 +137,28 @@ if __name__ == "__main__":
         dat = np.load(arg.input)
         xyz = dat[dat.files[0]]
     else:
-        exit(f"Error: File type {filext} is not supported.")
+        logging.error(f"File type {filext} is not supported.")
+        sys.exit(1)
 
-    print(f"Shape of NumPy array: {xyz.shape}")
+    logging.info(f"Shape of NumPy array: {xyz.shape}")
 
     index = arg.index_list
     if index:
         xyz = xyz[:, index]
-        print(f"List of atom index: {index}")
-        print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
+        logging.info(f"List of atom index: {index}")
+        logging.info(
+            f"Shape of NumPy array with only specified atom index: {xyz.shape}"
+        )
 
     out = filename
-    print("Calculating distance ...")
+    logging.info("Calculating distance ...")
     dat = distance(xyz)
     np.savez_compressed(f"{out}" + "_zmat_distance.npz", dist=dat)
-    print("Calculating angle ...")
+    logging.info("Calculating angle ...")
     dat = angle(xyz)
     np.savez_compressed(f"{out}" + "_zmat_angle.npz", angle=dat)
-    print("Calculating torsion ...")
+    logging.info("Calculating torsion ...")
     dat = torsion(xyz)
     np.savez_compressed(f"{out}" + "_zmat_torsion.npz", torsion=dat)
-    print("All data have been saved as npz files!")
-    print("-" * 10 + " Done " + "-" * 10)
+    logging.info("All data have been saved as npz files!")
+    logging.info("-" * 10 + " Done " + "-" * 10)

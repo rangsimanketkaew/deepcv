@@ -12,6 +12,7 @@ Info:
 
 import os
 import argparse
+import logging
 import multiprocessing as mp
 from functools import partial
 import numpy as np
@@ -19,6 +20,8 @@ from scipy import spatial
 import ase.io
 from ase.data import chemical_symbols
 from tools import adjmat_param as param
+
+logging = logging.getLogger("DeepCV")
 
 
 def find_atomic_symbol(numbers, index):
@@ -244,9 +247,10 @@ def calc_adjmat(xyz, symbols, r_0, n, m):
             for first in symbols
         ]
     except KeyError as err:
-        exit(
+        logging.error(
             f'Error: Chemical symbol pair {err} is not defined in "src/tools/adjmat_param.py". Please check!'
         )
+        exit()
 
     r_0 = np.asarray(tmp)
     r_ij = spatial.distance.cdist(xyz, xyz)
@@ -416,7 +420,7 @@ def main():
     filename, filext = os.path.splitext(args.input)
 
     if filext == ".xyz":
-        print("Converting text data to NumPy array...")
+        logging.info("Converting text data to NumPy array...")
         f = open(args.input, "r")
         no_atoms = int(f.readline())
         f.close()
@@ -435,23 +439,25 @@ def main():
         dat = np.load(args.input)
         xyz = dat[dat.files[0]]
     else:
-        exit(f"Error: File type {filext} is not supported.")
+        logging.error(f"Error: File type {filext} is not supported.")
+        exit()
 
-    print(f"Shape of NumPy array: {xyz.shape}")
+    logging.info(f"Shape of NumPy array: {xyz.shape}")
 
     index = args.index_list
     # Check index
     if min(index) <= 0:
-        exit(
+        logging.error(
             f"Error: there is at least one index in {index} that is equal or less than 0."
         )
+        exit()
 
-    print(f"List of atom indices: {index}")
+    logging.info(f"List of atom indices: {index}")
 
     # Change index of atoms from 1-based to 0-based
     index = [i - 1 for i in index]
     xyz = xyz[:, index]
-    print(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
+    logging.info(f"Shape of NumPy array with only specified atom index: {xyz.shape}")
 
     ############################
     # Calculate representation #
@@ -475,19 +481,19 @@ def main():
 
     # Internal coordinates
     if args.rep == "zmat":
-        print("Calculate distance coordinates of all structures")
+        logging.info("Calculate distance coordinates of all structures")
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_dist, xyz, chunksize))
         if args.save:
             np.savez_compressed(f"{filename}_dist.npz", dist=matrix)
 
-        print("Calculate bond angle coordinates of all structures")
+        logging.info("Calculate bond angle coordinates of all structures")
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_angle, xyz, chunksize))
         if args.save:
             np.savez_compressed(f"{filename}_angle.npz", angle=matrix)
 
-        print("Calculate torsion angle coordinates of all structures")
+        logging.info("Calculate torsion angle coordinates of all structures")
         with mp.Pool(num_workers) as p:
             matrix = np.array(p.map(calc_torsion, xyz, chunksize))
         if args.save:
@@ -495,7 +501,7 @@ def main():
 
     # Adjacency matrix
     elif args.rep == "adjmat":
-        print("Calculate adjacency matrix")
+        logging.info("Calculate adjacency matrix")
         with mp.Pool(num_workers) as p:
             worker = partial(
                 calc_adjmat, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m
@@ -506,7 +512,7 @@ def main():
 
     # SPRINT coordinates
     elif args.rep == "sprint":
-        print("Calculate SPRINT coordinates and sorted atom index")
+        logging.info("Calculate SPRINT coordinates and sorted atom index")
         with mp.Pool(num_workers) as p:
             worker = partial(
                 calc_sprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m
@@ -519,7 +525,7 @@ def main():
 
     # xSPRINT coordinates
     elif args.rep == "xsprint":
-        print("Calculate xSPRINT coordinates and sorted atom index")
+        logging.info("Calculate xSPRINT coordinates and sorted atom index")
         with mp.Pool(num_workers) as p:
             worker = partial(
                 calc_xsprint, symbols=symbols, r_0=param.r_0, n=param.n, m=param.m

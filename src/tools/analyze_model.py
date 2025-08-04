@@ -16,6 +16,7 @@ import tensorflow as tf
 from tensorflow.keras import models
 import matplotlib.pyplot as plt
 
+
 # Loss for custom_object
 @tf.function
 def GRMSE(y_true, y_pred):
@@ -53,7 +54,9 @@ def get_inter_model(f, layer_name="bottleneck", sum_ori=False, sum_new=False):
     if sum_ori:
         model.summary()
 
-    new_model = models.Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
+    new_model = models.Model(
+        inputs=model.input, outputs=model.get_layer(layer_name).output
+    )
     # alternative to the use of index: model.layers[index of layer].output
 
     # Show summary of the new model

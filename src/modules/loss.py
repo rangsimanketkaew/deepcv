@@ -30,7 +30,7 @@ class CustomLoss(tf.keras.losses.Loss):
     """
 
     def __init__(self, main_loss, penalty_loss, layer, alpha, name="custom_loss"):
-        """Initialize a custom loss function class 
+        """Initialize a custom loss function class
 
         Args:
             main_loss (func): Primary loss function, L, in the paper
@@ -227,7 +227,9 @@ def reduced_AE(y_true, y_pred):
         tensor: reduced AE
     """
     ones = tf.ones(y_true.shape)
-    reciprocal = tf.math.divide_no_nan(ones, tf.math.abs(tf.math.subtract(y_true, y_pred)))
+    reciprocal = tf.math.divide_no_nan(
+        ones, tf.math.abs(tf.math.subtract(y_true, y_pred))
+    )
     return 1 / tf.math.reduce_sum(reciprocal)
 
 
@@ -251,7 +253,9 @@ def reduced_APE(y_true, y_pred):
         tensor: reduced AE
     """
     ones = tf.ones(y_true.shape)
-    reciprocal = tf.math.divide_no_nan(ones, tf.math.abs(deviate(y_true, y_pred) * 100.0))
+    reciprocal = tf.math.divide_no_nan(
+        ones, tf.math.abs(deviate(y_true, y_pred) * 100.0)
+    )
     return 1 / tf.math.reduce_sum(reciprocal)
 
 

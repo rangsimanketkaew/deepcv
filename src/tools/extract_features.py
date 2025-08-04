@@ -13,7 +13,7 @@ import numpy as np
 from calc_rep import _distance, _angle, _angle_sign, _torsion
 
 
-def DA():
+def main():
     """Diels-Alder (DA) reaction
 
     Product of the DA reaction
@@ -67,4 +67,4 @@ def DA():
 
 
 if __name__ == "__main__":
-    DA()
+    main()

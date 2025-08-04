@@ -85,7 +85,6 @@ def main():
     imported = tf.saved_model.load(args.model)
     model = imported.signatures["serving_default"]
     out_tensor = model(vector)
-    print(out_tensor["reshape"])
     logging.info(f"Shape of output tensor: {out_tensor['reshape'].shape}")
     logging.info("=" * 30 + " DONE " + "=" * 30)
 

@@ -27,11 +27,15 @@ def explained_variance(projections, k=2):
         var (float): Variance
     """
     n_sample = projections.shape[0]
-    var = np.array([(projections[:, i] ** 2).sum() / (n_sample - 1) for i in range(k)]).round(2)
+    var = np.array(
+        [(projections[:, i] ** 2).sum() / (n_sample - 1) for i in range(k)]
+    ).round(2)
     return var
 
 
-def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", folder="."):
+def encode_fig(
+    i, model_inp, model_out, x_train, y_train, out_name="dense_2", folder="."
+):
     """Plot encoded data (latent space) from the encoder model
 
     Args:
@@ -42,7 +46,7 @@ def encode_fig(i, model_inp, model_out, x_train, y_train, out_name="dense_2", fo
         y_train (array): True values
         out_name (str, optional): Name of the output layer of the encoder. Defaults to "dense_2".
         folder (str, optional): Nameo the output folder for saving images. Defaults to ".".
-    
+
     Returns:
         ev (float): Variance
     """

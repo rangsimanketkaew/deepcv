@@ -12,10 +12,15 @@ Info:
 Stacking multiple arrays into single array
 """
 
+import sys
+import logging
 import glob
 import argparse
 import numpy as np
 from tqdm import tqdm
+
+logging = logging.getLogger("DeepCV")
+
 
 def main():
     info = "Merge multiple NumPy's array compressed file (npz) of internal coordinates (z-matrix) into one npz file."
@@ -55,35 +60,37 @@ def main():
     for f in args.npz:
         files += glob.glob(f)
     if len(files) == 0:
-        print("Error: .npz input files not found. Please check if you specified the filename correctly.")
-        exit()
+        logging.error(
+            ".npz input files not found. Please check if you specified the filename correctly."
+        )
+        sys.exit(1)
     npz = sorted(files)
 
     # check npz key
     dat_load = np.load(npz[0])
     if not args.key_npz:
         if len(dat_load.files) == 1:
-            print("npz file contains one array.")
+            logging.info("npz file contains one array.")
             args.key_npz = dat_load.files[0]
         elif len(dat_load.files) > 1:
-            print(
+            logging.error(
                 "npz file contains more than one array, please specify the key name of the array you want to stack."
             )
-            exit()
+            sys.exit(1)
 
     # stack arrays
     dat = dat_load[args.key_npz]
     for i in tqdm(range(1, len(npz))):
         dat = np.vstack((dat, np.load(npz[i])[args.key_npz]))
 
-    print(f"Shape of output NumPy array (after stacking): {dat.shape}")
+    logging.info(f"Shape of output NumPy array (after stacking): {dat.shape}")
 
     if args.output:
         out = args.output.split(".")[0] + ".npz"
     else:
         out = f"stacked_{len(npz)}arr_{args.key_npz}.npz"
     np.savez_compressed(f"{out}", arr=dat)
-   
+
 
 if __name__ == "__main__":
     main()

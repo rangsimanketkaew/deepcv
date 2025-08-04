@@ -14,6 +14,7 @@ Generate PLUMED input file using DAENN collective variable model for metadynamic
 
 import os
 import sys
+import logging
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
@@ -25,6 +26,8 @@ from utils import util
 from tools import adjmat_param as param
 from itertools import combinations_with_replacement
 from datetime import datetime
+
+logging = logging.getLogger("DeepCV")
 
 
 class WritePlumed:
@@ -80,7 +83,7 @@ class WritePlumed:
                     f"t{i+1}: TORSION ATOMS={index[i+3]},{index[i]},{index[i+1]},{index[i+2]}\n"
                 )
                 num_inp += 1
-        print(f">>>   |- Number of Z-matrix inputs: {num_inp}")
+        logging.info(f"  |- Number of Z-matrix inputs: {num_inp}")
         self.num_feat += num_inp
         self.arg_input = [f"d{j+1}" for j in range(len(index) - 1)] + [
             f"a{j+1}" for j in range(len(index) - 2)
@@ -126,14 +129,15 @@ class WritePlumed:
                     str_pair = "".join(map(str, swapped_pair))
                     r_0_ = param.r_0[str(str_pair)]
                 except:
-                    exit(f"Error: Chemical symbol pair {str_pair} is not defined in \"src/tools/adjmat_param.py\". Please check!")
+                    logging.error(
+                        f'Chemical symbol pair {str_pair} is not defined in "deepcv/src/tools/adjmat_param.py". Please check!'
+                    )
+                    sys.exit(1)
             r_0.append(r_0_)
         # ---------------
         # Write the swiching function
         if len(index_pairs) == 1:
-            f.write(
-                f"  SWITCH={{RATIONAL R_0={r_0[0]} NN={param.n} MM={param.m}}}\n"
-            )
+            f.write(f"  SWITCH={{RATIONAL R_0={r_0[0]} NN={param.n} MM={param.m}}}\n")
         elif len(index_pairs) > 1:
             for i in range(len(index_pairs)):
                 switch = "".join(map(str, index_pairs[i]))
@@ -144,7 +148,7 @@ class WritePlumed:
         f.write("... CONTACT_MATRIX\n")
         f.write("SPRINT MATRIX=mat LABEL=ss\n\n")
         f.write(f"PRINT ARG=ss.* FILE=input_SPRINT.log STRIDE={stride}\n")
-        print(f">>>   |- Number of SPRINT inputs: {num_sprint}")
+        logging.info(f"  |- Number of SPRINT inputs: {num_sprint}")
         self.num_feat += num_sprint
         arg = [f"ss.coord-{i}" for i in range(num_sprint)]
         self.arg_input += arg
@@ -171,7 +175,7 @@ class WritePlumed:
         for i in range(len(index) - 3):
             f.write(f"l2_d{i+3}: DISTANCE ATOMS={index[i+3]},{index[i]}\n")
             num_input += 1
-        print(f">>>   |- Number of inputs for secondary loss function: {num_input}")
+        logging.info(f"  |- Number of inputs for secondary loss function: {num_input}")
         self.num_feat += num_input
         arg = [f"l2_d{j+1}" for j in range(len(index) - 1)]
         self.arg_input += arg
@@ -226,23 +230,26 @@ class WritePlumed:
             "leakyrelu": lambda v: f"{leakyrelu_coeff}*step(-(x{v:+.8f}))+step(x{v:+.8f})*(x{v:+.8f})",
             "elu": lambda v: f"{leakyrelu_coeff}*(exp(step(-(x{v:+.8f})))-1)+step(x{v:+.8f})*(x{v:+.8f})",
         }
-        print(f">>>   |- Number of total inputs: {self.num_feat}")
+        logging.info(f"  |- Number of total inputs: {self.num_feat}")
 
         # Check if number of inputs and weight of the first layer are corresponding
         if self.num_feat != weight[kw_1].shape[0]:
-            exit(
-                f"Error: Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding"
+            logging.error(
+                f"Input size ({self.num_feat}) and weight size ({weight[kw_1].shape[0]}) are not corresponding"
             )
+            sys.exit(1)
 
-        print(">>> Encoder info")
-        print(f">>>   |- Activation functions: {func_1.lower()}, {func_2}, {func_3}")
+        logging.info("Encoder info")
+        logging.info(f"  |- Activation functions: {func_1.lower()}, {func_2}, {func_3}")
         func_1 = act_func[func_1.lower()]
         func_2 = act_func[func_2.lower()]
         func_3 = act_func[func_3.lower()]
         size_layer1 = weight[kw_1].shape[1]
         size_layer2 = weight[kw_2].shape[1]
         size_layer3 = weight[kw_3].shape[1]
-        print(f">>>   |- Size of layers: {size_layer1}, {size_layer2}, {size_layer3}")
+        logging.info(
+            f"  |- Size of layers: {size_layer1}, {size_layer2}, {size_layer3}"
+        )
 
         f = open(self.output_plumed, "a")
         f.write("\n" + "#" + "-" * 60 + "\n")
@@ -442,9 +449,10 @@ def main():
     args = parser.parse_args()
 
     # ------- Read input -------#
-    print(">>> Reading DeepCV input file ...")
+    logging.info("Reading DeepCV input file ...")
     if not os.path.isfile(args.input):
-        exit(f'Error: No such file "{args.input}"')
+        logging.error(f"File {args.input} is not found")
+        sys.exit(1)
     json = util.load_json(args.input)
     func_1 = json["network"]["act_funcs"][0]
     func_2 = json["network"]["act_funcs"][1]
@@ -454,17 +462,19 @@ def main():
     bias = json["output"]["out_biases_npz"]
 
     # ------- Check weight file -------#
-    print(f">>> Checking weight output file: {weight}")
+    logging.info(f"Checking weight output file: {weight}")
     weight = folder + "/" + "autoencoder" + "/" + weight
     if not os.path.isfile(weight):
-        exit(f'Error: No such file "{weight}"')
+        logging.error(f"File {weight} is not found")
+        sys.exit(1)
     weight = np.load(weight)
 
     # ------- Check bias file -------#
-    print(f">>> Checking bias output file  : {bias}")
+    logging.info(f"Checking bias output file  : {bias}")
     bias = folder + "/" + "autoencoder" + "/" + bias
     if not os.path.isfile(bias):
-        exit(f'Error: No such file "{bias}"')
+        logging.error(f"File {bias} is not found")
+        sys.exit(1)
     bias = np.load(bias)
 
     kw = weight.files[:3]  # get keywords of first three layers
@@ -489,8 +499,8 @@ def main():
     # -------- Write neural network functions (DAENN CV)--------#
     p.write_neuralnet(weight, bias, kw, func_1, func_2, func_3)
     p.write_metad()
-    print(
-        f">>> Plumed data have been written successfully to '{os.path.abspath(args.output)}'"
+    logging.info(
+        f"Plumed data have been written successfully to '{os.path.abspath(args.output)}'"
     )
 
 

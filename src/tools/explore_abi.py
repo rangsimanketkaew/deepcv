@@ -73,7 +73,9 @@ def calc_explore_abi(fes):
     plt.ylabel("CV2")
 
     # Plot energy surface
-    surf = ax.plot_surface(cv1, cv2, ener, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax.plot_surface(
+        cv1, cv2, ener, cmap=cm.coolwarm, linewidth=0, antialiased=False
+    )
     # invert
     plt.gca().invert_xaxis()
     plt.gca().invert_yaxis()
@@ -93,8 +95,12 @@ def calc_explore_abi(fes):
     grad_cv2 = np.array(grad_cv2)
 
     # Plot gradients
-    surf = ax.plot_surface(cv1, cv2, grad_cv1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-    surf = ax.plot_surface(cv1, cv2, grad_cv2, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax.plot_surface(
+        cv1, cv2, grad_cv1, cmap=cm.coolwarm, linewidth=0, antialiased=False
+    )
+    surf = ax.plot_surface(
+        cv1, cv2, grad_cv2, cmap=cm.coolwarm, linewidth=0, antialiased=False
+    )
 
     plt.show()
 
