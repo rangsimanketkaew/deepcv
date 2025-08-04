@@ -12,17 +12,17 @@ in PLUMED format using `MATHEVAL` or `CUSTOM` function ([see details here](https
 ```sh
 $ deepcv deepcv2plumed --input input_ae_DA.json --atom-index {1..6} --sprint-index C=1,2,3,4,5,6
 
->>> Reading DeepCV input file ...
->>> Checking weight output file: model_weights.npz
->>> Checking bias output file  : model_biases.npz
->>>   |- Number of Z-matrix inputs: 12
->>>   |- Number of SPRINT inputs: 6
->>>   |- Number of inputs for secondary loss function: 5
->>>   |- Number of total inputs: 23
->>> Encoder info
->>>   |- Activation functions: relu, relu, relu
->>>   |- Size of layers: 32, 8, 2
->>> Plumed data have been written successfully to 'plumed_deepcv.dat'
+DeepCV:INFO >>> Reading DeepCV input file ...
+DeepCV:INFO >>> Checking weight output file: model_weights.npz
+DeepCV:INFO >>> Checking bias output file  : model_biases.npz
+DeepCV:INFO >>>   |- Number of Z-matrix inputs: 12
+DeepCV:INFO >>>   |- Number of SPRINT inputs: 6
+DeepCV:INFO >>>   |- Number of inputs for secondary loss function: 5
+DeepCV:INFO >>>   |- Number of total inputs: 23
+DeepCV:INFO >>> Encoder info
+DeepCV:INFO >>>   |- Activation functions: relu, relu, relu
+DeepCV:INFO >>>   |- Size of layers: 32, 8, 2
+DeepCV:INFO >>> Plumed data have been written successfully to 'plumed_deepcv.dat'
 ```
 
 The example of a generated `plumed_deepcv.dat` for the Diels-Alder reaction is [plumed_deepcv.dat](https://gitlab.uzh.ch/lubergroup/deepcv/-/blob/master/output/plumed_deepcv.dat).

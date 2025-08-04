@@ -53,13 +53,13 @@ The following example calculates the features using only all carbon atoms (index
 
 ```sh
 $ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep zmat --save
-Converting text data to NumPy array...
-Shape of NumPy array: (50, 16, 3)
-List of atom indices: [1, 2, 3, 4, 5, 6]
-Shape of NumPy array with only specified atom index: (50, 6, 3)
-Calculate distance coordinates of all structures
-Calculate bond angle coordinates of all structures
-Calculate torsion angle coordinates of all structures
+DeepCV:INFO >>> Converting text data to NumPy array...
+DeepCV:INFO >>> Shape of NumPy array: (50, 16, 3)
+DeepCV:INFO >>> List of atom indices: [1, 2, 3, 4, 5, 6]
+DeepCV:INFO >>> Shape of NumPy array with only specified atom index: (50, 6, 3)
+DeepCV:INFO >>> Calculate distance coordinates of all structures
+DeepCV:INFO >>> Calculate bond angle coordinates of all structures
+DeepCV:INFO >>> Calculate torsion angle coordinates of all structures
 ```
 
 ### 2. SPRINT and xSPRINT coordinates
@@ -68,22 +68,22 @@ Calculate torsion angle coordinates of all structures
 
 ```sh
 $ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep sprint --save
-Converting text data to NumPy array...
-Shape of NumPy array: (50, 16, 3)
-List of atom indices: [1, 2, 3, 4, 5, 6]
-Shape of NumPy array with only specified atom index: (50, 6, 3)
-Calculate SPRINT coordinates and sorted atom index
+DeepCV:INFO >>> Converting text data to NumPy array...
+DeepCV:INFO >>> Shape of NumPy array: (50, 16, 3)
+DeepCV:INFO >>> List of atom indices: [1, 2, 3, 4, 5, 6]
+DeepCV:INFO >>> Shape of NumPy array with only specified atom index: (50, 6, 3)
+DeepCV:INFO >>> Calculate SPRINT coordinates and sorted atom index
 ```
 
 - xSPRINT coordinates
 
 ```sh
 $ deepcv calc_rep --input traj.xyz --atom-index {1..6} --rep xsprint --save
-Converting text data to NumPy array...
-Shape of NumPy array: (50, 16, 3)
-List of atom indices: [1, 2, 3, 4, 5, 6]
-Shape of NumPy array with only specified atom index: (50, 6, 3)
-Calculate xSPRINT coordinates and sorted atom index
+DeepCV:INFO >>> Converting text data to NumPy array...
+DeepCV:INFO >>> Shape of NumPy array: (50, 16, 3)
+DeepCV:INFO >>> List of atom indices: [1, 2, 3, 4, 5, 6]
+DeepCV:INFO >>> Shape of NumPy array with only specified atom index: (50, 6, 3)
+DeepCV:INFO >>> Calculate xSPRINT coordinates and sorted atom index
 ```
 
 ### Check files
