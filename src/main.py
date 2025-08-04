@@ -23,8 +23,6 @@ list_of_functions = [
     ["gen_input", "Input generator"],
     ["daenn", "Deep autoencoder neural network"],
     ["deepcv2plumed", "Create PLUMED input file"],
-    ["single_train", "Single-data fully-connected neural network"],
-    ["multi_train", "Multi-data fully-connected neural network"],
     ["gan_train", "Training generative adversarial network (GAN)"],
     ["gan_predict", "Generating samples using trained GAN"],
     ["analyze_FES", "FES validation"],
@@ -81,10 +79,6 @@ def main():
         modules.daenn.main()
     elif calling == "deepcv2plumed":
         tools.deepcv2plumed.main()
-    elif calling == "single_train":
-        modules.single_train.main()
-    elif calling == "multi_train":
-        modules.multi_train.main()
     elif calling == "gan_train":
         modules.gan_train.main()
     elif calling == "gan_predict":

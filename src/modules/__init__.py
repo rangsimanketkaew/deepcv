@@ -29,8 +29,6 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(name)s:%(levelname)s >>> %(message)s")
 
 # Bring all modules to the same level as main.py
-from . import single_train
-from . import multi_train
 from . import daenn
 from . import gan_train
 from . import gan_predict
