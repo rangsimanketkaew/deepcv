@@ -10,18 +10,34 @@ https://github.com/charnley/rmsd
 
 __version__ = "1.3.2"
 
+import argparse
+import sys
 import copy
 import gzip
 import re
+import logging
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
-AXIS_SWAPS = np.array([[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 1, 0], [2, 0, 1]])
+logging = logging.getLogger("DeepCV")
+
+AXIS_SWAPS = np.array(
+    [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 1, 0], [2, 0, 1]]
+)
 
 AXIS_REFLECTIONS = np.array(
-    [[1, 1, 1], [-1, 1, 1], [1, -1, 1], [1, 1, -1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, -1]]
+    [
+        [1, 1, 1],
+        [-1, 1, 1],
+        [1, -1, 1],
+        [1, 1, -1],
+        [-1, -1, 1],
+        [-1, 1, -1],
+        [1, -1, -1],
+        [-1, -1, -1],
+    ]
 )
 
 
@@ -479,7 +495,9 @@ def makeW(r1, r2, r3, r4=0):
     """
     matrix involved in quaternion rotation
     """
-    W = np.asarray([[r4, r3, -r2, r1], [-r3, r4, r1, r2], [r2, -r1, r4, r3], [-r1, -r2, -r3, r4]])
+    W = np.asarray(
+        [[r4, r3, -r2, r1], [-r3, r4, r1, r2], [r2, -r1, r4, r3], [-r1, -r2, -r3, r4]]
+    )
     return W
 
 
@@ -487,7 +505,9 @@ def makeQ(r1, r2, r3, r4=0):
     """
     matrix involved in quaternion rotation
     """
-    Q = np.asarray([[r4, -r3, r2, r1], [r3, r4, -r1, r2], [-r2, r1, r4, r3], [-r1, -r2, -r3, r4]])
+    Q = np.asarray(
+        [[r4, -r3, r2, r1], [r3, r4, -r1, r2], [-r2, r1, r4, r3], [-r1, -r2, -r3, r4]]
+    )
     return Q
 
 
@@ -884,8 +904,8 @@ def check_reflections(
                 min_review = tmp_review
 
     if not (p_atoms == q_atoms[min_review]).all():
-        print("error: Not aligned")
-        quit()
+        logging.error("Not aligned")
+        sys.exit(1)
 
     return min_rmsd, min_swap, min_reflection, min_review
 
@@ -1072,7 +1092,8 @@ def get_coordinates(filename, fmt):
     elif fmt == "pdb" or fmt == "pdbgz" or fmt == "pdb.gz":
         get_func = get_coordinates_pdb
     else:
-        exit("Could not recognize file format: {:s}".format(fmt))
+        logging.error("Could not recognize file format: {:s}".format(fmt))
+        sys.exit(1)
 
     return get_func(filename)
 
@@ -1138,17 +1159,29 @@ def get_coordinates_pdb(filename):
                         else:
                             raise Exception
                 except:
-                    exit("error: Parsing atomtype for the following line: \n{0:s}".format(line))
+                    logging.error(
+                        "Parsing atomtype for the following line: \n{0:s}".format(line)
+                    )
+                    sys.exit(1)
 
                 if x_column is None:
                     try:
                         # look for x column
                         for i, x in enumerate(tokens):
-                            if "." in x and "." in tokens[i + 1] and "." in tokens[i + 2]:
+                            if (
+                                "." in x
+                                and "." in tokens[i + 1]
+                                and "." in tokens[i + 2]
+                            ):
                                 x_column = i
                                 break
                     except IndexError:
-                        exit("error: Parsing coordinates for the following line: \n{0:s}".format(line))
+                        logging.error(
+                            "Parsing coordinates for the following line: \n{0:s}".format(
+                                line
+                            )
+                        )
+                        sys.exit(1)
                 # Try to read the coordinates
                 try:
                     V.append(np.asarray(tokens[x_column : x_column + 3], dtype=float))
@@ -1160,7 +1193,10 @@ def get_coordinates_pdb(filename):
                         z = line[46:54]
                         V.append(np.asarray([x, y, z], dtype=float))
                     except:
-                        exit("error: Parsing input for the following line: \n{0:s}".format(line))
+                        logging.error(
+                            "Parsing input for the following line: \n{0:s}".format(line)
+                        )
+                        sys.exit(1)
 
     V = np.asarray(V)
     atoms = np.asarray(atoms)
@@ -1204,7 +1240,8 @@ def get_coordinates_xyz(filename):
     try:
         n_atoms = int(f.readline())
     except ValueError:
-        exit("error: Could not obtain the number of atoms in the .xyz file.")
+        logging.error("Could not obtain the number of atoms in the .xyz file.")
+        sys.exit(1)
 
     # Skip the title line
     f.readline()
@@ -1231,7 +1268,12 @@ def get_coordinates_xyz(filename):
             V.append(np.array(numbers)[:3])
             atoms.append(atom)
         else:
-            exit("Reading the .xyz file failed in line {0}. Please check the format.".format(lines_read + 2))
+            logging.error(
+                "Reading the .xyz file failed in line {0}. Please check the format.".format(
+                    lines_read + 2
+                )
+            )
+            sys.exit(1)
 
     f.close()
     atoms = np.array(atoms)
@@ -1240,10 +1282,6 @@ def get_coordinates_xyz(filename):
 
 
 def main():
-
-    import argparse
-    import sys
-
     description = __doc__
 
     version_msg = """
@@ -1265,7 +1303,12 @@ See https://github.com/charnley/rmsd for citation information
     )
 
     # Input structures
-    parser.add_argument("structure_a", metavar="FILE_A", type=str, help="structures in .xyz or .pdb format")
+    parser.add_argument(
+        "structure_a",
+        metavar="FILE_A",
+        type=str,
+        help="structures in .xyz or .pdb format",
+    )
     parser.add_argument("structure_b", metavar="FILE_B", type=str)
 
     # Admin
@@ -1283,7 +1326,10 @@ See https://github.com/charnley/rmsd for citation information
 
     # Reorder arguments
     parser.add_argument(
-        "-e", "--reorder", action="store_true", help="align the atoms of molecules (default: Hungarian)"
+        "-e",
+        "--reorder",
+        action="store_true",
+        help="align the atoms of molecules (default: Hungarian)",
     )
     parser.add_argument(
         "--reorder-method",
@@ -1306,18 +1352,32 @@ See https://github.com/charnley/rmsd for citation information
     # Filter
     index_group = parser.add_mutually_exclusive_group()
     index_group.add_argument(
-        "-nh", "--no-hydrogen", action="store_true", help="ignore hydrogens when calculating RMSD"
+        "-nh",
+        "--no-hydrogen",
+        action="store_true",
+        help="ignore hydrogens when calculating RMSD",
     )
     index_group.add_argument(
-        "--remove-idx", nargs="+", type=int, help="index list of atoms NOT to consider", metavar="IDX"
+        "--remove-idx",
+        nargs="+",
+        type=int,
+        help="index list of atoms NOT to consider",
+        metavar="IDX",
     )
     index_group.add_argument(
-        "--add-idx", nargs="+", type=int, help="index list of atoms to consider", metavar="IDX"
+        "--add-idx",
+        nargs="+",
+        type=int,
+        help="index list of atoms to consider",
+        metavar="IDX",
     )
 
     # format and print
     parser.add_argument(
-        "--format", action="store", help="format of input files. valid format are xyz and pdb", metavar="FMT"
+        "--format",
+        action="store",
+        help="format of input files. valid format are xyz and pdb",
+        metavar="FMT",
     )
     parser.add_argument(
         "-p",
@@ -1353,20 +1413,20 @@ See https://github.com/charnley/rmsd for citation information
     q_size = q_all.shape[0]
 
     if not p_size == q_size:
-        print("error: Structures not same size")
-        quit()
+        logging.error("Structures not same size")
+        sys.exit(1)
 
     if np.count_nonzero(p_all_atoms != q_all_atoms) and not args.reorder:
         msg = """
-error: Atoms are not in the same order.
+Atoms are not in the same order.
 
 Use --reorder to align the atoms (can be expensive for large structures).
 
 Please see --help or documentation for more information or
 https://github.com/charnley/rmsd for further examples.
 """
-        print(msg)
-        exit()
+        logging.error(msg)
+        sys.exit(1)
 
     # Set local view
     p_view = None
@@ -1397,16 +1457,16 @@ https://github.com/charnley/rmsd for further examples.
     else:
 
         if args.reorder and args.output:
-            print(
-                "error: Cannot reorder atoms and print structure, when excluding atoms (such as --no-hydrogen)"
+            logging.error(
+                "Cannot reorder atoms and print structure, when excluding atoms (such as --no-hydrogen)"
             )
-            quit()
+            sys.exit(1)
 
         if args.use_reflections and args.output:
-            print(
-                "error: Cannot use reflections on atoms and print, when excluding atoms (such as --no-hydrogen)"
+            logging.error(
+                "Cannot use reflections on atoms and print, when excluding atoms (such as --no-hydrogen)"
             )
-            quit()
+            sys.exit(1)
 
         p_coord = copy.deepcopy(p_all[p_view])
         q_coord = copy.deepcopy(q_all[q_view])
@@ -1432,8 +1492,8 @@ https://github.com/charnley/rmsd for further examples.
         rotation_method = None
 
     else:
-        print("error: Unknown rotation method:", args.rotation)
-        quit()
+        logging.error("Unknown rotation method:", args.rotation)
+        sys.exit(1)
 
     # set reorder method
     if not args.reorder:
@@ -1452,8 +1512,8 @@ https://github.com/charnley/rmsd for further examples.
         reorder_method = reorder_distance
 
     else:
-        print("error: Unknown reorder method:", args.reorder_method)
-        quit()
+        logging.error("Unknown reorder method:", args.reorder_method)
+        sys.exit(1)
 
     # Save the resulting RMSD
     result_rmsd = None
@@ -1461,7 +1521,12 @@ https://github.com/charnley/rmsd for further examples.
     if args.use_reflections:
 
         result_rmsd, q_swap, q_reflection, q_review = check_reflections(
-            p_atoms, q_atoms, p_coord, q_coord, reorder_method=reorder_method, rotation_method=rotation_method
+            p_atoms,
+            q_atoms,
+            p_coord,
+            q_coord,
+            reorder_method=reorder_method,
+            rotation_method=rotation_method,
         )
 
     elif args.use_reflections_keep_stereo:
@@ -1483,8 +1548,8 @@ https://github.com/charnley/rmsd for further examples.
         q_atoms = q_atoms[q_review]
 
         if not all(p_atoms == q_atoms):
-            print("error: Structure not aligned")
-            quit()
+            logging.error("Structure not aligned")
+            sys.exit(1)
 
     # print result
     if args.output:
@@ -1492,8 +1557,8 @@ https://github.com/charnley/rmsd for further examples.
         if args.reorder:
 
             if q_review.shape[0] != q_all.shape[0]:
-                print("error: Reorder length error. Full atom list needed for --print")
-                quit()
+                logging.error("Reorder length error. Full atom list needed for --print")
+                sys.exit(1)
 
             q_all = q_all[q_review]
             q_all_atoms = q_all_atoms[q_review]
@@ -1509,7 +1574,9 @@ https://github.com/charnley/rmsd for further examples.
         q_all += p_cent
 
         # done and done
-        xyz = set_coordinates(q_all_atoms, q_all, title="{} - modified".format(args.structure_b))
+        xyz = set_coordinates(
+            q_all_atoms, q_all, title="{} - modified".format(args.structure_b)
+        )
         print(xyz)
 
     else:
