@@ -128,7 +128,9 @@ class ModelConfig:
 
         # Calculate default save_every_n_epoch if not provided
         if save_every_n_epoch is None:
-            save_every_n_epoch = max(int(num_epoch / DEFAULT_SAVE_INTERVAL), DEFAULT_SAVE_INTERVAL)
+            save_every_n_epoch = max(
+                int(num_epoch / DEFAULT_SAVE_INTERVAL), DEFAULT_SAVE_INTERVAL
+            )
 
         return cls(
             optimizer=model_data.get("optimizer", "adam"),
@@ -573,7 +575,9 @@ class Autoencoder(Model):
 
         return _loss
 
-    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=DEFAULT_GAMMA):
+    def custom_loss_2(
+        self, y_true, y_pred, main_loss, penalty_loss, gamma=DEFAULT_GAMMA
+    ):
         """Method 2: add_loss
 
         Custom loss for model.add_loss(). add_loss creates loss as tensor, not function,
@@ -860,14 +864,14 @@ class Autoencoder(Model):
 
 def save_loss_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
     """Save loss history plots for training visualization.
-    
+
     Args:
         model: Trained autoencoder model with history
         config: Configuration object containing output settings
         out_autoencoder: Path to autoencoder output directory
     """
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4))
-        
+
     # Total loss
     ax1.set_title("Total loss")
     ax1.plot(model.history.history["loss"], label="train")
@@ -898,7 +902,7 @@ def save_loss_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
     # Adjust layout and save
     plt.tight_layout()
     save_path = Path(out_autoencoder) / config.output.loss_plot
-    fig.savefig(save_path, dpi=300, bbox_inches='tight')
+    fig.savefig(save_path, dpi=300, bbox_inches="tight")
     logging.info(f"Loss history plot saved to {save_path}")
 
     if config.settings.show_loss:
@@ -907,7 +911,7 @@ def save_loss_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
 
 def save_metrics_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
     """Save metrics history plots for training visualization.
-    
+
     Args:
         model: Trained autoencoder model with history
         config: Configuration object containing output settings
@@ -936,9 +940,9 @@ def save_metrics_history(model, config: DAENNConfig, out_autoencoder: str) -> No
     # Adjust layout and save
     plt.tight_layout()
     save_path = Path(out_autoencoder) / config.output.metrics_plot
-    fig.savefig(save_path, dpi=300, bbox_inches='tight')
+    fig.savefig(save_path, dpi=300, bbox_inches="tight")
     logging.info(f"Metrics history plot saved to {save_path}")
-    
+
     if config.settings.show_metrics:
         plt.show()
 
