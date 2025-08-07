@@ -28,6 +28,8 @@ from datetime import datetime
 from inspect import getmembers, isfunction
 from pathlib import Path
 from contextlib import redirect_stdout
+from dataclasses import dataclass
+from typing import List, Optional
 
 import functools
 import numpy as np
@@ -46,11 +48,263 @@ from tools import ae_visual
 logging = logging.getLogger("DeepCV")
 
 
+@dataclass
+class ProjectConfig:
+    """Configuration for project settings."""
+
+    name: str
+    neural_network: str
+
+    @classmethod
+    def from_json(cls, json_data):
+        project_data = json_data.get("project", {})
+        return cls(
+            name=project_data.get("name", "Unknown"),
+            neural_network=project_data.get("neural_network", "daenn"),
+        )
+
+
+@dataclass
+class DatasetConfig:
+    """Configuration for dataset settings."""
+
+    primary: List[str]
+    secondary: List[str]
+    split: bool
+    split_ratio: float
+    shuffle: bool
+    normalize_scale: float
+    max_scale: float
+    keys: Optional[List[str]] = None
+
+    @classmethod
+    def from_json(cls, json_data):
+        dataset_data = json_data.get("dataset", {})
+        return cls(
+            primary=dataset_data.get("primary", []),
+            secondary=dataset_data.get("secondary", []),
+            split=dataset_data.get("split", True),
+            split_ratio=dataset_data.get("split_ratio", 0.8),
+            shuffle=dataset_data.get("shuffle", True),
+            normalize_scale=dataset_data.get("normalize_scale", 0.0),
+            max_scale=dataset_data.get("max_scale", 1.0),
+            keys=dataset_data.get("keys", None),
+        )
+
+    def validate(self):
+        """Validate dataset configuration."""
+        if not self.primary:
+            raise ValueError("Primary dataset list cannot be empty")
+        if not 0.1 <= self.split_ratio <= 0.9:
+            raise ValueError("Split ratio must be between 0.1 and 0.9")
+        if self.keys and len(self.keys) != len(self.primary + self.secondary):
+            raise ValueError("Number of keys must match total number of datasets")
+
+
+@dataclass
+class ModelConfig:
+    """Configuration for model settings."""
+
+    optimizer: str
+    main_loss: str
+    penalty_loss: str
+    loss_weights: List[float]
+    num_epoch: int
+    batch_size: int
+    save_every_n_epoch: Optional[int] = None
+
+    @classmethod
+    def from_json(cls, json_data):
+        model_data = json_data.get("model", {})
+        num_epoch = model_data.get("num_epoch", 100)
+        save_every_n_epoch = model_data.get("save_every_n_epoch", None)
+
+        # Calculate default save_every_n_epoch if not provided
+        if save_every_n_epoch is None:
+            save_every_n_epoch = max(int(num_epoch / 10), 10)
+
+        return cls(
+            optimizer=model_data.get("optimizer", "adam"),
+            main_loss=model_data.get("main_loss", "mse"),
+            penalty_loss=model_data.get("penalty_loss", "mse"),
+            loss_weights=model_data.get("loss_weights", [1.0, 1.0]),
+            num_epoch=num_epoch,
+            batch_size=model_data.get("batch_size", 32),
+            save_every_n_epoch=int(save_every_n_epoch),
+        )
+
+    def validate(self):
+        """Validate model configuration."""
+        if self.num_epoch <= 0:
+            raise ValueError("Number of epochs must be positive")
+        if self.batch_size < 0:
+            raise ValueError("Batch size must be non-negative (0 for full batch)")
+        if len(self.loss_weights) != 2:
+            raise ValueError("Loss weights must have exactly 2 values")
+
+
+@dataclass
+class NetworkConfig:
+    """Configuration for network architecture."""
+
+    units: List[int]
+    act_funcs: List[str]
+
+    @classmethod
+    def from_json(cls, json_data):
+        network_data = json_data.get("network", {})
+        return cls(
+            units=network_data.get("units", [256, 128, 64, 128, 256]),
+            act_funcs=network_data.get(
+                "act_funcs", ["relu", "relu", "relu", "relu", "relu"]
+            ),
+        )
+
+    def validate(self):
+        """Validate network configuration."""
+        if len(self.units) != 5:
+            raise ValueError("Network must have exactly 5 layers (units list)")
+        if len(self.act_funcs) != 5:
+            raise ValueError("Network must have exactly 5 activation functions")
+        if any(u <= 0 for u in self.units):
+            raise ValueError("All units must be positive integers")
+
+
+@dataclass
+class PerformanceConfig:
+    """Configuration for performance settings."""
+
+    enable_gpu: bool
+    gpus: int
+
+    @classmethod
+    def from_json(cls, json_data):
+        perf_data = json_data.get("performance", {})
+        return cls(
+            enable_gpu=perf_data.get("enable_gpu", True), gpus=perf_data.get("gpus", 1)
+        )
+
+    def validate(self):
+        """Validate performance configuration."""
+        if self.gpus < 1:
+            raise ValueError("Number of GPUs must be at least 1")
+
+
+@dataclass
+class SettingsConfig:
+    """Configuration for general settings."""
+
+    verbosity: int
+    show_summary: bool
+    save_model: bool
+    save_weights: bool
+    save_weights_npz: bool
+    save_biases_npz: bool
+    save_graph: bool
+    save_loss: bool
+    show_loss: bool
+    save_metrics: bool
+    show_metrics: bool
+
+    @classmethod
+    def from_json(cls, json_data):
+        settings_data = json_data.get("settings", {})
+        return cls(
+            verbosity=settings_data.get("verbosity", 1),
+            show_summary=settings_data.get("show_summary", True),
+            save_model=settings_data.get("save_model", True),
+            save_weights=settings_data.get("save_weights", False),
+            save_weights_npz=settings_data.get("save_weights_npz", False),
+            save_biases_npz=settings_data.get("save_biases_npz", False),
+            save_graph=settings_data.get("save_graph", True),
+            save_loss=settings_data.get("save_loss", True),
+            show_loss=settings_data.get("show_loss", False),
+            save_metrics=settings_data.get("save_metrics", True),
+            show_metrics=settings_data.get("show_metrics", False),
+        )
+
+
+@dataclass
+class OutputConfig:
+    """Configuration for output settings."""
+
+    out_dir: str
+    out_tb: str
+    out_model: str
+    out_weights: str
+    out_weights_npz: str
+    out_biases_npz: str
+    loss_plot: str
+    metrics_plot: str
+
+    @classmethod
+    def from_json(cls, json_data):
+        output_data = json_data.get("output", {})
+        return cls(
+            out_dir=output_data.get("out_dir", "./output"),
+            out_tb=output_data.get("out_tb", "tensorboard"),
+            out_model=output_data.get("out_model", "model"),
+            out_weights=output_data.get("out_weights", "weights.h5"),
+            out_weights_npz=output_data.get("out_weights_npz", "weights.npz"),
+            out_biases_npz=output_data.get("out_biases_npz", "biases.npz"),
+            loss_plot=output_data.get("loss_plot", "loss_history.png"),
+            metrics_plot=output_data.get("metrics_plot", "metrics_history.png"),
+        )
+
+
+@dataclass
+class DAENNConfig:
+    """Complete configuration for DAENN training."""
+
+    project: ProjectConfig
+    dataset: DatasetConfig
+    model: ModelConfig
+    network: NetworkConfig
+    performance: PerformanceConfig
+    settings: SettingsConfig
+    output: OutputConfig
+
+    @classmethod
+    def from_json(cls, json_data):
+        """Create configuration from JSON data with validation."""
+        config = cls(
+            project=ProjectConfig.from_json(json_data),
+            dataset=DatasetConfig.from_json(json_data),
+            model=ModelConfig.from_json(json_data),
+            network=NetworkConfig.from_json(json_data),
+            performance=PerformanceConfig.from_json(json_data),
+            settings=SettingsConfig.from_json(json_data),
+            output=OutputConfig.from_json(json_data),
+        )
+
+        # Validate all configurations
+        config.validate()
+        return config
+
+    def validate(self):
+        """Validate all configuration sections."""
+        try:
+            self.dataset.validate()
+            self.model.validate()
+            self.network.validate()
+            self.performance.validate()
+            logging.info("Configuration validation passed")
+        except ValueError as e:
+            logging.error(f"Configuration validation failed: {e}")
+            raise
+
+
 class Autoencoder(Model):
     def __init__(self):
         super(Autoencoder, self).__init__()
 
-    def add_dataset(self, train_set, test_set, num_primary, num_secondary):
+    def add_dataset(
+        self, 
+        train_set: List[np.ndarray], 
+        test_set: List[np.ndarray], 
+        num_primary: int, 
+        num_secondary: int
+    ) -> None:
         """Add dataset after creating an instance of Autoencoder class
 
         Args:
@@ -567,7 +821,9 @@ class Autoencoder(Model):
                 model.export(path_output)
                 logging.info(f"Model exported to: {path_output}")
             except:
-                logging.error(f"Failed to export model in SavedModel format: {path_output}")
+                logging.error(
+                    f"Failed to export model in SavedModel format: {path_output}"
+                )
 
     @staticmethod
     def save_graph(model, file_name="graph", save_dir=None, dpi=192):
@@ -581,9 +837,9 @@ class Autoencoder(Model):
         """
         if save_dir is None:
             save_dir = os.getcwd()
-        
+
         output_path = Path(save_dir) / f"{file_name}.png"
-        
+
         plot_model(
             model,
             to_file=str(output_path),
@@ -593,6 +849,32 @@ class Autoencoder(Model):
             expand_nested=False,
             dpi=dpi,
         )
+
+
+def load_and_validate_config(input_file: str) -> DAENNConfig:
+    """Load and validate configuration from JSON file.
+
+    Args:
+        input_file (str): Path to the JSON configuration file
+
+    Returns:
+        DAENNConfig: Validated configuration object
+
+    Raises:
+        FileNotFoundError: If input file doesn't exist
+        ValueError: If configuration is invalid
+    """
+    if not os.path.isfile(input_file):
+        raise FileNotFoundError(f'No such file "{input_file}"')
+
+    try:
+        json_data = util.load_json(input_file)
+        config = DAENNConfig.from_json(json_data)
+        logging.info("Configuration loaded and validated successfully")
+        return config
+    except Exception as e:
+        logging.error(f"Failed to load configuration: {e}")
+        raise
 
 
 def main():
@@ -609,77 +891,26 @@ def main():
 
     args = parser.parse_args()
 
-    if not os.path.isfile(args.input):
-        logging.error('No such file "' + str(args.input) + '"')
-        sys.exit(1)
-
-    # Load data from JSON input file
-    json = util.load_json(args.input)
-    project = json["project"]["name"]
-    neural_network = json["project"]["neural_network"]
-    # ---------
-    primary_data = json["dataset"]["primary"]
-    secondary_data = json["dataset"]["secondary"]
-    split = json["dataset"]["split"]
-    split_ratio = json["dataset"]["split_ratio"]
-    shuffle = json["dataset"]["shuffle"]
-    normalize_scale = json["dataset"]["normalize_scale"]
-    max_scale = json["dataset"]["max_scale"]
-    # ---------
-    optimizer = json["model"]["optimizer"]
-    main_loss = json["model"]["main_loss"]
-    penalty_loss = json["model"]["penalty_loss"]
-    loss_weights = json["model"]["loss_weights"]
-    num_epoch = json["model"]["num_epoch"]
-    batch_size = json["model"]["batch_size"]
+    # Load and validate configuration
     try:
-        save_every_n_epoch = json["model"]["save_every_n_epoch"]
-        save_every_n_epoch = int(save_every_n_epoch)
-    except KeyError:
-        save_every_n_epoch = int(num_epoch / 10)
-        if save_every_n_epoch == 0:
-            save_every_n_epoch = 10
-    # ---------
-    units = json["network"]["units"]
-    act_funcs = json["network"]["act_funcs"]
-    # ---------
-    enable_gpu = json["performance"]["enable_gpu"]
-    gpus = json["performance"]["gpus"]
-    # ---------
-    verbosity = json["settings"]["verbosity"]
-    show_summary = json["settings"]["show_summary"]
-    save_model = json["settings"]["save_model"]
-    save_weights = json["settings"]["save_weights"]
-    save_weights_npz = json["settings"]["save_weights_npz"]
-    save_biases_npz = json["settings"]["save_biases_npz"]
-    save_graph = json["settings"]["save_graph"]
-    save_loss = json["settings"]["save_loss"]
-    show_loss = json["settings"]["show_loss"]
-    save_metrics = json["settings"]["save_metrics"]
-    show_metrics = json["settings"]["show_metrics"]
-    # ---------
-    out_dir = json["output"]["out_dir"]
-    out_tb = json["output"]["out_tb"]
-    out_model = json["output"]["out_model"]
-    out_weights = json["output"]["out_weights"]
-    out_weights_npz = json["output"]["out_weights_npz"]
-    out_biases_npz = json["output"]["out_biases_npz"]
-    loss_plot = json["output"]["loss_plot"]
-    metrics_plot = json["output"]["metrics_plot"]
+        config = load_and_validate_config(args.input)
+    except (FileNotFoundError, ValueError) as e:
+        logging.error(str(e))
+        sys.exit(1)
 
     # ========================================
 
     # sys.stdout = open("stdout_daenn_{:%Y_%m_%d_%H_%M_%S}.txt".format(datetime.now()), "w")
 
     logging.info("=" * 30 + " Program started " + "=" * 30)
-    logging.info(f"Project: {project}")
+    logging.info(f"Project: {config.project.name}")
     logging.info(
         "Date {:%d/%m/%Y}".format(datetime.now())
         + " at {:%H:%M:%S}".format(datetime.now())
     )
 
-    if neural_network.lower() != "daenn":
-        logging.error(f"This is a DAENN trainer, not {neural_network}.")
+    if config.project.neural_network.lower() != "daenn":
+        logging.error(f"This is a DAENN trainer, not {config.project.neural_network}.")
         sys.exit(1)
 
     ################
@@ -687,15 +918,16 @@ def main():
     ################
     # concatenate two lists of primary dataset (for main loss) and
     # secondary dataset (for penalty loss) into a single list for convenient preprocessing
-    all_dataset = primary_data + secondary_data
+    all_dataset = config.dataset.primary + config.dataset.secondary
 
     # Key
     try:
-        dataset_keys = json["dataset"]["keys"]
-        no_keys = False
-        assert len(all_dataset) == len(
-            dataset_keys
-        ), "Total number of datasets and number of keys provided in the input file are not the same"
+        dataset_keys = config.dataset.keys
+        no_keys = dataset_keys is None
+        if not no_keys:
+            assert len(all_dataset) == len(
+                dataset_keys
+            ), "Total number of datasets and number of keys provided in the input file are not the same"
     except:
         no_keys = True
 
@@ -720,13 +952,16 @@ def main():
         logging.info(f"{i+1}. Dataset: {j.shape}")
 
     # Split dataset
-    if not split:
+    if not config.dataset.split:
         logging.error("Supports only spitting. Please set split to true.")
         sys.exit(1)
     train_arr, test_arr = [], []
     for i, j in enumerate(dataset_arr):
         train, test = train_test_split(
-            j, train_size=split_ratio, shuffle=shuffle, random_state=42
+            j,
+            train_size=config.dataset.split_ratio,
+            shuffle=config.dataset.shuffle,
+            random_state=42,
         )
         train_arr.append(train)
         test_arr.append(test)
@@ -736,34 +971,36 @@ def main():
         logging.info(f"{i+1}. Train: {j.shape} & Test: {test_arr[i].shape}")
 
     # Normalization
-    if float(max_scale) == 0.0:
+    if float(config.dataset.max_scale) == 0.0:
         try:
             max_scale_train = [i.max() for i in train_arr]
             max_scale_test = [i.max() for i in test_arr]
             logging.warning(
-                f"As max_scale is set to {max_scale}, use maximum value in a dataset for scaling"
+                f"As max_scale is set to {config.dataset.max_scale}, use maximum value in a dataset for scaling"
             )
         except:
             logging.error("Cannot determine maximum scale")
             sys.exit(1)
     else:
-        max_scale_train = [max_scale for i in train_arr]
-        max_scale_test = [max_scale for i in test_arr]
+        max_scale_train = [config.dataset.max_scale for i in train_arr]
+        max_scale_test = [config.dataset.max_scale for i in test_arr]
 
     try:
         # train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
         train_arr = [
-            (j - normalize_scale) / max_scale_train[i] for i, j in enumerate(train_arr)
+            (j - config.dataset.normalize_scale) / max_scale_train[i]
+            for i, j in enumerate(train_arr)
         ]
         test_arr = [
-            (j - normalize_scale) / max_scale_test[i] for i, j in enumerate(test_arr)
+            (j - config.dataset.normalize_scale) / max_scale_test[i]
+            for i, j in enumerate(test_arr)
         ]
     except:
         logging.error("Normalization failed. Please check scaling parameters")
         sys.exit(1)
 
     # Train on GPU?
-    if not enable_gpu:
+    if not config.performance.enable_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     ########################
@@ -773,7 +1010,7 @@ def main():
         "Number of units/hidden layer [units] is not equal to number of activation functions "
         + "[act_funcs]. Please check your DAENN input file!"
     )
-    assert len(units) == len(act_funcs), error_assert
+    assert len(config.network.units) == len(config.network.act_funcs), error_assert
 
     # Activation function
     tf_act_func = getmembers(tf.keras.activations, isfunction)
@@ -793,7 +1030,7 @@ def main():
             logging.error(err)
             sys.exit(1)
 
-    user_act_func = list(map(check_act_func, act_funcs))
+    user_act_func = list(map(check_act_func, config.network.act_funcs))
 
     ######
     # Loss
@@ -801,26 +1038,26 @@ def main():
     tf_loss = dict(getmembers(tf.keras.losses, isfunction))
 
     # Main loss
-    if main_loss in tf_loss.keys():
-        main_loss = tf_loss[main_loss]
-    elif main_loss in list(vars(loss).keys()):
-        main_loss = vars(loss)[main_loss]
+    if config.model.main_loss in tf_loss.keys():
+        main_loss = tf_loss[config.model.main_loss]
+    elif config.model.main_loss in list(vars(loss).keys()):
+        main_loss = vars(loss)[config.model.main_loss]
     else:
         err = (
-            f"Loss function you specified for main_loss, {main_loss}, is not supported."
+            f"Loss function you specified for main_loss, {config.model.main_loss}, is not supported."
             + f"Available losses are {tf_loss.keys()} and DeepCV losses are defined in loss.py"
         )
         logging.error(err)
         sys.exit(1)
 
     # Penalty loss (loss-like penalty function for DAENN)
-    if penalty_loss in tf_loss.keys():
-        penalty_loss = tf_loss[penalty_loss]
-    elif penalty_loss in list(vars(loss).keys()):
-        penalty_loss = vars(loss)[penalty_loss]
+    if config.model.penalty_loss in tf_loss.keys():
+        penalty_loss = tf_loss[config.model.penalty_loss]
+    elif config.model.penalty_loss in list(vars(loss).keys()):
+        penalty_loss = vars(loss)[config.model.penalty_loss]
     else:
         err = (
-            f"Loss function you specified for penalty_loss, {penalty_loss}, is not supported."
+            f"Loss function you specified for penalty_loss, {config.model.penalty_loss}, is not supported."
             + f"Available TF losses are {tf_loss.keys()} and DeepCV losses are defined in loss.py"
         )
         logging.error(err)
@@ -830,11 +1067,13 @@ def main():
     # Check output
     ##############
     # Make sure that the top output directory exists
-    out_parent = os.path.abspath(out_dir)
+    out_parent = os.path.abspath(config.output.out_dir)
     try:
         Path(out_parent).mkdir(parents=True, exist_ok=True)
     except:
-        logging.error(f"Can't create output directory you specified, {out_dir}!")
+        logging.error(
+            f"Can't create output directory you specified, {config.output.out_dir}!"
+        )
         sys.exit(1)
     # Create output directory for autoencoder, encoder and decoder
     out_autoencoder = out_parent + "/autoencoder/"
@@ -848,26 +1087,40 @@ def main():
     # Build, compile and train encoder & decoder models separately
     ##############################################################
     model = Autoencoder()
-    model.add_dataset(train_arr, test_arr, len(primary_data), len(secondary_data))
+    model.add_dataset(
+        train_arr, test_arr, len(config.dataset.primary), len(config.dataset.secondary)
+    )
     # Check if multi-GPU parallelization is possible
-    if gpus == 1:
-        model.build_network(units=units, act_funcs=user_act_func)
+    if config.performance.gpus == 1:
+        model.build_network(units=config.network.units, act_funcs=user_act_func)
         model.build_autoencoder()
-        model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
-    elif gpus > 1:
+        model.compile_model(
+            config.model.optimizer, main_loss, penalty_loss, config.model.loss_weights
+        )
+    elif config.performance.gpus > 1:
         try:
             logging.warning("Training on multi-GPU on a single machine")
             # Use all available GPUs
             strategy = tf.distribute.MirroredStrategy(devices=None)
             with strategy.scope():
-                model.build_network(units=units, act_funcs=user_act_func)
+                model.build_network(units=config.network.units, act_funcs=user_act_func)
                 model.build_autoencoder()
-                model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+                model.compile_model(
+                    config.model.optimizer,
+                    main_loss,
+                    penalty_loss,
+                    config.model.loss_weights,
+                )
         except:
             logging.warning("Cannot enable multi-GPUs support for Keras")
-            model.build_network(units=units, act_funcs=user_act_func)
+            model.build_network(units=config.network.units, act_funcs=user_act_func)
             model.build_autoencoder()
-            model.compile_model(optimizer, main_loss, penalty_loss, loss_weights)
+            model.compile_model(
+                config.model.optimizer,
+                main_loss,
+                penalty_loss,
+                config.model.loss_weights,
+            )
     else:
         err = "Number of GPUs must be equal to or greater than 1"
         logging.error(err)
@@ -878,7 +1131,7 @@ def main():
     model.build_decoder()
 
     # show model info
-    if show_summary:
+    if config.settings.show_summary:
         model.save_summary(model.autoencoder, out_autoencoder)
         model.save_summary(model.encoder, out_encoder)
         model.save_summary(model.decoder, out_decoder)
@@ -889,9 +1142,14 @@ def main():
     # decoded_test = model.decoder_predict(encoded_test)
 
     # Train model
-    out_tb = out_parent + "/" + out_tb
+    out_tb = out_parent + "/" + config.output.out_tb
     model.train_model(
-        num_epoch, batch_size, save_every_n_epoch, verbosity, out_tb, out_autoencoder
+        config.model.num_epoch,
+        config.model.batch_size,
+        config.model.save_every_n_epoch,
+        config.settings.verbosity,
+        out_tb,
+        out_autoencoder,
     )
     logging.info("Congrats! Training model is completed.")
 
@@ -904,19 +1162,21 @@ def main():
     ########################
     # Save model and outputs
     ########################
-    if save_model:
-        model.save_model(model.autoencoder, out_autoencoder + "/" + out_model)
-        model.save_model(model.encoder, out_encoder + "/" + out_model)
-        model.save_model(model.decoder, out_decoder + "/" + out_model)
+    if config.settings.save_model:
+        model.save_model(
+            model.autoencoder, out_autoencoder + "/" + config.output.out_model
+        )
+        model.save_model(model.encoder, out_encoder + "/" + config.output.out_model)
+        model.save_model(model.decoder, out_decoder + "/" + config.output.out_model)
         logging.info(f"Models have been saved to {out_parent}")
 
-    if save_weights:
-        path = out_autoencoder + "/" + out_weights
+    if config.settings.save_weights:
+        path = out_autoencoder + "/" + config.output.out_weights
         model.autoencoder.save_weights(path, overwrite=True)
         logging.info(f"Weights of model have been saved to {path}")
 
-    if save_weights_npz:
-        filename = os.path.splitext(out_weights_npz)[0]
+    if config.settings.save_weights_npz:
+        filename = os.path.splitext(config.output.out_weights_npz)[0]
         path = out_autoencoder + "/" + filename + ".npz"
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
@@ -925,8 +1185,8 @@ def main():
         np.savez_compressed(path, **savez)
         logging.info(f"Weights of model have been saved to {path}")
 
-    if save_biases_npz:
-        filename = os.path.splitext(out_biases_npz)[0]
+    if config.settings.save_biases_npz:
+        filename = os.path.splitext(config.output.out_biases_npz)[0]
         path = out_autoencoder + "/" + filename + ".npz"
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
@@ -935,16 +1195,16 @@ def main():
         np.savez_compressed(path, **savez)
         logging.info(f"Biases of model have been saved to {path}")
 
-    if save_graph:
+    if config.settings.save_graph:
         model.save_graph(model.autoencoder, model.autoencoder.name, out_autoencoder)
         model.save_graph(model.encoder, model.encoder.name, out_encoder)
         model.save_graph(model.decoder, model.decoder.name, out_decoder)
         logging.info(
-            f"Directed graphs of all models have been saved to subfolder in {os.path.abspath(out_dir)}"
+            f"Directed graphs of all models have been saved to subfolder in {os.path.abspath(config.output.out_dir)}"
         )
 
     # summarize history for loss and accuracy
-    if save_loss:
+    if config.settings.save_loss:
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4))
         # fig.suptitle("Loss")
 
@@ -972,14 +1232,14 @@ def main():
         ax3.label_outer()
         ax3.legend(["train", "test"], loc="upper right")
 
-        save_path = out_autoencoder + "/" + loss_plot
+        save_path = out_autoencoder + "/" + config.output.loss_plot
         fig.savefig(save_path)
         logging.info(f"Loss history plot has been saved to {save_path}")
 
-        if show_loss:
+        if config.settings.show_loss:
             fig.show()
 
-    if save_metrics:
+    if config.settings.save_metrics:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
         ax1.plot(model.history.history["out_1_mse"])
@@ -998,10 +1258,10 @@ def main():
         ax2.label_outer()
         ax2.legend(["train", "test"], loc="upper right")
 
-        save_path = out_autoencoder + "/" + metrics_plot
+        save_path = out_autoencoder + "/" + config.output.metrics_plot
         plt.savefig(save_path)
         logging.info(f"Metric accuracy history plot has been saved to {save_path}")
-        if show_metrics:
+        if config.settings.show_metrics:
             fig.show()
 
     logging.info("=" * 30 + " DONE " + "=" * 30)
