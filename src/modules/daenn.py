@@ -13,10 +13,13 @@ Deep Autoencoder Neural Network (DAENN) for learning collective variables from m
 
 import os
 import sys
+from pathlib import Path
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
+# Add parent directory to path for relative imports
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
 
 import argparse
 import logging
@@ -557,25 +560,33 @@ class Autoencoder(Model):
             tf.keras.models.save_model(
                 model, path_output + ".keras", overwrite=True, include_optimizer=True
             )
+            logging.info(f"Model saved in Keras format: {path_output}.keras")
         except:
+            logging.error(f"Failed to save model in Keras format: {path_output}.keras")
             try:
                 model.export(path_output)
+                logging.info(f"Model exported to: {path_output}")
             except:
-                pass
+                logging.error(f"Failed to export model in SavedModel format: {path_output}")
 
     @staticmethod
-    def save_graph(model, file_name="graph", save_dir=os.getcwd(), dpi=192):
+    def save_graph(model, file_name="graph", save_dir=None, dpi=192):
         """Plot model and save it as image
 
         Args:
             model (Class): Model to save
             file_name (str, optional): Name of model graph. Defaults to "graph".
-            save_dir (str, optional): Output directory. Defaults to os.getcwd().
+            save_dir (str, optional): Output directory. Defaults to current working directory.
             dpi (int, optional): Image resolution. Defaults to 192.
         """
+        if save_dir is None:
+            save_dir = os.getcwd()
+        
+        output_path = Path(save_dir) / f"{file_name}.png"
+        
         plot_model(
             model,
-            to_file=save_dir + "/" + file_name + ".png",
+            to_file=str(output_path),
             show_shapes=True,
             show_layer_names=True,
             rankdir="TB",
