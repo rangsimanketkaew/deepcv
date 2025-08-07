@@ -12,10 +12,13 @@ Generative adversarial networks (GANs) for generating data from sample noise spa
 
 import os
 import sys
+from pathlib import Path
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
+# Add parent directory to path for relative imports
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
 
 import argparse
 import logging
@@ -63,7 +66,10 @@ class GAN_Model(object):
         momentum, epsilon, renorm, renorm_momentum = list(param.values())
         self.model.add(
             BatchNormalization(
-                momentum=momentum, epsilon=epsilon, renorm=renorm, renorm_momentum=renorm_momentum
+                momentum=momentum,
+                epsilon=epsilon,
+                renorm=renorm,
+                renorm_momentum=renorm_momentum,
             )
         )
 
@@ -131,13 +137,17 @@ class GAN_Model(object):
         if self.g_batch_norm:
             self.add_batch_norm(self.G, self.g_batch_norm_param)
         # Layer 2
-        self.G.add(Dense(self.g_units_2, name="layer2", kernel_regularizer=self.kernel_reg))
+        self.G.add(
+            Dense(self.g_units_2, name="layer2", kernel_regularizer=self.kernel_reg)
+        )
         if self.g_func_2.lower() == "leakyrelu":
             self.G.add(LeakyReLU(alpha=0.2))
         if self.g_batch_norm:
             self.add_batch_norm(self.G, self.g_batch_norm_param)
         # Layer 3
-        self.G.add(Dense(self.g_units_3, name="layer3", kernel_regularizer=self.kernel_reg))
+        self.G.add(
+            Dense(self.g_units_3, name="layer3", kernel_regularizer=self.kernel_reg)
+        )
         if self.g_func_3.lower() == "leakyrelu":
             self.G.add(LeakyReLU(alpha=0.2))
         if self.g_batch_norm:
@@ -204,7 +214,9 @@ class GAN_Model(object):
         ###########
         # Layer 1
         ###########
-        self.D.add(Dense(self.d_units_1, name="layer1", kernel_regularizer=self.kernel_reg))
+        self.D.add(
+            Dense(self.d_units_1, name="layer1", kernel_regularizer=self.kernel_reg)
+        )
         if self.d_func_1.lower() == "leakyrelu":
             self.D.add(LeakyReLU(alpha=0.2))
         if self.d_batch_norm:
@@ -212,7 +224,9 @@ class GAN_Model(object):
         ###########
         # Layer 2
         ###########
-        self.D.add(Dense(self.d_units_2, name="layer2", kernel_regularizer=self.kernel_reg))
+        self.D.add(
+            Dense(self.d_units_2, name="layer2", kernel_regularizer=self.kernel_reg)
+        )
         if self.d_func_2.lower() == "leakyrelu":
             self.D.add(LeakyReLU(alpha=0.2))
         if self.d_batch_norm:
@@ -238,7 +252,9 @@ class GAN_Model(object):
 
         return Model(inp, validity, name=name)
 
-    def train_gan(self, generator, discriminator, gan, epochs, batch_size, save_interval):
+    def train_gan(
+        self, generator, discriminator, gan, epochs, batch_size, save_interval
+    ):
         """Tran GAN model with given hyperparameters and pre-defined Generator and Discriminator
 
         Args:
@@ -249,7 +265,9 @@ class GAN_Model(object):
 
         self.epochs = epochs
         if str(batch_size) == "sqrt":
-            logging.info("Use a common heuristic for batch size: the square root of the size of the dataset")
+            logging.info(
+                "Use a common heuristic for batch size: the square root of the size of the dataset"
+            )
             self.batch_size = int(np.sqrt(self.train_set.shape[0]))
         else:
             self.batch_size = int(batch_size)
@@ -279,8 +297,12 @@ class GAN_Model(object):
                 gen_inp = generator.predict(noise)
 
                 # Separately train the discriminator on real and fake data
-                d_loss_real = discriminator.train_on_batch(train, np.ones((half_batch, 1)))
-                d_loss_fake = discriminator.train_on_batch(gen_inp, np.zeros((half_batch, 1)))
+                d_loss_real = discriminator.train_on_batch(
+                    train, np.ones((half_batch, 1))
+                )
+                d_loss_fake = discriminator.train_on_batch(
+                    gen_inp, np.zeros((half_batch, 1))
+                )
 
                 # Take average loss from real and fake data
                 d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
@@ -299,8 +321,12 @@ class GAN_Model(object):
                 self.history["g_loss"].append(g_loss)
 
                 # Progress bar
-                print(f"Epoch: {epoch + 1}/{self.epochs}\tBatch: {batch}/{self.batch_per_epoch}")
-                print(f"[D loss: {d_loss[0]:.8f}, acc.: {d_loss[1] * 100:.2f}] : [G loss: {g_loss:.8f}]")
+                print(
+                    f"Epoch: {epoch + 1}/{self.epochs}\tBatch: {batch}/{self.batch_per_epoch}"
+                )
+                print(
+                    f"[D loss: {d_loss[0]:.8f}, acc.: {d_loss[1] * 100:.2f}] : [G loss: {g_loss:.8f}]"
+                )
 
     @staticmethod
     def save_summary(model, save_dir):
@@ -358,7 +384,9 @@ class GAN_Model(object):
 
 
 def main():
-    info = "Generative adversarial networks (GANs) for learning latent data from features."
+    info = (
+        "Generative adversarial networks (GANs) for learning latent data from features."
+    )
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument(
         "-i",
@@ -501,7 +529,9 @@ def main():
     elif regularizer["name"].lower() == "l2":
         regularizer = l2(float(regularizer["factor"]))
     elif regularizer["name"].lower() == "l1_l2":
-        regularizer = l1_l2(float(regularizer["factor_1"]), float(regularizer["factor_2"]))
+        regularizer = l1_l2(
+            float(regularizer["factor_1"]), float(regularizer["factor_2"])
+        )
     else:
         logging.error(
             "Check your regularizer and factor. Set parameter to None if you do not want to apply regularizer."
@@ -521,7 +551,9 @@ def main():
     ###################
     if optimizer["name"].lower() == "adam":
         optimizer = Adam(
-            learning_rate=optimizer["learning_rate"], beta_1=optimizer["beta_1"], beta_2=optimizer["beta_2"]
+            learning_rate=optimizer["learning_rate"],
+            beta_1=optimizer["beta_1"],
+            beta_2=optimizer["beta_2"],
         )
     else:
         logging.error("Optimizer you specified is not available")
@@ -605,7 +637,12 @@ def main():
     ####################
     start_time = time.time()  # timing
     model.train_gan(
-        generator, discriminator, gan, epochs=num_epoch, batch_size=batch_size, save_interval=save_interval
+        generator,
+        discriminator,
+        gan,
+        epochs=num_epoch,
+        batch_size=batch_size,
+        save_interval=save_interval,
     )
     end_time = time.time()
     logging.info("Congrats! Training model is completed.")

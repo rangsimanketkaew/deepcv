@@ -15,10 +15,13 @@ Generate PLUMED input file using DAENN collective variable model for metadynamic
 import os
 import sys
 import logging
+from pathlib import Path
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
+# Add parent directory to path for relative imports
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
 
 import argparse
 import numpy as np
