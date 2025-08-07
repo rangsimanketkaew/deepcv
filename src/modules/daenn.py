@@ -1175,12 +1175,12 @@ def main():
         )
         model.save_model(model.encoder, out_encoder + "/" + config.output.out_model)
         model.save_model(model.decoder, out_decoder + "/" + config.output.out_model)
-        logging.info(f"Models have been saved to {out_parent}")
+        logging.info(f"Models saved to {out_parent}")
 
     if config.settings.save_weights:
         path = out_autoencoder + "/" + config.output.out_weights
         model.autoencoder.save_weights(path, overwrite=True)
-        logging.info(f"Weights of model have been saved to {path}")
+        logging.info(f"Weights of model saved to {path}")
 
     if config.settings.save_weights_npz:
         filename = os.path.splitext(config.output.out_weights_npz)[0]
@@ -1190,7 +1190,7 @@ def main():
             if layer.get_weights():
                 savez["layer" + str(i + 1)] = layer.get_weights()[0]
         np.savez_compressed(path, **savez)
-        logging.info(f"Weights of model have been saved to {path}")
+        logging.info(f"Weights of model saved to {path}")
 
     if config.settings.save_biases_npz:
         filename = os.path.splitext(config.output.out_biases_npz)[0]
@@ -1200,14 +1200,14 @@ def main():
             if layer.get_weights():
                 savez["layer" + str(i + 1)] = layer.get_weights()[1]
         np.savez_compressed(path, **savez)
-        logging.info(f"Biases of model have been saved to {path}")
+        logging.info(f"Biases of model saved to {path}")
 
     if config.settings.save_graph:
         model.save_graph(model.autoencoder, model.autoencoder.name, out_autoencoder)
         model.save_graph(model.encoder, model.encoder.name, out_encoder)
         model.save_graph(model.decoder, model.decoder.name, out_decoder)
         logging.info(
-            f"Directed graphs of all models have been saved to subfolder in {os.path.abspath(config.output.out_dir)}"
+            f"Directed graphs of all models saved to subfolder in {os.path.abspath(config.output.out_dir)}"
         )
 
     # summarize history for loss and accuracy
@@ -1241,7 +1241,7 @@ def main():
 
         save_path = out_autoencoder + "/" + config.output.loss_plot
         fig.savefig(save_path)
-        logging.info(f"Loss history plot has been saved to {save_path}")
+        logging.info(f"Loss history plot saved to {save_path}")
 
         if config.settings.show_loss:
             fig.show()
@@ -1267,7 +1267,7 @@ def main():
 
         save_path = out_autoencoder + "/" + config.output.metrics_plot
         plt.savefig(save_path)
-        logging.info(f"Metric accuracy history plot has been saved to {save_path}")
+        logging.info(f"Metric accuracy history plot saved to {save_path}")
         if config.settings.show_metrics:
             fig.show()
 
