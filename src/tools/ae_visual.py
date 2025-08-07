@@ -13,6 +13,7 @@ Info:
 import numpy as np
 import matplotlib.pyplot as plt
 
+from pathlib import Path
 from tensorflow.keras.models import Model
 
 
@@ -55,7 +56,7 @@ def encode_fig(
     ev = explained_variance(Z_enc)
     plt.title(f"Encoded data visualization: EV = {ev}")
     plt.scatter(Z_enc[:, 0], Z_enc[:, 1], c=Z_enc[:, 0], s=8, cmap="tab10")
-    plt.savefig(folder + "/" + "latent_space_" + str(i) + "_epochs.png")
+    plt.savefig(Path(folder) / f"latent_space_{i}_epochs.png")
     plt.clf()
 
     return ev

@@ -22,6 +22,7 @@ sys.path.append(parentdir)
 
 import argparse
 import numpy as np
+from pathlib import Path
 from utils import util
 from tools import adjmat_param as param
 from itertools import combinations_with_replacement
@@ -463,16 +464,16 @@ def main():
 
     # ------- Check weight file -------#
     logging.info(f"Checking weight output file: {weight}")
-    weight = folder + "/" + "autoencoder" + "/" + weight
-    if not os.path.isfile(weight):
+    weight = Path(folder) / "autoencoder" / weight
+    if not weight.is_file():
         logging.error(f"File {weight} is not found")
         sys.exit(1)
     weight = np.load(weight)
 
     # ------- Check bias file -------#
     logging.info(f"Checking bias output file  : {bias}")
-    bias = folder + "/" + "autoencoder" + "/" + bias
-    if not os.path.isfile(bias):
+    bias = Path(folder) / "autoencoder" / bias
+    if not bias.is_file():
         logging.error(f"File {bias} is not found")
         sys.exit(1)
     bias = np.load(bias)
@@ -500,7 +501,7 @@ def main():
     p.write_neuralnet(weight, bias, kw, func_1, func_2, func_3)
     p.write_metad()
     logging.info(
-        f"Plumed data have been written successfully to '{os.path.abspath(args.output)}'"
+        f"Plumed data written successfully to '{os.path.abspath(args.output)}'"
     )
 
 

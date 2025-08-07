@@ -312,7 +312,7 @@ class GAN_Model(object):
         """
         model.summary()
         # save summary to a text file
-        path = save_dir + "/" + "model_summary.txt"
+        path = Path(save_dir) / "model_summary.txt"
         with open(path, "w") as f:
             with redirect_stdout(f):
                 model.summary()
@@ -584,11 +584,11 @@ def main():
     ################################
     out_parent = os.path.abspath(out_dir)
     Path(out_parent).mkdir(parents=True, exist_ok=True)
-    out_dir_G = out_parent + "/" + out_dir_G
+    out_dir_G = Path(out_parent) / out_dir_G
     Path(out_dir_G).mkdir(parents=True, exist_ok=True)
-    out_dir_D = out_parent + "/" + out_dir_D
+    out_dir_D = Path(out_parent) / out_dir_D
     Path(out_dir_D).mkdir(parents=True, exist_ok=True)
-    out_dir_GAN = out_parent + "/" + out_dir_GAN
+    out_dir_GAN = Path(out_parent) / out_dir_GAN
     Path(out_dir_GAN).mkdir(parents=True, exist_ok=True)
 
     # show and save model info
@@ -643,7 +643,7 @@ def main():
         plt.ylabel("Loss value")
         plt.xlabel("Epoch")
         plt.legend(loc="upper left")
-        save_path = out_parent + "/" + loss_plot
+        save_path = Path(out_parent) / loss_plot
         plt.savefig(save_path)
         logging.info(f"Loss history plot has been saved to {save_path}")
         # plt.show()

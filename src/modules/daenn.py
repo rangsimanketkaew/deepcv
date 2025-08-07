@@ -804,7 +804,7 @@ class Autoencoder(Model):
         """
         model.summary()
         # save summary to a text file
-        path = save_dir + "/" + "model_summary.txt"
+        path = Path(save_dir) / "model_summary.txt"
         with open(path, "w") as f:
             with redirect_stdout(f):
                 model.summary()
@@ -1149,7 +1149,7 @@ def main():
     # decoded_test = model.decoder_predict(encoded_test)
 
     # Train model
-    out_tb = out_parent + "/" + config.output.out_tb
+    out_tb = Path(out_parent) / config.output.out_tb
     model.train_model(
         config.model.num_epoch,
         config.model.batch_size,
@@ -1171,20 +1171,20 @@ def main():
     ########################
     if config.settings.save_model:
         model.save_model(
-            model.autoencoder, out_autoencoder + "/" + config.output.out_model
+            model.autoencoder, Path(out_autoencoder) / config.output.out_model
         )
-        model.save_model(model.encoder, out_encoder + "/" + config.output.out_model)
-        model.save_model(model.decoder, out_decoder + "/" + config.output.out_model)
+        model.save_model(model.encoder, Path(out_encoder) / config.output.out_model)
+        model.save_model(model.decoder, Path(out_decoder) / config.output.out_model)
         logging.info(f"Models saved to {out_parent}")
 
     if config.settings.save_weights:
-        path = out_autoencoder + "/" + config.output.out_weights
+        path = Path(out_autoencoder) / config.output.out_weights
         model.autoencoder.save_weights(path, overwrite=True)
         logging.info(f"Weights of model saved to {path}")
 
     if config.settings.save_weights_npz:
         filename = os.path.splitext(config.output.out_weights_npz)[0]
-        path = out_autoencoder + "/" + filename + ".npz"
+        path = Path(out_autoencoder) / (filename + ".npz")
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
             if layer.get_weights():
@@ -1194,7 +1194,7 @@ def main():
 
     if config.settings.save_biases_npz:
         filename = os.path.splitext(config.output.out_biases_npz)[0]
-        path = out_autoencoder + "/" + filename + ".npz"
+        path = Path(out_autoencoder) / (filename + ".npz")
         savez = dict()
         for i, layer in enumerate(model.autoencoder.layers):
             if layer.get_weights():
@@ -1239,7 +1239,7 @@ def main():
         ax3.label_outer()
         ax3.legend(["train", "test"], loc="upper right")
 
-        save_path = out_autoencoder + "/" + config.output.loss_plot
+        save_path = Path(out_autoencoder) / config.output.loss_plot
         fig.savefig(save_path)
         logging.info(f"Loss history plot saved to {save_path}")
 
@@ -1265,7 +1265,7 @@ def main():
         ax2.label_outer()
         ax2.legend(["train", "test"], loc="upper right")
 
-        save_path = out_autoencoder + "/" + config.output.metrics_plot
+        save_path = Path(out_autoencoder) / config.output.metrics_plot
         plt.savefig(save_path)
         logging.info(f"Metric accuracy history plot saved to {save_path}")
         if config.settings.show_metrics:
