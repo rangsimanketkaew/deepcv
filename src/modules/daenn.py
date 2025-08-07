@@ -858,6 +858,91 @@ class Autoencoder(Model):
         )
 
 
+def save_loss_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
+    """Save loss history plots for training visualization.
+    
+    Args:
+        model: Trained autoencoder model with history
+        config: Configuration object containing output settings
+        out_autoencoder: Path to autoencoder output directory
+    """
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4))
+        
+    # Total loss
+    ax1.set_title("Total loss")
+    ax1.plot(model.history.history["loss"], label="train")
+    ax1.plot(model.history.history["val_loss"], label="test")
+    ax1.set_ylabel("loss")
+    ax1.set_xlabel("epoch")
+    ax1.legend(loc="upper right")
+    ax1.grid(True, alpha=0.3)
+
+    # Main loss (primary dataset)
+    ax2.set_title("Main loss (primary dataset)")
+    ax2.plot(model.history.history["out_1_loss"], label="train")
+    ax2.plot(model.history.history["val_out_1_loss"], label="test")
+    ax2.set_ylabel("loss")
+    ax2.set_xlabel("epoch")
+    ax2.legend(loc="upper right")
+    ax2.grid(True, alpha=0.3)
+
+    # Penalty loss (secondary dataset)
+    ax3.set_title("Penalty loss (secondary dataset)")
+    ax3.plot(model.history.history["out_2_loss"], label="train")
+    ax3.plot(model.history.history["val_out_2_loss"], label="test")
+    ax3.set_ylabel("loss")
+    ax3.set_xlabel("epoch")
+    ax3.legend(loc="upper right")
+    ax3.grid(True, alpha=0.3)
+
+    # Adjust layout and save
+    plt.tight_layout()
+    save_path = Path(out_autoencoder) / config.output.loss_plot
+    fig.savefig(save_path, dpi=300, bbox_inches='tight')
+    logging.info(f"Loss history plot saved to {save_path}")
+
+    if config.settings.show_loss:
+        plt.show()
+
+
+def save_metrics_history(model, config: DAENNConfig, out_autoencoder: str) -> None:
+    """Save metrics history plots for training visualization.
+    
+    Args:
+        model: Trained autoencoder model with history
+        config: Configuration object containing output settings
+        out_autoencoder: Path to autoencoder output directory
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+
+    # Accuracy for main loss (primary dataset)
+    ax1.plot(model.history.history["out_1_mse"], label="train")
+    ax1.plot(model.history.history["val_out_1_mse"], label="test")
+    ax1.set_title("Accuracy for main loss (primary dataset)")
+    ax1.set_ylabel("MSE")
+    ax1.set_xlabel("epoch")
+    ax1.legend(loc="upper right")
+    ax1.grid(True, alpha=0.3)
+
+    # Accuracy for penalty loss (secondary dataset)
+    ax2.plot(model.history.history["out_2_mse"], label="train")
+    ax2.plot(model.history.history["val_out_2_mse"], label="test")
+    ax2.set_title("Accuracy for penalty loss (secondary dataset)")
+    ax2.set_ylabel("MSE")
+    ax2.set_xlabel("epoch")
+    ax2.legend(loc="upper right")
+    ax2.grid(True, alpha=0.3)
+
+    # Adjust layout and save
+    plt.tight_layout()
+    save_path = Path(out_autoencoder) / config.output.metrics_plot
+    fig.savefig(save_path, dpi=300, bbox_inches='tight')
+    logging.info(f"Metrics history plot saved to {save_path}")
+    
+    if config.settings.show_metrics:
+        plt.show()
+
+
 def load_and_validate_config(input_file: str) -> DAENNConfig:
     """Load and validate configuration from JSON file.
 
@@ -1210,66 +1295,11 @@ def main():
             f"Directed graphs of all models saved to subfolder in {os.path.abspath(config.output.out_dir)}"
         )
 
-    # summarize history for loss and accuracy
+    # Save training history visualizations
     if config.settings.save_loss:
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4))
-        # fig.suptitle("Loss")
-
-        ax1.set_title("Total loss")
-        ax1.plot(model.history.history["loss"])
-        ax1.plot(model.history.history["val_loss"])
-        ax1.set_ylabel("loss")
-        ax1.set_xlabel("epoch")
-        ax1.label_outer()
-        ax1.legend(["train", "test"], loc="upper right")
-
-        ax2.set_title("Main loss (primary dataset)")
-        ax2.plot(model.history.history["out_1_loss"])
-        ax2.plot(model.history.history["val_out_1_loss"])
-        ax2.set_ylabel("loss")
-        ax2.set_xlabel("epoch")
-        ax2.label_outer()
-        ax2.legend(["train", "test"], loc="upper right")
-
-        ax3.set_title("Penalty loss (secondary dataset)")
-        ax3.plot(model.history.history["out_2_loss"])
-        ax3.plot(model.history.history["val_out_2_loss"])
-        ax3.set_ylabel("loss")
-        ax3.set_xlabel("epoch")
-        ax3.label_outer()
-        ax3.legend(["train", "test"], loc="upper right")
-
-        save_path = Path(out_autoencoder) / config.output.loss_plot
-        fig.savefig(save_path)
-        logging.info(f"Loss history plot saved to {save_path}")
-
-        if config.settings.show_loss:
-            fig.show()
-
+        save_loss_history(model, config, out_autoencoder)
     if config.settings.save_metrics:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
-
-        ax1.plot(model.history.history["out_1_mse"])
-        ax1.plot(model.history.history["val_out_1_mse"])
-        ax1.set_title("Accuracy for main loss (primary dataset)")
-        ax1.set_ylabel("accuracy metric")
-        ax1.set_xlabel("epoch")
-        ax1.label_outer()
-        ax1.legend(["train", "test"], loc="upper right")
-
-        ax2.plot(model.history.history["out_2_mse"])
-        ax2.plot(model.history.history["val_out_2_mse"])
-        ax2.set_title("Accuracy for penalty loss (secondary dataset)")
-        ax2.set_ylabel("accuracy metric")
-        ax2.set_xlabel("epoch")
-        ax2.label_outer()
-        ax2.legend(["train", "test"], loc="upper right")
-
-        save_path = Path(out_autoencoder) / config.output.metrics_plot
-        plt.savefig(save_path)
-        logging.info(f"Metric accuracy history plot saved to {save_path}")
-        if config.settings.show_metrics:
-            fig.show()
+        save_metrics_history(model, config, out_autoencoder)
 
     logging.info("=" * 30 + " DONE " + "=" * 30)
 
