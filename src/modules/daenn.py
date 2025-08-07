@@ -48,6 +48,13 @@ from tools import ae_visual
 logging = logging.getLogger("DeepCV")
 
 
+DEFAULT_SAVE_INTERVAL = 10
+DEFAULT_DPI = 192
+DEFAULT_GAMMA = 0.8
+FLOAT_PRECISION = np.float32
+RANDOM_STATE = 42
+
+
 @dataclass
 class ProjectConfig:
     """Configuration for project settings."""
@@ -121,7 +128,7 @@ class ModelConfig:
 
         # Calculate default save_every_n_epoch if not provided
         if save_every_n_epoch is None:
-            save_every_n_epoch = max(int(num_epoch / 10), 10)
+            save_every_n_epoch = max(int(num_epoch / DEFAULT_SAVE_INTERVAL), DEFAULT_SAVE_INTERVAL)
 
         return cls(
             optimizer=model_data.get("optimizer", "adam"),
@@ -299,11 +306,11 @@ class Autoencoder(Model):
         super(Autoencoder, self).__init__()
 
     def add_dataset(
-        self, 
-        train_set: List[np.ndarray], 
-        test_set: List[np.ndarray], 
-        num_primary: int, 
-        num_secondary: int
+        self,
+        train_set: List[np.ndarray],
+        test_set: List[np.ndarray],
+        num_primary: int,
+        num_secondary: int,
     ) -> None:
         """Add dataset after creating an instance of Autoencoder class
 
@@ -530,7 +537,7 @@ class Autoencoder(Model):
         #
         # self.autoencoder = Model(inputs=self.list_inp, outputs=self.list_out, name=model_name)
 
-    def custom_loss_1(self, main_loss, penalty_loss, gamma=0.8):
+    def custom_loss_1(self, main_loss, penalty_loss, gamma=DEFAULT_GAMMA):
         """Method 1: encapsulation
 
         Use the closure to make a custom loss be able to receive additional arguments.
@@ -544,7 +551,7 @@ class Autoencoder(Model):
         Args:
             main_loss (func): Main loss
             penalty_loss (func): Loss-like penalty function
-            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to DEFAULT_GAMMA.
 
         Returns:
             _loss (tensor): Return values from the closure function
@@ -566,7 +573,7 @@ class Autoencoder(Model):
 
         return _loss
 
-    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=0.8):
+    def custom_loss_2(self, y_true, y_pred, main_loss, penalty_loss, gamma=DEFAULT_GAMMA):
         """Method 2: add_loss
 
         Custom loss for model.add_loss(). add_loss creates loss as tensor, not function,
@@ -577,7 +584,7 @@ class Autoencoder(Model):
             y_pred (array): Array of prediction values
             main_loss (func): Main loss
             penalty_loss (func): Loss-like penalty function
-            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to DEFAULT_GAMMA.
 
         Returns:
             tensor: Return values from the closure function
@@ -588,13 +595,13 @@ class Autoencoder(Model):
             # + tf.keras.backend.reduce_mean(self.latent)
         )
 
-    def custom_loss_3(self, gamma):
+    def custom_loss_3(self, gamma=DEFAULT_GAMMA):
         """Method 3: external loss
 
         Define a class of loss and call it
 
         Args:
-            gamma (float): Weight for scaling down the impact of a loss function. Defaults to 0.8.
+            gamma (float): Weight for scaling down the impact of a loss function. Defaults to DEFAULT_GAMMA.
 
         Returns:
             loss.CustomLoss (class): custom loss object
@@ -651,7 +658,7 @@ class Autoencoder(Model):
         # Calling loss customization function/object
         # ------------------------------------------
         # self.autoencoder.add_loss(
-        #     self.custom_loss_2(self.inputs, self.latent, self.main_loss, self.penalty_loss, alpha=0.8)
+        #     self.custom_loss_2(self.inputs, self.latent, self.main_loss, self.penalty_loss, gamma=DEFAULT_GAMMA)
         # ) # uncomment this line to use method 2
 
         self.autoencoder.compile(
@@ -660,9 +667,9 @@ class Autoencoder(Model):
                 "out_1": self.loss_1(self.main_loss),
                 "out_2": self.loss_2(self.penalty_loss),
             },
-            # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=0.8),  # method 1
+            # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=DEFAULT_GAMMA),  # method 1
             # loss=None, # method 2
-            # loss=self.custom_loss_3(alpha=0.8), # method 3
+            # loss=self.custom_loss_3(gamma=DEFAULT_GAMMA), # method 3
             loss_weights=self.loss_weights,
             metrics=["mse", "mse"],
             # run_eagerly=True,
@@ -826,14 +833,14 @@ class Autoencoder(Model):
                 )
 
     @staticmethod
-    def save_graph(model, file_name="graph", save_dir=None, dpi=192):
+    def save_graph(model, file_name="graph", save_dir=None, dpi=DEFAULT_DPI):
         """Plot model and save it as image
 
         Args:
             model (Class): Model to save
             file_name (str, optional): Name of model graph. Defaults to "graph".
             save_dir (str, optional): Output directory. Defaults to current working directory.
-            dpi (int, optional): Image resolution. Defaults to 192.
+            dpi (int, optional): Image resolution. Defaults to DEFAULT_DPI.
         """
         if save_dir is None:
             save_dir = os.getcwd()
@@ -945,7 +952,7 @@ def main():
     # Preprocessing
     ###############
     # Use FP32 for speeding training and reducing precision error
-    dataset_arr = [i.astype(np.float32) for i in dataset_arr]
+    dataset_arr = [i.astype(FLOAT_PRECISION) for i in dataset_arr]
 
     logging.info("=== Shape of dataset before splitting ===")
     for i, j in enumerate(dataset_arr):
@@ -961,7 +968,7 @@ def main():
             j,
             train_size=config.dataset.split_ratio,
             shuffle=config.dataset.shuffle,
-            random_state=42,
+            random_state=RANDOM_STATE,
         )
         train_arr.append(train)
         test_arr.append(test)
@@ -986,7 +993,7 @@ def main():
         max_scale_test = [config.dataset.max_scale for i in test_arr]
 
     try:
-        # train_set = (train_set.astype(np.float32) - normalize_scale) / max_scale
+        # train_set = (train_set.astype(FLOAT_PRECISION) - normalize_scale) / max_scale
         train_arr = [
             (j - config.dataset.normalize_scale) / max_scale_train[i]
             for i, j in enumerate(train_arr)
