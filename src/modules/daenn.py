@@ -1088,13 +1088,9 @@ def main():
             f"Can't create output directory you specified, {config.output.out_dir}!"
         )
         sys.exit(1)
-    # Create output directory for autoencoder, encoder and decoder
+    # Create output directory for autoencoder
     out_autoencoder = out_parent + "/autoencoder/"
     Path(out_autoencoder).mkdir(parents=True, exist_ok=True)
-    out_encoder = out_parent + "/encoder/"
-    Path(out_encoder).mkdir(parents=True, exist_ok=True)
-    out_decoder = out_parent + "/decoder/"
-    Path(out_decoder).mkdir(parents=True, exist_ok=True)
 
     ##############################################################
     # Build, compile and train encoder & decoder models separately
