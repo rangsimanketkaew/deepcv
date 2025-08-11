@@ -458,56 +458,6 @@ class Autoencoder(Model):
         #     for i in range(len(self.size_inp))
         # ]
 
-    def build_encoder(self, name="encoder"):
-        """Build encoder model. An encoder is a neural network (it can be any type of network, e.g., FC, CNN,
-        RNN, etc) that takes the input, and output a feature map/vector/tensor. These feature vector hold the
-        information, the features, that represents the input.
-
-        Args:
-            name (str, optional): Name of model. Defaults to "encoder".
-        """
-        # There are two ways to create an encoder with different input branchs.
-        #  1) Use a list of sepatate input layers
-        # self.encoder = Model(inputs=self.list_inp, outputs=self.latent, name=name)
-        #  2) Use already-merged input so that the encoder can be later imported by TF graph loader
-        #     and it will take only one dataset which combines already input size already
-        self.encoder = Model(
-            inputs=[self.primary_inp] + self.secondary_inp,
-            outputs=self.latent,
-            name=name,
-        )
-
-    def build_decoder(self, model_name="decoder", output_name="decoder_output"):
-        """Build decoder model. The decoder is a network (usually the same network structure as encoder but in
-        opposite orientation) that takes the feature vector from the encoder, and gives the best closest match
-        to the actual input or intended output.
-
-        Args:
-            model_name (str, optional): Name of model. Defaults to "decoder".
-            output_name (str, optional): Name of the output layer. Defaults to "decoder_output".
-        """
-        # We can't use a latent (Tensor) dense layer as an input layer of the decoder because
-        # the input of Model class accepts only Input layer. We therefore need to re-construct
-        # the decoder based on the second half of Autoencoder.
-        decoder_input = Input(shape=(self.latent.shape[1],), name="decoder_input")
-        decoded1 = Dense(self.units_4, activation=self.func_4, use_bias=True)(
-            decoder_input
-        )
-        decoded2 = Dense(self.units_5, activation=self.func_5, use_bias=True)(decoded1)
-        outputs = Dense(self.inputs.shape[1], activation=None, use_bias=True)(
-            decoded2
-        )  # reconstruct input
-
-        split_layer = Lambda(
-            lambda x: tf.split(x, self.size_inp, axis=1, name=output_name)
-        )
-        output_split = split_layer(outputs)
-        self.decoder = Model(
-            inputs=decoder_input,
-            outputs=[output_split],
-            name=model_name,
-        )
-
     def build_autoencoder(self, model_name="daenn"):
         """Build autoencoder model. Combine encoder and decoder together so that they are trained together.
 
@@ -757,28 +707,6 @@ class Autoencoder(Model):
             verbose=verbose,
             callbacks=[tbCallBack, saveCallback],
         )
-
-    def encoder_predict(self, input_sample):
-        """Generate predictions using encoder
-
-        Args:
-            input_sample (array): Input sample
-
-        Returns:
-            array: Prediction output
-        """
-        return self.encoder.predict(input_sample)
-
-    def decoder_predict(self, encoded_sample):
-        """Generate predictions using decoder
-
-        Args:
-            encoded_sample (array): Encoded sample from the latent layer of encoder
-
-        Returns:
-            array: Prediction output
-        """
-        return self.decoder.predict(encoded_sample)
 
     def autoencoder_predict(self, test_set):
         """Generate predictions using a trained autoencoder
@@ -1193,20 +1121,9 @@ def main():
             config.model.optimizer, main_loss, penalty_loss, config.model.loss_weights
         )
 
-    # Construct encoder and decoder separately as well
-    model.build_encoder()
-    model.build_decoder()
-
     # show model info
     if config.settings.show_summary:
         model.save_summary(model.autoencoder, out_autoencoder)
-        model.save_summary(model.encoder, out_encoder)
-        model.save_summary(model.decoder, out_decoder)
-
-    # Test prediction
-    # test_arr_ = tf.concat(test_arr, axis=1)
-    # encoded_test = model.encoder_predict(test_arr_)
-    # decoded_test = model.decoder_predict(encoded_test)
 
     # Train model
     out_tb = Path(out_parent) / config.output.out_tb
@@ -1233,9 +1150,7 @@ def main():
         model.save_model(
             model.autoencoder, Path(out_autoencoder) / config.output.out_model
         )
-        model.save_model(model.encoder, Path(out_encoder) / config.output.out_model)
-        model.save_model(model.decoder, Path(out_decoder) / config.output.out_model)
-        logging.info(f"Models saved to {out_parent}")
+        logging.info(f"Model saved to {out_parent}")
 
     if config.settings.save_weights:
         path = Path(out_autoencoder) / config.output.out_weights
@@ -1264,10 +1179,8 @@ def main():
 
     if config.settings.save_graph:
         model.save_graph(model.autoencoder, model.autoencoder.name, out_autoencoder)
-        model.save_graph(model.encoder, model.encoder.name, out_encoder)
-        model.save_graph(model.decoder, model.decoder.name, out_decoder)
         logging.info(
-            f"Directed graphs of all models saved to subfolder in {os.path.abspath(config.output.out_dir)}"
+            f"Directed graph of model saved to subfolder in {os.path.abspath(config.output.out_dir)}"
         )
 
     # Save training history visualizations
