@@ -1137,11 +1137,14 @@ def main():
     )
     logging.info("Congrats! Training model is completed.")
 
-    # Test prediction
-    # test_arr_ = tf.concat(test_arr, axis=1)
-    # assert model.autoencoder_predict(
-    #     test_arr_
-    # ), "Failed to make a prediction. Check your network architecture again!"
+    # Test model
+    test_set = [
+        tf.concat(test_arr[: len(config.dataset.primary)], axis=1),
+        tf.concat(test_arr[len(config.dataset.primary) :], axis=1),
+    ]
+    assert model.autoencoder_predict(
+        test_set
+    ), "Failed to make a prediction. Check your network architecture again!"
 
     ########################
     # Save model and outputs
