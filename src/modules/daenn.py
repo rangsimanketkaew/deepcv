@@ -184,19 +184,11 @@ class PerformanceConfig:
     """Configuration for performance settings."""
 
     enable_gpu: bool
-    gpus: int
 
     @classmethod
     def from_json(cls, json_data):
         perf_data = json_data.get("performance", {})
-        return cls(
-            enable_gpu=perf_data.get("enable_gpu", True), gpus=perf_data.get("gpus", 1)
-        )
-
-    def validate(self):
-        """Validate performance configuration."""
-        if self.gpus < 1:
-            raise ValueError("Number of GPUs must be at least 1")
+        return cls(enable_gpu=perf_data.get("enable_gpu", True))
 
 
 @dataclass
@@ -296,7 +288,6 @@ class DAENNConfig:
             self.dataset.validate()
             self.model.validate()
             self.network.validate()
-            self.performance.validate()
             logging.info("Configuration validation passed")
         except ValueError as e:
             logging.error(f"Configuration validation failed: {e}")
@@ -671,9 +662,11 @@ class Autoencoder(Model):
                 "out_1": self.loss_1(self.main_loss),
                 "out_2": self.loss_2(self.penalty_loss),
             },
-            # loss=self.custom_loss_1(self.main_loss, self.penalty_loss, gamma=DEFAULT_GAMMA),  # method 1
-            # loss=None, # method 2
-            # loss=self.custom_loss_3(gamma=DEFAULT_GAMMA), # method 3
+            # loss=self.custom_loss_1(
+            #     self.main_loss, self.penalty_loss, gamma=DEFAULT_GAMMA
+            # ),  # method 1
+            # loss=None,  # method 2
+            # loss=self.custom_loss_3(gamma=DEFAULT_GAMMA),  # method 3
             loss_weights=self.loss_weights,
             metrics=["mse", "mse"],
             # run_eagerly=True,
@@ -1095,10 +1088,6 @@ def main():
         logging.error("Normalization failed. Please check scaling parameters")
         sys.exit(1)
 
-    # Train on GPU?
-    if not config.performance.enable_gpu:
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
     ########################
     # Check layer parameters
     ########################
@@ -1186,41 +1175,23 @@ def main():
     model.add_dataset(
         train_arr, test_arr, len(config.dataset.primary), len(config.dataset.secondary)
     )
-    # Check if multi-GPU parallelization is possible
-    if config.performance.gpus == 1:
+
+    # Detect GPUs
+    gpus = tf.config.list_physical_devices("GPU")
+
+    if config.performance.enable_gpu and len(gpus) > 1:
+        strategy = tf.distribute.MirroredStrategy()  # Multi-GPU
+        logging.info("Using Multi-GPU (MirroredStrategy)")
+    else:
+        strategy = tf.distribute.get_strategy()  # Single GPU or CPU
+        logging.info("Using Single GPU/CPU")
+
+    with strategy.scope():
         model.build_network(units=config.network.units, act_funcs=user_act_func)
         model.build_autoencoder()
         model.compile_model(
             config.model.optimizer, main_loss, penalty_loss, config.model.loss_weights
         )
-    elif config.performance.gpus > 1:
-        try:
-            logging.warning("Training on multi-GPU on a single machine")
-            # Use all available GPUs
-            strategy = tf.distribute.MirroredStrategy(devices=None)
-            with strategy.scope():
-                model.build_network(units=config.network.units, act_funcs=user_act_func)
-                model.build_autoencoder()
-                model.compile_model(
-                    config.model.optimizer,
-                    main_loss,
-                    penalty_loss,
-                    config.model.loss_weights,
-                )
-        except:
-            logging.warning("Cannot enable multi-GPUs support for Keras")
-            model.build_network(units=config.network.units, act_funcs=user_act_func)
-            model.build_autoencoder()
-            model.compile_model(
-                config.model.optimizer,
-                main_loss,
-                penalty_loss,
-                config.model.loss_weights,
-            )
-    else:
-        err = "Number of GPUs must be equal to or greater than 1"
-        logging.error(err)
-        sys.exit(1)
 
     # Construct encoder and decoder separately as well
     model.build_encoder()

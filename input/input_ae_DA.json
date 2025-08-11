@@ -39,8 +39,7 @@
   },
   "performance": {
     "_comment": "Setting for training performance",
-    "enable_gpu": true,
-    "gpus": 1
+    "enable_gpu": true
   },
   "settings": {
     "_comment": "User-defined settings",
