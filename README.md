@@ -1,6 +1,6 @@
 # Deep Learning for Collective Variables (DeepCV)
 
-DeepCV is a tool to learn collective variables (CVs) of a chemical process for enhanced sampling simulation, using *deep autoencoder neural network* (DAENN) model (non-iterative approach).
+DeepCV is a generative model to learn and generate [collective variables (CVs)](https://en.wikipedia.org/wiki/Reaction_coordinate) of a chemical process for enhanced sampling molecular simulations, using *deep autoencoder neural network* (DAENN) model (non-iterative approach) and a Min-Max game for loss customization.
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
