@@ -4,6 +4,10 @@ DeepCV is a tool to learn collective variables (CVs) of a chemical process for e
 
 Website: https://lubergroup.pages.uzh.ch/deepcv/
 
+Papers:
+1. [R. Ketkaew, F. Creazzo, and S. Luber. *J. Phys. Chem. Lett. 2022, 13, 7, 1797-1805*](https://pubs.acs.org/doi/10.1021/acs.jpclett.1c04004)
+2. [R. Ketkaew and S. Luber. *J. Chem. Inf. Model. 2022, 62, 24, 6352-6364*](https://pubs.acs.org/doi/10.1021/acs.jcim.2c00883)
+
 ## Main Features
 
 1. Molecular descriptors
@@ -73,9 +77,10 @@ where `input_ae_DA.json` is [an input file of DAENN for Diels-Alder reaction](in
 
 ## In Progress
 
-1. Variational autoencoder
-2. Improve neural network algorithm for large systems e.g. metal-oxide surface
+1. Improve variational autoencoder generator
+2. Improve the scaling of neural network algorithm for large systems e.g. metal-oxide surface
 3. Improve code compatibility between TensorFlow, PLUMED, and CP2K
+4. Implement graph-based models
 
 ---
 
